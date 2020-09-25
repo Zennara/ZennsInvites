@@ -7,18 +7,14 @@ import json
 
 client = discord.Client()
 
-
-data = {}
-data['users'] = []
-data['users'].append({
-    'name': 'Zennara#8377',
-    'invites': 50,
-    'left': 15
-})
+f = open('database.json')
+users = json.load(f)
+f.close()
 
 #Writing JSON data
 with open("database.json", 'w') as f:
-  json.dump(data, f)
+  json.dump(users, f)
+  f.close()
 
 @client.event
 async def on_ready():
@@ -26,13 +22,13 @@ async def on_ready():
 
 x = input()
 if x == "test":
-  with open('database.json', 'r') as file:
-     json_data = json.load(file)
-     for item in json_data:
-           if item['name'] in ['Zennara#8377']:
-              item['name'] = "test"
-  with open('/path/to/josn_file.json', 'w') as file:
-      json.dump(json_data, file, indent=2)
+  f = open('database.json')
+  users = json.load(f)
+
+  print(users['Zennara'])
+  print(users['Zennara']['invites'])
+  print(users['Zennara']['leaves'])
+  f.close()
     
 @client.event
 async def on_message(message):
@@ -42,19 +38,21 @@ async def on_message(message):
             if i.inviter == message.author:
                 totalInvites += i.uses
         await message.channel.send("You've invited " + str(totalInvites) + " members(s) to the server!")
-    if message.content.startswith('!db'):
-      invites = db[str(message.author)]
-      print("You've invited" + invites + " member(s) to the server!")
+
+    #if message.content.startswith('!db'):
+      
 
 @client.event
 async def on_member_join(member):
-  with open('database.json') as json_file:
-    data = json.load(json_file)
-    for p in data['users']:
-        print('name: ' + p['name'])
-        print('Website: ' + p['website'])
-        print('From: ' + p['from'])
-        print('')
+  f = open('database.json')
+  if member.id not in users:
+    users[member.id] = {'invites': 0, 'leaves': 0}
+  users[member.id]['invites'] = users[member.id]['invites'] + 1
+  with open("database.json", 'w') as f:
+    json.dump(users, f)
+    f.close()
+
+
 
   
 
