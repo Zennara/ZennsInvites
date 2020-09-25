@@ -2,7 +2,6 @@ import keep_alive
 import discord
 import os
 import asyncio
-from replit import db
 import json
 
 client = discord.Client()
@@ -18,7 +17,7 @@ with open("database.json", 'w') as f:
 
 @client.event
 async def on_ready():
-    print("ZennInvites Ready")
+    print("\nZennInvites Ready")
 
 x = input()
 if x == "test":
@@ -44,18 +43,12 @@ async def on_message(message):
 
 @client.event
 async def on_member_join(member):
-  f = open('database.json')
   if member.id not in users:
     users[member.id] = {'invites': 0, 'leaves': 0}
   users[member.id]['invites'] = users[member.id]['invites'] + 1
   with open("database.json", 'w') as f:
     json.dump(users, f)
     f.close()
-
-
-
-  
-
 
 
 #client.loop.create_task(PushInvites())
