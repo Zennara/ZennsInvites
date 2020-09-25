@@ -18,16 +18,6 @@ with open("database.json", 'w') as f:
 @client.event
 async def on_ready():
     print("\nZennInvites Ready")
-
-x = input()
-if x == "test":
-  f = open('database.json')
-  users = json.load(f)
-
-  print(users['Zennara'])
-  print(users['Zennara']['invites'])
-  print(users['Zennara']['leaves'])
-  f.close()
     
 @client.event
 async def on_message(message):
