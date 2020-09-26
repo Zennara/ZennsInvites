@@ -12,24 +12,24 @@ invites = {}
 last = ""
 
 async def fetch():
- global last
- global invites
- global codeOwner
- global joinCode
- await client.wait_until_ready()
- gld = client.get_guild(int(guild_id))
- while True:
-  invs = await gld.invites()
-  tmp = []
-  for i in invs:
-   for s in invites:
-    if s[0] == i.code:
-     if int(i.uses) > s[1]:
-      #get inviter id
-      codeOwner = str(i.inviter.id)
-      joinCode = str(i.code)
-   tmp.append(tuple((i.code, i.uses)))
-  invites = tmp
+  global last
+  global invites
+  global codeOwner
+  global joinCode
+  await client.wait_until_ready()
+  gld = client.get_guild(int(guild_id))
+  while True:
+    invs = await gld.invites()
+    tmp = []
+    for i in invs:
+      for s in invites:
+        if s[0] == i.code:
+          if int(i.uses) > s[1]:
+            #get inviter id
+            codeOwner = str(i.inviter.id)
+            joinCode = str(i.code)
+      tmp.append(tuple((i.code, i.uses)))
+    invites = tmp
   await asyncio.sleep(4)
 
 @client.event
@@ -48,7 +48,6 @@ async def on_message(message):
     if message.content.startswith('!info '):
         user = message.guild.get_member(message.mentions[0].id)
         embed = discord.Embed(color=0x8a0303)
-        #title=user.name + "#" + user.discriminator, color=0x8a0303
         embed.set_author(name=user.name + "#" + user.discriminator)
         embed.add_field(name="ID:", value=message.mentions[0].id, inline=False)
         embed.set_thumbnail(url=user.avatar_url)
@@ -56,9 +55,23 @@ async def on_message(message):
         #split created_at into date and time
         createDT = str(user.created_at).split()
         createdDate = createDT[0]
-        createdTime = datetime.strptime(str(createDT[1][0 : len(createDT[1]) - 7]), "%H:%M:%S")
+        createdTime = str(datetime.strptime(str(createDT[1][0 : len(createDT[1]) - 7]), "%H:%M:%S").strftime("%I:%M %p"))
 
-        embed.add_field(name="Joined Discord on:", value=createdDate + " at " + str(createdTime.strftime("%I:%M %p")), inline=False)
+        #split joined_at into date and time
+        joinedDT = str(user.joined_at).split()
+        joinedDate = joinedDT[0]
+        joinedTime = str(datetime.strptime(str(joinedDT[1][0 : len(joinedDT[1]) - 7]), "%H:%M:%S").strftime("%I:%M %p"))
+
+        embed.add_field(name="Joined Server at", value=joinedDate + " at " + joinedTime, inline=True)
+        with open("database.json", 'r') as f:
+          users = json.load(f)
+          try:
+            jCode = users[str(user.id)]['joinCode']
+          except:
+            jCode = "null"
+          embed.add_field(name="Join Code", value=jCode)
+          f.close()
+        embed.add_field(name="Joined Discord at", value=createdDate + " at " + createdTime, inline=False)
         embed.set_footer(text="Requested by " + message.author.name + "#" + message.author.discriminator + "\nID: " + str(message.author.id))
         await message.channel.send(embed=embed)
       
@@ -73,7 +86,7 @@ async def on_member_join(member):
   #wait until fetch() is done
   await asyncio.sleep(5)
 
-  #declare users{}
+  #declare user
   with open("database.json", 'r') as f:
     users = json.load(f)
     f.close()
