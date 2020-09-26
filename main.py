@@ -47,16 +47,20 @@ async def on_message(message):
 
     if message.content.startswith('!info '):
         user = message.guild.get_member(message.mentions[0].id)
-        embedVar = discord.Embed(title=user.name, color=0x8a0303)
-        embedVar.add_field(name="ID:", value=message.mentions[0].id, inline=False)
+        embed = discord.Embed(color=0x8a0303)
+        #title=user.name + "#" + user.discriminator, color=0x8a0303
+        embed.set_author(name=user.name + "#" + user.discriminator)
+        embed.add_field(name="ID:", value=message.mentions[0].id, inline=False)
+        embed.set_thumbnail(url=user.avatar_url)
 
         #split created_at into date and time
         createDT = str(user.created_at).split()
         createdDate = createDT[0]
         createdTime = datetime.strptime(str(createDT[1][0 : len(createDT[1]) - 7]), "%H:%M:%S")
 
-        embedVar.add_field(name="Joined Discord on:", value=createdDate + " at " + str(createdTime.strftime("%I:%M %p")), inline=False)
-        await message.channel.send(embed=embedVar)
+        embed.add_field(name="Joined Discord on:", value=createdDate + " at " + str(createdTime.strftime("%I:%M %p")), inline=False)
+        embed.set_footer(text="Requested by " + message.author.name + "#" + message.author.discriminator + "\nID: " + str(message.author.id))
+        await message.channel.send(embed=embed)
       
 
 @client.event
