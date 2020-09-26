@@ -3,7 +3,7 @@ import discord
 import os
 import asyncio
 import json
-from discord.utils import get
+from datetime import datetime
 
 client = discord.Client()
 
@@ -49,7 +49,13 @@ async def on_message(message):
         user = message.guild.get_member(message.mentions[0].id)
         embedVar = discord.Embed(title=user.name, color=0x8a0303)
         embedVar.add_field(name="ID:", value=message.mentions[0].id, inline=False)
-        embedVar.add_field(name="Date Created:", value=user.created_at, inline=False)
+
+        #split created_at into date and time
+        createDT = str(user.created_at).split()
+        createdDate = createDT[0]
+        createdTime = datetime.strptime(str(createDT[1][0 : len(createDT[1]) - 7]), "%H:%M:%S")
+
+        embedVar.add_field(name="Joined Discord on:", value=createdDate + " at " + str(createdTime.strftime("%I:%M %p")), inline=False)
         await message.channel.send(embed=embedVar)
       
 
