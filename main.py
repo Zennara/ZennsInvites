@@ -63,6 +63,8 @@ async def on_message(message):
         joinedTime = str(datetime.strptime(str(joinedDT[1][0 : len(joinedDT[1]) - 7]), "%H:%M:%S").strftime("%I:%M %p"))
 
         embed.add_field(name="Joined Server at", value=joinedDate + " at " + joinedTime, inline=True)
+
+        #join code
         with open("database.json", 'r') as f:
           users = json.load(f)
           try:
@@ -71,7 +73,19 @@ async def on_message(message):
             jCode = "null"
           embed.add_field(name="Join Code", value=jCode)
           f.close()
+
+        #joine discord
         embed.add_field(name="Joined Discord at", value=createdDate + " at " + createdTime, inline=False)
+
+        #if boosting display since when
+        if (str(user.premium_since) != "None"):
+          #split premium_since into date and time
+          premiumDT = str(user.premium_since).split()
+          premiumDate = premiumDT[0]
+          premiumTime = str(datetime.strptime(str(premiumDT[1][0 : len(premiumDT[1]) - 7]), "%H:%M:%S").strftime("%I:%M %p"))
+          embed.add_field(name="Boosting Server since", value=premiumDate + " at " + premiumTime, inline=False)
+
+        #requested by
         embed.set_footer(text="Requested by " + message.author.name + "#" + message.author.discriminator + "\nID: " + str(message.author.id))
         await message.channel.send(embed=embed)
       
