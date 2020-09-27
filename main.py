@@ -41,7 +41,8 @@ async def on_ready():
     
 @client.event
 async def on_message(message):
-    if message.content.startswith('!invites'):
+    #only run on CM server
+    if message.content.startswith('!invites') and str(message.guild.id) == guild_id:
       #get user (member object)
       if (message.content == '!invites'):
         user = message.author
@@ -66,6 +67,13 @@ async def on_message(message):
 
       embed = discord.Embed(color=0x8a0303)
       embed.add_field(name=user.name + "#" + user.discriminator, value="You have **" + str(Invites) + "** invites! (**" + str(totalInvites) + "** regular, **-" + str(Leaves) + "** leaves)", inline=False)
+
+      #split current datetime
+      nowDT = str(datetime.now()).split()
+      nowDate = nowDT[0]
+      nowTime = str(datetime.strptime(str(nowDT[1][0 : len(nowDT[1]) - 7]), "%H:%M:%S").strftime("%I:%M %p"))
+
+      embed.set_footer(text=nowDate + " at " + nowTime)
 
       await message.channel.send(embed=embed)
 
@@ -94,15 +102,16 @@ async def on_message(message):
 
         embed.add_field(name="Joined Server at", value=joinedDate + " at " + joinedTime, inline=True)
 
-        #join code
-        with open("database.json", 'r') as f:
-          users = json.load(f)
-          try:
-            jCode = users[str(user.id)]['joinCode']
-          except:
-            jCode = "null"
-          embed.add_field(name="Join Code", value=jCode)
-          f.close()
+        #join code and owner, only run on guild_id server
+        if str(message.guild.id) == guild_id:
+          with open("database.json", 'r') as f:
+            users = json.load(f)
+            try:
+              jCode = users[str(user.id)]['joinCode']
+            except:
+              jCode = "null"
+            embed.add_field(name="Join Code", value=jCode)
+            f.close()
 
         #joined discord
         embed.add_field(name="Joined Discord at", value=createdDate + " at " + createdTime, inline=False)
