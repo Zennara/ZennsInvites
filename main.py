@@ -51,15 +51,23 @@ async def on_message(message):
       f.close()
     prefix = data["prefix"]
 
+    print((await message.channel.fetch_message(759836810469048373)).embeds[0].colour)
+    try: 
+      print(str(message.embeds[0].colour))
+    except:
+      print('')
+
     #help
     if message.content == prefix + 'help':
       embed = discord.Embed(color=0x8a0303)
       embed.set_author(name=client.user.name + " Help", icon_url=client.user.avatar_url)
       start = "`" + prefix + "help"
-      embed.add_field(name="Counters", value=start + "stats`", inline=False)
+      embed.add_field(name="Counters", value=start + " counters`", inline=False)
       embed.add_field(name="Invites", value=start + " invites`", inline=False)
       embed.add_field(name="Role Reactions", value=start + " reactions`", inline=False)
       embed.add_field(name="Commands", value=start + " commands`", inline=False)
+      embed.add_field(name="Disboard", value=start + " disboard`", inline=False)
+      embed.set_footer(text="______________________\nMade By Zennara#8377")
       await message.channel.send(embed=embed)
 
     #help invites (InviteManager)
@@ -70,6 +78,7 @@ async def on_message(message):
       embed.add_field(name="`"+prefix+ "leaderboard`", value="Shows the invites leaderboard", inline=False)
       embed.add_field(name="`"+prefix+ "editinvites <member>`", value="Add or subtract invites from a user", inline=False)
       embed.add_field(name="`"+prefix+ "editleaves <member>`", value="Add or subtract invites from a user", inline=False)
+      embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
       await message.channel.send(embed=embed)
 
     #help reactions (Zira)
@@ -78,6 +87,7 @@ async def on_message(message):
       embed.set_author(name=client.user.name + " Reactions Help", icon_url=client.user.avatar_url)
       embed.add_field(name="`"+prefix+ "rr <channelID> <messageID> <reaction> <role>`", value="Give a role when user reacts to message", inline=False)
       embed.add_field(name="`"+prefix+ "delrr <channelID> <messageID>`", value="Remove a reaction role", inline=False)
+      embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
       await message.channel.send(embed=embed)
 
     #help stats (Server Stats)
@@ -86,6 +96,7 @@ async def on_message(message):
       embed.set_author(name=client.user.name + " Counters Help", icon_url=client.user.avatar_url)
       embed.add_field(name="`"+prefix+ "addcounter <tracker>`", value="Make a new server counter", inline=False)
       embed.add_field(name="`"+prefix+ "delcounter <tracker>`", value="Delete a server counter", inline=False)
+      embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
       await message.channel.send(embed=embed)
 
     #help commands
@@ -94,6 +105,16 @@ async def on_message(message):
       embed.add_field(name="`"+prefix+ "info [member]`", value="Show info about a member", inline=False)
       embed.add_field(name="`"+prefix+ "prefix <prefix>`", value="Change the command prefix", inline=False)
       embed.set_author(name=client.user.name + " Commands Help", icon_url=client.user.avatar_url)
+      embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
+      await message.channel.send(embed=embed)
+
+    #help disboard
+    if message.content == prefix + 'help disboard':
+      embed = discord.Embed(color=0x8a0303)
+      embed.add_field(name="`"+prefix+ "d leaderboard`", value="Show the disboard bump leaderboard", inline=False)
+      embed.add_field(name="`"+prefix+ "d bumps [member]`", value="Show how many bumps a user has", inline=False)
+      embed.add_field(name="`"+prefix+ "d editbumps <member>`", value="Add or subtract bumps from a member", inline=False)
+      embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
       await message.channel.send(embed=embed)
     
     #change prefix
