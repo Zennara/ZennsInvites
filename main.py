@@ -41,7 +41,7 @@ async def on_ready():
   with open("database.json", 'r') as f:
       data = json.load(f)
       f.close()
-  await client.change_presence(activity=discord.Game(name=data["prefix"] + "help"))
+  await client.change_presence(activity=discord.Streaming(name=data["prefix"] + "help", url="https://www.twitch.tv/xzennara/about"))
     
 @client.event
 async def on_message(message):
