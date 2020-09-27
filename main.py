@@ -42,14 +42,29 @@ async def on_ready():
 @client.event
 async def on_message(message):
     if message.content.startswith('!invites'):
-        totalInvites = 0
-        for i in await message.guild.invites():
-            if i.inviter == message.author:
-                totalInvites += i.uses
-        await message.channel.send("You've invited " + str(totalInvites) + " members(s) to the server!")
+      #get user (member object)
+      if (message.content == '!invites'):
+        user = message.author
+      else:
+        user = message.guild.get_member(message.mentions[0].id)
+
+      #get invites
+      with open("database.json", 'r') as f:
+        users = json.load(f)
+        f.close()
+      #check if user is in database
+      if str(user.id) not in users:
+        users[str(user.id)] = {'invites': 0, 'leaves': 0, 'joinCode': "null", 'inviter': "null"}
+      Invites = users[str(user.id)]['invites']
+      Leaves = users[str(user.id)]['leaves']
+      totalInvites = Invites - Leaves
+
+      embed = discord.Embed(color=0x8a0303)
+      embed.add_field(name=user.name + "#" + user.discriminator, value="You have **" + str(Invites) + "** invites! (**" + str(totalInvites) + "** regular, **-" + str(Leaves) + "** leaves)", inline=False)
+
+      await message.channel.send(embed=embed)
 
     if message.content.startswith('!info'):
-
         #get user (member object)
         if (message.content == '!info'):
           user = message.author
