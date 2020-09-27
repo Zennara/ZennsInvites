@@ -5,13 +5,16 @@ import asyncio
 import json
 from datetime import datetime
 
+#declare client
 client = discord.Client()
 
+#server-specific ids
 guild_id = "696583117502152774"
+
+#check invites and compare
 invites = {}
 last = ""
-
-async def fetch():
+async def getInvites():
   global last
   global invites
   global codeOwner
@@ -46,7 +49,11 @@ async def on_message(message):
         await message.channel.send("You've invited " + str(totalInvites) + " members(s) to the server!")
 
     if message.content.startswith('!info '):
+
+        #get user (member object)
         user = message.guild.get_member(message.mentions[0].id)
+
+        #set embed
         embed = discord.Embed(color=0x8a0303)
         embed.set_author(name=user.name + "#" + user.discriminator)
         embed.add_field(name="ID:", value=message.mentions[0].id, inline=False)
@@ -97,7 +104,7 @@ async def on_member_join(member):
   last = str(member.id)
   lastName = str(member.name)
 
-  #wait until fetch() is done
+  #wait until getInvites() is done
   await asyncio.sleep(5)
 
   #declare user
@@ -123,7 +130,7 @@ async def on_member_join(member):
 
 @client.event
 async def on_member_remove(member):
-  #wait for fetch()
+  #wait for getInvites()
   await asyncio.sleep(5)
 
   #declare user
@@ -143,7 +150,7 @@ async def on_member_remove(member):
   
 
 
-client.loop.create_task(fetch())
+client.loop.create_task(getInvites())
 
 keep_alive.keep_alive() 
 #keep the bot running after the window closes, use UptimeRobot to ping the website at least every <60min. to prevent the website from going to sleep, turning off the bot
