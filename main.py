@@ -59,6 +59,11 @@ async def on_message(message):
       Leaves = users[str(user.id)]['leaves']
       totalInvites = Invites - Leaves
 
+      #write new data to files
+      with open("database.json", 'w') as f:
+        json.dump(users, f)
+        f.close()
+
       embed = discord.Embed(color=0x8a0303)
       embed.add_field(name=user.name + "#" + user.discriminator, value="You have **" + str(Invites) + "** invites! (**" + str(totalInvites) + "** regular, **-" + str(Leaves) + "** leaves)", inline=False)
 
