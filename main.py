@@ -37,6 +37,8 @@ async def getInvites():
 
 @client.event
 async def on_ready():
+  global bumped
+  bumped = False
   print("\nZennInvites Ready\n")
   with open("database.json", 'r') as f:
       data = json.load(f)
@@ -45,17 +47,19 @@ async def on_ready():
     
 @client.event
 async def on_message(message):
+    global bumped
     #get prefix
     with open("database.json", 'r') as f:
       data = json.load(f)
       f.close()
     prefix = data["prefix"]
 
-    print((await message.channel.fetch_message(759836810469048373)).embeds[0].colour)
-    try: 
-      print(str(message.embeds[0].colour))
-    except:
-      print('')
+    #print((await message.channel.fetch_message(759836810469048373)).embeds[0].colour)
+
+    #split current datetime
+    nowDT = str(datetime.now()).split()
+    nowDate = nowDT[0]
+    nowTime = str(datetime.strptime(str(nowDT[1][0 : len(nowDT[1]) - 7]), "%H:%M:%S").strftime("%I:%M %p"))
 
     #help
     if message.content == prefix + 'help':
@@ -70,14 +74,67 @@ async def on_message(message):
       embed.set_footer(text="______________________\nMade By Zennara#8377")
       await message.channel.send(embed=embed)
 
+    #check bump disboard
+    if message.content == '!d bump':
+      bumped = True
+      #get user (member object)
+      global user
+      user = message.author
+    #check disboard bot reply
+    elif bumped == True:
+      if str(message.embeds[0].colour) == "#24b7b7":
+        if str(user.id) not in data:
+          data[str(user.id)] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
+        data[str(user.id)]['bumps'] += 1
+      bumped = False
+
+    #disboard bumps
+    if message.content.startswith(prefix + 'd bumps'):
+      #get user (member object)
+      if (message.content == prefix + 'd bumps'):
+        user = message.author
+      else:
+        user = message.guild.get_member(message.mentions[0].id)
+
+      #check if user is in database
+      if str(user.id) not in data:
+        data[str(user.id)] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
+      bumps = data[str(user.id)]['bumps']
+
+      #send embed
+      embed = discord.Embed(color=0x8a0303)
+      embed.add_field(name=user.name + "#" + user.discriminator, value="You have bumped the server **" + str(bumps) + "** times!", inline=False)
+      embed.set_footer(text=nowDate + " at " + nowTime)
+      await message.channel.send(embed=embed)
+
+    #edit bumps
+    if message.content.startswith(prefix + "d editbumps"):
+      #get user (member object)
+      user = message.guild.get_member(message.mentions[0].id)
+      
+      #get previous bumps amount
+      prevBumps = data[str(user.id)]['bumps']
+
+      try:
+        editBumpAmount = int(message.content.split()[3])
+        data[str(user.id)]['bumps'] = editBumpAmount
+
+        #send embed
+        embed = discord.Embed(color=0x8a0303)
+        embed.add_field(name=user.name + "#" + user.discriminator, value="User now has **" + str(data[str(user.id)]['bumps']) + "** bumps! (Original: **" + str(prevBumps) + "**)", inline=False)
+        embed.set_footer(text=nowDate + " at " + nowTime)
+        await message.channel.send(embed=embed)
+      except:
+        print('')
+
     #help invites (InviteManager)
     if message.content == prefix + 'help invites':
       embed = discord.Embed(color=0x8a0303)
       embed.set_author(name=client.user.name + " Invites Help", icon_url=client.user.avatar_url)
       embed.add_field(name="`"+prefix+ "invites [member]`", value="Shows how many invites the user has", inline=False)
       embed.add_field(name="`"+prefix+ "leaderboard`", value="Shows the invites leaderboard", inline=False)
-      embed.add_field(name="`"+prefix+ "editinvites <member>`", value="Add or subtract invites from a user", inline=False)
-      embed.add_field(name="`"+prefix+ "editleaves <member>`", value="Add or subtract invites from a user", inline=False)
+      embed.add_field(name="`"+prefix+ "editinvites <member>`", value="Set invites of a user", inline=False)
+      embed.add_field(name="`"+prefix+ "editleaves <member>`", value="Set leaves of a user", inline=False)
       embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
       await message.channel.send(embed=embed)
 
@@ -113,16 +170,13 @@ async def on_message(message):
       embed = discord.Embed(color=0x8a0303)
       embed.add_field(name="`"+prefix+ "d leaderboard`", value="Show the disboard bump leaderboard", inline=False)
       embed.add_field(name="`"+prefix+ "d bumps [member]`", value="Show how many bumps a user has", inline=False)
-      embed.add_field(name="`"+prefix+ "d editbumps <member>`", value="Add or subtract bumps from a member", inline=False)
+      embed.add_field(name="`"+prefix+ "d editbumps <member>`", value="Set bumps of a member", inline=False)
       embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
       await message.channel.send(embed=embed)
     
     #change prefix
     if message.content.startswith(prefix + 'prefix '):
       data["prefix"] = message.content.split()[1]
-      with open("database.json", 'w') as f:
-        json.dump(data, f)
-        f.close()
       await client.change_presence(activity=discord.Game(name=data["prefix"] + "help"))
 
     #only run on guild_id server
@@ -135,23 +189,13 @@ async def on_message(message):
 
       #check if user is in database
       if str(user.id) not in data:
-        data[str(user.id)] = {'invites': 0, 'leaves': 0, 'joinCode': "null", 'inviter': "null"}
+        data[str(user.id)] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
       Invites = data[str(user.id)]['invites']
       Leaves = data[str(user.id)]['leaves']
       totalInvites = Invites - Leaves
 
-      #write new data to files
-      with open("database.json", 'w') as f:
-        json.dump(data, f)
-        f.close()
-
       embed = discord.Embed(color=0x8a0303)
       embed.add_field(name=user.name + "#" + user.discriminator, value="You have **" + str(Invites) + "** invites! (**" + str(totalInvites) + "** regular, **-" + str(Leaves) + "** leaves)", inline=False)
-
-      #split current datetime
-      nowDT = str(datetime.now()).split()
-      nowDate = nowDT[0]
-      nowTime = str(datetime.strptime(str(nowDT[1][0 : len(nowDT[1]) - 7]), "%H:%M:%S").strftime("%I:%M %p"))
 
       embed.set_footer(text=nowDate + " at " + nowTime)
 
@@ -185,10 +229,7 @@ async def on_message(message):
         #join code and owner, only run on guild_id server
         if str(message.guild.id) == guild_id:
           if str(user.id) not in data:
-            data[str(user.id)] = {'invites': 0, 'leaves': 0, 'joinCode': "null", 'inviter': "null"}
-          with open("database.json", 'w') as f:
-            json.dump(data, f)
-            f.close()
+            data[str(user.id)] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
           jCode = data[str(user.id)]['joinCode']
 
           embed.add_field(name="Join Code", value=jCode, inline=True)
@@ -211,6 +252,11 @@ async def on_message(message):
         embed.set_footer(text="Requested by " + message.author.name + "#" + message.author.discriminator + "\nID: " + str(message.author.id))
         await message.channel.send(embed=embed)
 
+    #write new data to files
+    with open("database.json", 'w') as f:
+      json.dump(data, f)
+      f.close()
+
 @client.event
 async def on_member_join(member):
   global last
@@ -228,13 +274,13 @@ async def on_member_join(member):
 
   #append join code
   if str(member.id) not in data:
-    data[str(member.id)] = {'invites': 0, 'leaves': 0, 'joinCode': joinCode, 'inviter': codeOwner}
+    data[str(member.id)] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': joinCode, 'inviter': codeOwner}
   data[str(member.id)]['joinCode'] = joinCode
   data[str(member.id)]['inviter'] = codeOwner
 
   #add to invites
   if codeOwner not in data:
-    data[codeOwner] = {'invites': 0, 'leaves': 0, 'joinCode': "null", 'inviter': "null"}
+    data[codeOwner] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
   data[codeOwner]['invites'] += 1
 
   #write new data to files
