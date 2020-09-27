@@ -77,12 +77,9 @@ async def on_message(message):
 
     #add counter
     if message.content.startswith(prefix + "addcounter"):
-      counterType = message.content.split()[1]
-
       guild = client.get_guild(int(guild_id))
-      foundCategory = False
-      foundChannel = False
 
+      foundCategory = False
       #find category
       for category in guild.categories:
         if category.name == "Server Stats":
@@ -93,28 +90,35 @@ async def on_message(message):
       if foundCategory == False:
         categoryObject = await guild.create_category("Server Stats", overwrites=None, reason=None)
 
-      if message.content == prefix + 'addcounter members':
-        #find channel
-        for channel in guild.channels:
-          if channel.name.startswith("Members:"):
-            channelObject = channel
-            foundChannel = True
-            break
-        #create channel
-        if foundChannel == False:
-          channelObject = await guild.create_voice_channel(f"Members: {guild.member_count}", overwrites=None, category=categoryObject, reason=None)
-          await channelObject.set_permissions(guild.default_role, connect = False)
+      #get amount of bots
+      bots = 0
+      for member in guild.members:
+        if member.bot:
+          bots += 1
+      
+      cont = False
+      #get channel creation type
+      if message.content == prefix + "addcounter members":
+        channelName = "Members"
+        channelType = guild.member_count - bots
+        cont = True
 
-      elif message.content == prefix + 'addcounter bots':
+      if message.content == prefix + "addcounter bots":
+        channelName = "Bots"
+        channelType = bots
+        cont = True
+        
+      foundChannel = False
+      if cont:
         #find channel
         for channel in guild.channels:
-          if channel.name.startswith("Bots:"):
+          if channel.name.startswith(channelName + ":"):
             channelObject = channel
             foundChannel = True
             break
         #create channel
         if foundChannel == False:
-          channelObject = await guild.create_voice_channel(f"Members: {guild.member_count}", overwrites=None, category=categoryObject, reason=None)
+          channelObject = await guild.create_voice_channel(f"{channelName}: {channelType}",   overwrites=None, category=categoryObject, reason=None)
           await channelObject.set_permissions(guild.default_role, connect = False)
       
 
