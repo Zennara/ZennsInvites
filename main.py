@@ -74,7 +74,7 @@ async def on_message(message):
           embed.add_field(name="Join Code", value=jCode)
           f.close()
 
-        #joine discord
+        #joined discord
         embed.add_field(name="Joined Discord at", value=createdDate + " at " + createdTime, inline=False)
 
         #if boosting display since when
@@ -107,18 +107,41 @@ async def on_member_join(member):
 
   #append join code
   if str(member.id) not in users:
-    users[str(member.id)] = {'invites': 0, 'leaves': 0, 'joinCode': joinCode}
+    users[str(member.id)] = {'invites': 0, 'leaves': 0, 'joinCode': joinCode, 'inviter': codeOwner}
   users[str(member.id)]['joinCode'] = joinCode
+  users[str(member.id)]['inviter'] = codeOwner
 
   #add to invites
   if codeOwner not in users:
-    users[codeOwner] = {'invites': 0, 'leaves': 0, 'joinCode': "null"}
+    users[codeOwner] = {'invites': 0, 'leaves': 0, 'joinCode': "null", 'inviter': "null"}
   users[codeOwner]['invites'] += 1
 
   #write new data to files
   with open("database.json", 'w') as f:
     json.dump(users, f)
     f.close()
+
+@client.event
+async def on_member_remove(member):
+  #wait for fetch()
+  await asyncio.sleep(5)
+
+  #declare user
+  with open("database.json", 'r') as f:
+    users = json.load(f)
+    f.close()
+
+  #add to leaves
+  if str(member.id) in users:
+    if users[str(member.id)]['inviter'] != "null":
+      users[users[str(member.id)]['inviter']]['leaves'] += 1
+
+  #write new data to files
+  with open("database.json", 'w') as f:
+    json.dump(users, f)
+    f.close()
+  
+
 
 client.loop.create_task(fetch())
 
