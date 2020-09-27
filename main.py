@@ -48,15 +48,18 @@ async def on_message(message):
                 totalInvites += i.uses
         await message.channel.send("You've invited " + str(totalInvites) + " members(s) to the server!")
 
-    if message.content.startswith('!info '):
+    if message.content.startswith('!info'):
 
         #get user (member object)
-        user = message.guild.get_member(message.mentions[0].id)
+        if (message.content == '!info'):
+          user = message.author
+        else:
+          user = message.guild.get_member(message.mentions[0].id)
 
         #set embed
         embed = discord.Embed(color=0x8a0303)
         embed.set_author(name=user.name + "#" + user.discriminator)
-        embed.add_field(name="ID:", value=message.mentions[0].id, inline=False)
+        embed.add_field(name="ID:", value=user.id, inline=False)
         embed.set_thumbnail(url=user.avatar_url)
 
         #split created_at into date and time
