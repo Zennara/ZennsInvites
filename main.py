@@ -67,10 +67,6 @@ async def on_message(message):
       else:
         user = message.guild.get_member(message.mentions[0].id)
 
-      #get invites
-      with open("database.json", 'r') as f:
-        data = json.load(f)
-        f.close()
       #check if user is in database
       if str(user.id) not in data:
         data[str(user.id)] = {'invites': 0, 'leaves': 0, 'joinCode': "null", 'inviter': "null"}
@@ -122,9 +118,6 @@ async def on_message(message):
 
         #join code and owner, only run on guild_id server
         if str(message.guild.id) == guild_id:
-          with open("database.json", 'r') as f:
-            data = json.load(f)
-            f.close()
           if str(user.id) not in data:
             data[str(user.id)] = {'invites': 0, 'leaves': 0, 'joinCode': "null", 'inviter': "null"}
           with open("database.json", 'w') as f:
