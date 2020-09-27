@@ -100,18 +100,18 @@ async def on_message(message):
         joinedDate = joinedDT[0]
         joinedTime = str(datetime.strptime(str(joinedDT[1][0 : len(joinedDT[1]) - 7]), "%H:%M:%S").strftime("%I:%M %p"))
 
-        embed.add_field(name="Joined Server at", value=joinedDate + " at " + joinedTime, inline=True)
+        embed.add_field(name="Joined Server at", value=joinedDate + " at " + joinedTime, inline=False)
 
         #join code and owner, only run on guild_id server
         if str(message.guild.id) == guild_id:
           with open("database.json", 'r') as f:
             users = json.load(f)
-            try:
-              jCode = users[str(user.id)]['joinCode']
-            except:
-              jCode = "null"
-            embed.add_field(name="Join Code", value=jCode)
+            jCode = users[str(user.id)]['joinCode']
             f.close()
+          embed.add_field(name="Join Code", value=jCode, inline=True)
+          if users[str(user.id)]['inviter'] != "null":
+            inviterMember = message.guild.get_member(int(users[str(user.id)]['inviter']))
+            embed.add_field(name="Owned By", value=inviterMember.name + "#" + inviterMember.discriminator, inline=True)
 
         #joined discord
         embed.add_field(name="Joined Discord at", value=createdDate + " at " + createdTime, inline=False)
