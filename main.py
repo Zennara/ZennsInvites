@@ -10,6 +10,7 @@ client = discord.Client()
 
 #server-specific ids
 guild_id = "696583117502152774"
+guild = client.get_guild(int(guild_id))
 
 #check invites and compare
 invites = {}
@@ -73,6 +74,49 @@ async def on_message(message):
       embed.add_field(name="Disboard", value=start + " disboard`", inline=False)
       embed.set_footer(text="______________________\nMade By Zennara#8377")
       await message.channel.send(embed=embed)
+
+    #add counter
+    if message.content.startswith(prefix + "addcounter"):
+      counterType = message.content.split()[1]
+
+      guild = client.get_guild(int(guild_id))
+      foundCategory = False
+      foundChannel = False
+
+      #find category
+      for category in guild.categories:
+        if category.name == "Server Stats":
+          categoryObject = category
+          foundCategory = True
+          break
+      #create category
+      if foundCategory == False:
+        categoryObject = await guild.create_category("Server Stats", overwrites=None, reason=None)
+
+      if message.content == prefix + 'addcounter members':
+        #find channel
+        for channel in guild.channels:
+          if channel.name.startswith("Members:"):
+            channelObject = channel
+            foundChannel = True
+            break
+        #create channel
+        if foundChannel == False:
+          channelObject = await guild.create_voice_channel(f"Members: {guild.member_count}", overwrites=None, category=categoryObject, reason=None)
+          await channelObject.set_permissions(guild.default_role, connect = False)
+
+      elif message.content == prefix + 'addcounter bots':
+        #find channel
+        for channel in guild.channels:
+          if channel.name.startswith("Bots:"):
+            channelObject = channel
+            foundChannel = True
+            break
+        #create channel
+        if foundChannel == False:
+          channelObject = await guild.create_voice_channel(f"Members: {guild.member_count}", overwrites=None, category=categoryObject, reason=None)
+          await channelObject.set_permissions(guild.default_role, connect = False)
+      
 
     #check bump disboard
     if message.content == '!d bump':
