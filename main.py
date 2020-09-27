@@ -144,7 +144,6 @@ async def on_message(message):
         #requested by
         embed.set_footer(text="Requested by " + message.author.name + "#" + message.author.discriminator + "\nID: " + str(message.author.id))
         await message.channel.send(embed=embed)
-      
 
 @client.event
 async def on_member_join(member):
