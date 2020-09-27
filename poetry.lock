@@ -147,6 +147,14 @@ version = "4.7.6"
 
 [[package]]
 category = "main"
+description = "Discord RPC client written in Python"
+name = "pypresence"
+optional = false
+python-versions = ">=3.5"
+version = "4.0.0"
+
+[[package]]
+category = "main"
 description = "A library for interacting with features of repl.it"
 name = "replit"
 optional = false
@@ -192,7 +200,7 @@ idna = ">=2.0"
 multidict = ">=4.0"
 
 [metadata]
-content-hash = "b33ce91abbdb73cc294e8c9a534b0cea4a7ad47789af7aae7ae88534a5e1339b"
+content-hash = "5ecbf6d73b8b8cd0ce1a20d12294e39df741fc83ad79c9bdda24c381fa73693a"
 python-versions = "^3.8"
 
 [metadata.files]
@@ -303,6 +311,9 @@ multidict = [
     {file = "multidict-4.7.6-cp38-cp38-win32.whl", hash = "sha256:5cf311a0f5ef80fe73e4f4c0f0998ec08f954a6ec72b746f3c179e37de1d210d"},
     {file = "multidict-4.7.6-cp38-cp38-win_amd64.whl", hash = "sha256:7388d2ef3c55a8ba80da62ecfafa06a1c097c18032a501ffd4cabbc52d7f2b19"},
     {file = "multidict-4.7.6.tar.gz", hash = "sha256:fbb77a75e529021e7c4a8d4e823d88ef4d23674a202be4f5addffc72cbb91430"},
+]
+pypresence = [
+    {file = "pypresence-4.0.0.tar.gz", hash = "sha256:8eed4871d25f5c6bf52710bf2a9fe18601dc58c74726917e87c685de2e9151d9"},
 ]
 replit = [
     {file = "replit-2.0.0-py3-none-any.whl", hash = "sha256:862b49887f486a5c83eba4809b86a977378a008f1c5d53ab3c1187418194cf18"},
