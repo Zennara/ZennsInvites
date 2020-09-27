@@ -133,8 +133,8 @@ async def on_message(message):
       embed.set_author(name=client.user.name + " Invites Help", icon_url=client.user.avatar_url)
       embed.add_field(name="`"+prefix+ "invites [member]`", value="Shows how many invites the user has", inline=False)
       embed.add_field(name="`"+prefix+ "leaderboard`", value="Shows the invites leaderboard", inline=False)
-      embed.add_field(name="`"+prefix+ "editinvites <member>`", value="Set invites of a user", inline=False)
-      embed.add_field(name="`"+prefix+ "editleaves <member>`", value="Set leaves of a user", inline=False)
+      embed.add_field(name="`"+prefix+ "editinvites <member> <amount>`", value="Set invites of a user", inline=False)
+      embed.add_field(name="`"+prefix+ "editleaves <member> <amount>`", value="Set leaves of a user", inline=False)
       embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
       await message.channel.send(embed=embed)
 
@@ -170,7 +170,7 @@ async def on_message(message):
       embed = discord.Embed(color=0x8a0303)
       embed.add_field(name="`"+prefix+ "d leaderboard`", value="Show the disboard bump leaderboard", inline=False)
       embed.add_field(name="`"+prefix+ "d bumps [member]`", value="Show how many bumps a user has", inline=False)
-      embed.add_field(name="`"+prefix+ "d editbumps <member>`", value="Set bumps of a member", inline=False)
+      embed.add_field(name="`"+prefix+ "d editbumps <member> <amount>`", value="Set bumps of a member", inline=False)
       embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
       await message.channel.send(embed=embed)
     
