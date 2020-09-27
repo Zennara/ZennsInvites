@@ -38,31 +38,49 @@ async def getInvites():
 @client.event
 async def on_ready():
   print("\nZennInvites Ready\n")
+  with open("database.json", 'r') as f:
+      data = json.load(f)
+      f.close()
+  await client.change_presence(activity=discord.Game(name=data["prefix"] + "help"))
     
 @client.event
 async def on_message(message):
-    #only run on CM server
-    if message.content.startswith('!invites') and str(message.guild.id) == guild_id:
+    #get prefix
+    with open("database.json", 'r') as f:
+      data = json.load(f)
+      f.close()
+    prefix = data["prefix"]
+
+    #change prefix
+    if message.content.startswith(prefix + 'prefix '):
+      data["prefix"] = message.content.split()[1]
+      with open("database.json", 'w') as f:
+        json.dump(data, f)
+        f.close()
+      await client.change_presence(activity=discord.Game(name=data["prefix"] + "help"))
+
+    #only run on guild_id server
+    if message.content.startswith(prefix + 'invites') and str(message.guild.id) == guild_id:
       #get user (member object)
-      if (message.content == '!invites'):
+      if (message.content == prefix + 'invites'):
         user = message.author
       else:
         user = message.guild.get_member(message.mentions[0].id)
 
       #get invites
       with open("database.json", 'r') as f:
-        users = json.load(f)
+        data = json.load(f)
         f.close()
       #check if user is in database
-      if str(user.id) not in users:
-        users[str(user.id)] = {'invites': 0, 'leaves': 0, 'joinCode': "null", 'inviter': "null"}
-      Invites = users[str(user.id)]['invites']
-      Leaves = users[str(user.id)]['leaves']
+      if str(user.id) not in data:
+        data[str(user.id)] = {'invites': 0, 'leaves': 0, 'joinCode': "null", 'inviter': "null"}
+      Invites = data[str(user.id)]['invites']
+      Leaves = data[str(user.id)]['leaves']
       totalInvites = Invites - Leaves
 
       #write new data to files
       with open("database.json", 'w') as f:
-        json.dump(users, f)
+        json.dump(data, f)
         f.close()
 
       embed = discord.Embed(color=0x8a0303)
@@ -77,9 +95,9 @@ async def on_message(message):
 
       await message.channel.send(embed=embed)
 
-    if message.content.startswith('!info'):
+    if message.content.startswith(prefix + 'info'):
         #get user (member object)
-        if (message.content == '!info'):
+        if (message.content == prefix + 'info'):
           user = message.author
         else:
           user = message.guild.get_member(message.mentions[0].id)
@@ -105,12 +123,18 @@ async def on_message(message):
         #join code and owner, only run on guild_id server
         if str(message.guild.id) == guild_id:
           with open("database.json", 'r') as f:
-            users = json.load(f)
-            jCode = users[str(user.id)]['joinCode']
+            data = json.load(f)
             f.close()
+          if str(user.id) not in data:
+            data[str(user.id)] = {'invites': 0, 'leaves': 0, 'joinCode': "null", 'inviter': "null"}
+          with open("database.json", 'w') as f:
+            json.dump(data, f)
+            f.close()
+          jCode = data[str(user.id)]['joinCode']
+
           embed.add_field(name="Join Code", value=jCode, inline=True)
-          if users[str(user.id)]['inviter'] != "null":
-            inviterMember = message.guild.get_member(int(users[str(user.id)]['inviter']))
+          if data[str(user.id)]['inviter'] != "null":
+            inviterMember = message.guild.get_member(int(data[str(user.id)]['inviter']))
             embed.add_field(name="Owned By", value=inviterMember.name + "#" + inviterMember.discriminator, inline=True)
 
         #joined discord
@@ -141,23 +165,23 @@ async def on_member_join(member):
 
   #declare user
   with open("database.json", 'r') as f:
-    users = json.load(f)
+    data = json.load(f)
     f.close()
 
   #append join code
-  if str(member.id) not in users:
-    users[str(member.id)] = {'invites': 0, 'leaves': 0, 'joinCode': joinCode, 'inviter': codeOwner}
-  users[str(member.id)]['joinCode'] = joinCode
-  users[str(member.id)]['inviter'] = codeOwner
+  if str(member.id) not in data:
+    data[str(member.id)] = {'invites': 0, 'leaves': 0, 'joinCode': joinCode, 'inviter': codeOwner}
+  data[str(member.id)]['joinCode'] = joinCode
+  data[str(member.id)]['inviter'] = codeOwner
 
   #add to invites
-  if codeOwner not in users:
-    users[codeOwner] = {'invites': 0, 'leaves': 0, 'joinCode': "null", 'inviter': "null"}
-  users[codeOwner]['invites'] += 1
+  if codeOwner not in data:
+    data[codeOwner] = {'invites': 0, 'leaves': 0, 'joinCode': "null", 'inviter': "null"}
+  data[codeOwner]['invites'] += 1
 
   #write new data to files
   with open("database.json", 'w') as f:
-    json.dump(users, f)
+    json.dump(data, f)
     f.close()
 
 @client.event
@@ -167,17 +191,17 @@ async def on_member_remove(member):
 
   #declare user
   with open("database.json", 'r') as f:
-    users = json.load(f)
+    data = json.load(f)
     f.close()
 
   #add to leaves
-  if str(member.id) in users:
-    if users[str(member.id)]['inviter'] != "null":
-      users[users[str(member.id)]['inviter']]['leaves'] += 1
+  if str(member.id) in data:
+    if data[str(member.id)]['inviter'] != "null":
+      data[data[str(member.id)]['inviter']]['leaves'] += 1
 
   #write new data to files
   with open("database.json", 'w') as f:
-    json.dump(users, f)
+    json.dump(data, f)
     f.close()
   
 
@@ -188,5 +212,5 @@ keep_alive.keep_alive()
 #keep the bot running after the window closes, use UptimeRobot to ping the website at least every <60min. to prevent the website from going to sleep, turning off the bot
 
 #run bot
-#Bot token is in .env file on repl.it, which isn't viewable by users
+#Bot token is in .env file on repl.it, which isn't viewable by data
 client.run(os.environ.get("TOKEN"))
