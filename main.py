@@ -124,13 +124,13 @@ async def on_message(message):
       foundCategory = False
       #find category
       for category in guild.categories:
-        if category.name == "Server Stats":
+        if category.name == str(message.guild.name) + " Stats":
           categoryObject = category
           foundCategory = True
           break
       #create category
       if foundCategory == False:
-        categoryObject = await guild.create_category("Server Stats", overwrites=None, reason=None)
+        categoryObject = await guild.create_category(str(message.guild.name) + " Stats", overwrites=None, reason=None)
 
       #get amount of bots
       bots = 0
@@ -149,42 +149,34 @@ async def on_message(message):
         channelName = "Members"
         channelType = guild.member_count - bots
         cont = True
-
       if message.content == prefix + "addcounter bots":
         channelName = "Bots"
         channelType = bots
         cont = True
-
       if message.content == prefix + "addcounter channels":
         channelName = "Channels"
         channelType = total_channels + 1
         cont = True
-
       if message.content == prefix + "addcounter textchannels":
         channelName = "Text Channels"
         channelType = total_text_channels
         cont = True
-
       if message.content == prefix + "addcounter voicechannels":
         channelName = "Voice Channels"
         channelType = total_voice_channels + 1
         cont = True
-
       if message.content == prefix + "addcounter categories":
         channelName = "Categories"
         channelType = len(guild.categories)
         cont = True
-
       if message.content == prefix + "addcounter bans":
         channelName = "Bans"
         channelType = len(await guild.bans())
         cont = True
-
       if message.content == prefix + "addcounter roles":
         channelName = "Roles"
         channelType = len(guild.roles)
         cont = True
-
       if message.content == prefix + "addcounter messages":
         channelName = "Messages"
         count = 0
@@ -219,6 +211,14 @@ async def on_message(message):
           channelObject = await guild.create_voice_channel(f"{channelName}: {channelType}",   overwrites=None, category=categoryObject, reason=None)
           await channelObject.set_permissions(guild.default_role, connect = False)
       
+    #delete counter
+    if message.content.startswith(prefix + "delcounter"):
+      for channel in message.guild.voice_channels:
+        try: 
+          if channel.name.lower().startswith(str(message.content.split()[1])):
+            await channel.delete()
+        except:
+          break 
 
     #check bump disboard
     if message.content == '!d bump':
