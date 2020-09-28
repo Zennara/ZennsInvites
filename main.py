@@ -228,10 +228,11 @@ async def on_message(message):
       user = message.author
     #check disboard bot reply
     elif bumped == True:
-      if str(message.embeds[0].colour) == "#24b7b7":
-        if str(user.id) not in data:
-          data[str(user.id)] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
-        data[str(user.id)]['bumps'] += 1
+      if str(message.author.id) == "302050872383242240": #disboard bot ID
+        if str(message.embeds[0].colour) == "#24b7b7":
+          if str(user.id) not in data:
+            data[str(user.id)] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
+          data[str(user.id)]['bumps'] += 1
       bumped = False
 
     #disboard bumps
