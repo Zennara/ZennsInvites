@@ -1,3 +1,6 @@
+#CastleMiner Discord bot, made by Zennara#8377
+#This is a custom discord bot. It is only written to work on one server.
+
 import keep_alive
 import discord
 import os
@@ -96,6 +99,11 @@ async def on_message(message):
         if member.bot:
           bots += 1
       
+      #get channels/ categories
+      total_text_channels = len(guild.text_channels)
+      total_voice_channels = len(guild.voice_channels)
+      total_channels = total_text_channels  + total_voice_channels
+
       cont = False
       #get channel creation type
       if message.content == prefix + "addcounter members":
@@ -107,6 +115,54 @@ async def on_message(message):
         channelName = "Bots"
         channelType = bots
         cont = True
+
+      if message.content == prefix + "addcounter channels":
+        channelName = "Channels"
+        channelType = total_channels + 1
+        cont = True
+
+      if message.content == prefix + "addcounter textchannels":
+        channelName = "Text Channels"
+        channelType = total_text_channels
+        cont = True
+
+      if message.content == prefix + "addcounter voicechannels":
+        channelName = "Voice Channels"
+        channelType = total_voice_channels + 1
+        cont = True
+
+      if message.content == prefix + "addcounter categories":
+        channelName = "Categories"
+        channelType = len(guild.categories)
+        cont = True
+
+      if message.content == prefix + "addcounter bans":
+        channelName = "Bans"
+        channelType = len(await guild.bans())
+        cont = True
+
+      if message.content == prefix + "addcounter roles":
+        channelName = "Roles"
+        channelType = len(guild.roles)
+        cont = True
+
+      if message.content == prefix + "addcounter messages":
+        channelName = "Messages"
+        count = 0
+
+        #loading message
+        embed = discord.Embed(color=0x8a0303)
+        embed.add_field(name=client.user.name + "#" + client.user.discriminator, value="**Loading...**", inline=False)
+        embed.set_footer(text=nowDate + " at " + nowTime)
+        message2 = await message.channel.send(embed=embed)
+
+        #get amount of messages
+        for channel in guild.text_channels:
+          count += len(await channel.history(limit=None))
+        channelType = count
+        cont = True
+
+        await message2.delete()
         
       foundChannel = False
       if cont:
@@ -207,15 +263,16 @@ async def on_message(message):
     #help commands
     if message.content == prefix + 'help commands':
       embed = discord.Embed(color=0x8a0303)
+      embed.set_author(name=client.user.name + " Commands Help", icon_url=client.user.avatar_url)
       embed.add_field(name="`"+prefix+ "info [member]`", value="Show info about a member", inline=False)
       embed.add_field(name="`"+prefix+ "prefix <prefix>`", value="Change the command prefix", inline=False)
-      embed.set_author(name=client.user.name + " Commands Help", icon_url=client.user.avatar_url)
       embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
       await message.channel.send(embed=embed)
 
     #help disboard
     if message.content == prefix + 'help disboard':
       embed = discord.Embed(color=0x8a0303)
+      embed.set_author(name=client.user.name + " Disboard Help", icon_url=client.user.avatar_url)
       embed.add_field(name="`"+prefix+ "d leaderboard`", value="Show the disboard bump leaderboard", inline=False)
       embed.add_field(name="`"+prefix+ "d bumps [member]`", value="Show how many bumps a user has", inline=False)
       embed.add_field(name="`"+prefix+ "d editbumps <member> <amount>`", value="Set bumps of a member", inline=False)
