@@ -37,7 +37,46 @@ async def getInvites():
             joinCode = str(i.code)
       tmp.append(tuple((i.code, i.uses)))
     invites = tmp
-  await asyncio.sleep(4)
+  await asyncio.sleep(1)
+
+async def checkCounters():
+  while True:
+    #discord API limits rates to twice every 10m for channel edits
+    await asyncio.sleep(600)
+    print("test")
+
+    guild = client.get_guild(int(guild_id))
+    #get amount of bots
+    bots = 0
+    for member in guild.members:
+      if member.bot:
+        bots += 1
+
+    #get data
+    with open("database.json", 'r') as f:
+      data = json.load(f)
+      f.close()
+
+      #update channels
+    for channel in guild.voice_channels:
+      if channel.name.startswith("Members"):
+        await channel.edit(name="Members: " + str(guild.member_count - bots))
+      if channel.name.startswith("Bots"):
+        await channel.edit(name="Bots: " + str(guild.member_count - bots))
+      if channel.name.startswith("Channels"):
+        await channel.edit(name="Channels: " + str(len(guild.text_channels) + len(guild.voice_channels) - len(guild.categories)))
+      if channel.name.startswith("Text Channels"):
+        await channel.edit(name="Text Channels: " + str(len(guild.text_channels)))
+      if channel.name.startswith("Voice Channels"):
+        await channel.edit(name="Voice Channels: " + str(len(guild.voice_channels)))
+      if channel.name.startswith("Categories"):
+        await channel.edit(name="Categories: " + str(len(guild.categories)))
+      if channel.name.startswith("Roles"):
+        await channel.edit(name="Roles: " + str(len(guild.roles)))
+      if channel.name.startswith("Bans"):
+        await channel.edit(name="Bans: " + str(len(await guild.bans())))
+      if channel.name.startswith("Messages"):
+        await channel.edit(name="Messages: " + str(data['messages']))
 
 @client.event
 async def on_ready():
@@ -58,7 +97,8 @@ async def on_message(message):
       f.close()
     prefix = data["prefix"]
 
-    #print((await message.channel.fetch_message(759836810469048373)).embeds[0].colour)
+    #get messages and add
+    data["messages"] += 1
 
     #split current datetime
     nowDT = str(datetime.now()).split()
@@ -102,7 +142,7 @@ async def on_message(message):
       #get channels/ categories
       total_text_channels = len(guild.text_channels)
       total_voice_channels = len(guild.voice_channels)
-      total_channels = total_text_channels  + total_voice_channels
+      total_channels = total_text_channels  + total_voice_channels - len(guild.categories)
 
       cont = False
       #get channel creation type
@@ -158,9 +198,12 @@ async def on_message(message):
 
         #get amount of messages
         for channel in guild.text_channels:
-          count += len(await channel.history(limit=None))
+          count += len(await channel.history(limit=None).flatten())
         channelType = count
         cont = True
+
+        #store amount of messages
+        data["messages"] = count
 
         await message2.delete()
         
@@ -370,7 +413,7 @@ async def on_member_join(member):
   lastName = str(member.name)
 
   #wait until getInvites() is done
-  await asyncio.sleep(5)
+  await asyncio.sleep(1.1)
 
   #declare user
   with open("database.json", 'r') as f:
@@ -396,7 +439,7 @@ async def on_member_join(member):
 @client.event
 async def on_member_remove(member):
   #wait for getInvites()
-  await asyncio.sleep(5)
+  await asyncio.sleep(1.1)
 
   #declare user
   with open("database.json", 'r') as f:
@@ -416,6 +459,7 @@ async def on_member_remove(member):
 
 
 client.loop.create_task(getInvites())
+client.loop.create_task(checkCounters())
 
 keep_alive.keep_alive() 
 #keep the bot running after the window closes, use UptimeRobot to ping the website at least every <60min. to prevent the website from going to sleep, turning off the bot
