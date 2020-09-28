@@ -1,5 +1,5 @@
 #CastleMiner Discord bot, made by Zennara#8377
-#This is a custom discord bot. It is only written to work on one server.
+#This is a custom discord bot. It is written to work on only one server.
 
 import keep_alive
 import discord
@@ -112,8 +112,8 @@ async def on_message(message):
       embed.add_field(name="Counters", value=start + " counters`", inline=False)
       embed.add_field(name="Invites", value=start + " invites`", inline=False)
       embed.add_field(name="Role Reactions", value=start + " reactions`", inline=False)
-      embed.add_field(name="Commands", value=start + " commands`", inline=False)
       embed.add_field(name="Disboard", value=start + " disboard`", inline=False)
+      embed.add_field(name="Commands", value=start + " commands`", inline=False)
       embed.set_footer(text="______________________\nMade By Zennara#8377")
       await message.channel.send(embed=embed)
 
@@ -306,6 +306,7 @@ async def on_message(message):
     if message.content == prefix + 'help commands':
       embed = discord.Embed(color=0x8a0303)
       embed.set_author(name=client.user.name + " Commands Help", icon_url=client.user.avatar_url)
+      embed.add_field(name="`"+prefix+ "database`", value="Retrieve past info and store in database", inline=False)
       embed.add_field(name="`"+prefix+ "info [member]`", value="Show info about a member", inline=False)
       embed.add_field(name="`"+prefix+ "prefix <prefix>`", value="Change the command prefix", inline=False)
       embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
