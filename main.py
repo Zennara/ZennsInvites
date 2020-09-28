@@ -43,7 +43,6 @@ async def checkCounters():
   while True:
     #discord API limits rates to twice every 10m for channel edits
     await asyncio.sleep(600)
-    print("test")
 
     guild = client.get_guild(int(guild_id))
     #get amount of bots
@@ -86,7 +85,7 @@ async def on_ready():
   with open("database.json", 'r') as f:
       data = json.load(f)
       f.close()
-  await client.change_presence(activity=discord.Streaming(name=data["prefix"] + "help", url="https://www.twitch.tv/xzennara/about"))
+  await client.change_presence(activity=discord.Streaming(name=" | " + data["prefix"] + "help", url="https://www.twitch.tv/xzennara/about"))
     
 @client.event
 async def on_message(message):
