@@ -1,6 +1,7 @@
 #CastleMiner Discord bot, made by Zennara#8377
 #This is a custom discord bot. It is written to work on only one server.
 
+#imports
 import keep_alive
 import discord
 import os
@@ -56,7 +57,7 @@ async def checkCounters():
       data = json.load(f)
       f.close()
 
-      #update channels
+    #update channels
     for channel in guild.voice_channels:
       if channel.name.startswith("Members"):
         await channel.edit(name="Members: " + str(guild.member_count - bots))
@@ -215,7 +216,7 @@ async def on_message(message):
     if message.content.startswith(prefix + "delcounter"):
       for channel in message.guild.voice_channels:
         try: 
-          if channel.name.lower().startswith(str(message.content.split()[1])):
+          if channel.name.lower().startswith(str(message.content.split()[1].lower())):
             await channel.delete()
         except:
           break 
@@ -344,7 +345,7 @@ async def on_message(message):
       totalInvites = Invites - Leaves
 
       embed = discord.Embed(color=0x8a0303)
-      embed.add_field(name=user.name + "#" + user.discriminator, value="You have **" + str(Invites) + "** invites! (**" + str(totalInvites) + "** regular, **-" + str(Leaves) + "** leaves)", inline=False)
+      embed.add_field(name=user.name + "#" + user.discriminator, value="You have **" + str(totalInvites) + "** invites! (**" + str(Invites) + "** regular, **-" + str(Leaves) + "** leaves)", inline=False)
 
       embed.set_footer(text=nowDate + " at " + nowTime)
 
