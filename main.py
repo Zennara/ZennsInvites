@@ -122,9 +122,6 @@ async def on_raw_reaction_remove(payload):
 
 @client.event
 async def on_message(message):
-    sales = {"test": {'apple': 2, 'orange': 3, 'grapes': 4 }}
-
-    print(sales.items())
     global user
     global bumped
     #get prefix
