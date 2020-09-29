@@ -419,7 +419,7 @@ async def on_message(message):
       embed.set_author(name=client.user.name + " Reactions Help", icon_url=client.user.avatar_url)
       embed.add_field(name="`"+prefix+ "rr <channelID> <messageID> <:reaction:> <roleID>`", value="Give a role when user reacts to message", inline=False)
       embed.add_field(name="`"+prefix+ "delrr <channelID> <messageID>`", value="Remove a reaction role", inline=False)
-      embed.add_field(name="`"+prefix+ "rolereactions`", value="Lists all role reaction messages", inline=False)
+      embed.add_field(name="`"+prefix+ "reactions`", value="Lists all role reaction messages", inline=False)
       embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
       await message.channel.send(embed=embed)
 
