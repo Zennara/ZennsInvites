@@ -119,27 +119,6 @@ async def on_message(message):
     nowDate = nowDT[0]
     nowTime = str(datetime.strptime(str(nowDT[1][0 : len(nowDT[1]) - 7]), "%H:%M:%S").strftime("%I:%M %p"))
 
-    #edit invites
-    if messagecontent.startswith(prefix + "editinvites"):
-      #run in try in case of error
-      try:
-        #get user (member object)
-        user = message.guild.get_member(message.mentions[0].id)
-      
-        #get previous invites amount
-        prevInvites = data[str(user.id)]['invites']
-
-        editBumpAmount = int(messagecontent.split()[2])
-        data[str(user.id)]['invites'] = editBumpAmount
-
-        #send embed
-        embed = discord.Embed(color=0x593695, description="User now has **" + str(data[str(user.id)]['invites']) + "** invites! (Original: **" + str(prevInvites) + "**)")
-        embed.set_author(name="@" + user.name + "#" + str(user.discriminator), icon_url=user.avatar_url)
-        embed.set_footer(text=nowDate + " at " + nowTime)
-        await message.channel.send(embed=embed)
-      except:
-        pass
-
     #edit amounts
     if messagecontent.startswith(prefix + "edit"):
       #run in try's in case of error
