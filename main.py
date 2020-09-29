@@ -327,7 +327,7 @@ async def on_message(message):
     #change prefix
     if message.content.startswith(prefix + 'prefix '):
       data["prefix"] = message.content.split()[1]
-      await client.change_presence(activity=discord.Game(name=data["prefix"] + "help"))
+      await client.change_presence(activity=discord.Streaming(name=" | " + data["prefix"] + "help", url="https://www.twitch.tv/xzennara/about"))
 
     #only run on guild_id server
     if message.content.startswith(prefix + 'invites') and str(message.guild.id) == guild_id:
