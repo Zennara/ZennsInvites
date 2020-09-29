@@ -106,7 +106,19 @@ async def on_raw_reaction_add(payload):
       if str(payload.emoji.name) == str(data["role" + str(payload.guild_id) + str(payload.channel_id) + str(payload.message_id)]['reaction']):
         #give role
         role = payload.member.guild.get_role(int(data["role" + str(payload.guild_id) + str(payload.channel_id) + str(payload.message_id)]['role']))
-        await payload.member.add_roles(role, atomic=False)
+        await payload.member.add_roles(role, atomic=True)
+
+@client.event
+async def on_raw_reaction_remove(payload):
+  with open("database.json", 'r') as f:
+    data = json.load(f)
+    f.close()
+  if "role" + str(payload.guild_id) + str(payload.channel_id) + str(payload.message_id) in data:
+    #check if it is correct reaction emoji
+    if str(payload.emoji.name) == str(data["role" + str(payload.guild_id) + str(payload.channel_id) + str(payload.message_id)]['reaction']):
+      #give role
+      role = client.get_guild(int(payload.guild_id)).get_role(int(data["role" + str(payload.guild_id) + str(payload.channel_id) + str(payload.message_id)]['role']))
+      await client.get_guild(int(payload.guild_id)).get_member(payload.user_id).remove_roles(role, atomic=True)
     
 
 
