@@ -159,9 +159,8 @@ async def on_message(message):
             break
         msg = await channel2.fetch_message(int(messageID))
 
-        print('test')
+        #delete role
         if "role" + str(message.guild.id) + str(channelID) + str(messageID) in data:
-          print('test2')
           await msg.remove_reaction(data["role" + str(message.guild.id) + str(channelID) + str(messageID)]['reaction'], client.user)
           del data["role" + str(message.guild.id) + str(channelID) + str(messageID)]
       except:
