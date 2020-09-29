@@ -115,6 +115,10 @@ async def on_message(message):
     nowDate = nowDT[0]
     nowTime = str(datetime.strptime(str(nowDT[1][0 : len(nowDT[1]) - 7]), "%H:%M:%S").strftime("%I:%M %p"))
 
+    #add role reaction message
+    if messagecontent.startswith(prefix + 'rr'):
+      if str(message.guild.id) == guild_id:
+
     #update database
     if messagecontent == prefix + "database":
       if str(message.guild.id) == guild_id: 
@@ -357,6 +361,7 @@ async def on_message(message):
       embed.set_author(name=client.user.name + " Reactions Help", icon_url=client.user.avatar_url)
       embed.add_field(name="`"+prefix+ "rr <channelID> <messageID> <reaction> <role>`", value="Give a role when user reacts to message", inline=False)
       embed.add_field(name="`"+prefix+ "delrr <channelID> <messageID>`", value="Remove a reaction role", inline=False)
+      embed.add_field(name="`"+prefix+ "rolereactions`", value="Lists all role reaction messages", inline=False)
       embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
       await message.channel.send(embed=embed)
 
