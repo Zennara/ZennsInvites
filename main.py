@@ -86,8 +86,8 @@ async def on_ready():
   with open("database.json", 'r') as f:
       data = json.load(f)
       f.close()
-  await client.change_presence(activity=discord.Streaming(name=" | " + data["prefix"] + "help", url="https://www.twitch.tv/xzennara/about"))
-    
+  await client.change_presence(activity=discord.Streaming(name=" | " + data["prefix"] + "help", url="https://www.twitch.tv/xzennara/about"))  
+
 @client.event
 async def on_message(message):
     global user
@@ -104,6 +104,38 @@ async def on_message(message):
     #set message content to lowercase
     messagecontent = message.content.lower()
 
+    #split current datetime
+    nowDT = str(datetime.now()).split()
+    nowDate = nowDT[0]
+    nowTime = str(datetime.strptime(str(nowDT[1][0 : len(nowDT[1]) - 7]), "%H:%M:%S").strftime("%I:%M %p"))
+
+    #update database
+    if messagecontent == prefix + "database":
+      if str(message.author.id) not in data:
+        #loading message
+        embed = discord.Embed(color=0x593695, description="**Loading Users Into Database...**")
+        embed.set_author(name="@" + client.user.name + "#" + client.user.discriminator, icon_url=client.user.avatar_url)
+        embed.set_footer(text=nowDate + " at " + nowTime)
+        message2 = await message.channel.send(embed=embed)
+
+        #invites
+        for member in message.guild.members:
+          totalInvites = 0
+          for i in await message.guild.invites():
+            if i.inviter == member:
+              totalInvites += i.uses
+          #add member to database
+          if str(member.id) not in data:
+            data[str(member.id)] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
+          data[str(member.id)]['invites'] = totalInvites
+
+        await message2.delete()
+      else:
+        embed = discord.Embed(color=0x593695, description="**Database has already been uploaded.**")
+        embed.set_author(name="@" + client.user.name + "#" + client.user.discriminator, icon_url=client.user.avatar_url)
+        embed.set_footer(text=nowDate + " at " + nowTime)
+        await message.channel.send(embed=embed)
+
     #put users in database
     if str(message.author.id) not in data:
       data[str(message.author.id)] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
@@ -113,11 +145,6 @@ async def on_message(message):
         data[str(message.guild.get_member(message.mentions[0].id).id)] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
     except:
       pass
-
-    #split current datetime
-    nowDT = str(datetime.now()).split()
-    nowDate = nowDT[0]
-    nowTime = str(datetime.strptime(str(nowDT[1][0 : len(nowDT[1]) - 7]), "%H:%M:%S").strftime("%I:%M %p"))
 
     #edit amounts
     if messagecontent.startswith(prefix + "edit"):
@@ -258,7 +285,7 @@ async def on_message(message):
     if messagecontent.startswith(prefix + "delcounter"):
       for channel in message.guild.voice_channels:
         try: 
-          if channel.name.lower().startswith(str(messagecontent.split()[1]):
+          if channel.name.lower().startswith(str(messagecontent.split()[1])):
             await channel.delete()
         except:
           break 
