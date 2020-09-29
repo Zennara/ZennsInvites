@@ -132,6 +132,22 @@ async def on_message(message):
     nowDate = nowDT[0]
     nowTime = str(datetime.strptime(str(nowDT[1][0 : len(nowDT[1]) - 7]), "%H:%M:%S").strftime("%I:%M %p"))
 
+    if messagecontent == prefix + "reactions":  
+      #display all role reaction messages
+      embed = discord.Embed(color=0x593695, description="**Messages with Reaction Roles**")
+
+      #get all RR messages
+      count = 0
+      for k in data.keys():
+        count += 1
+        if k.startswith('role'):
+          embed.add_field(name="Message "+str(count), value="**Role:** <@&" + str(data[k]['role']) + ">\n**Emoji:** " + str(data[k]['reaction']) + "\n**Channel: ** <#" + str(data[k]['channel']) + ">\n**Message ID:** " + str(data[k]['message']) + "[\nJump to message](https://discordapp.com/channels/"+str(message.guild.id)+"/"+str(data[k]['channel'])+"/"+str(data[k]['message'])+")")
+          #[Click here](https://discordapp.com/channels/[server_id]/[channel_id]?jump=[message_id])
+
+      embed.set_author(name=message.guild.name, icon_url=message.guild.icon_url)
+      embed.set_footer(text=nowDate + " at " + nowTime)
+      await message.channel.send(embed=embed)
+
     #add role reaction message
     if messagecontent.startswith(prefix + 'rr'):
       if str(message.guild.id) == guild_id:
@@ -160,7 +176,6 @@ async def on_message(message):
             data[placement] = {'server': str(message.guild.id), 'channel': str(RRchannelID), 'message': str(RRmessageID), 'reaction': RRreaction, 'role': str(roleID)}
         except:
           pass
-
 
     #update database
     if messagecontent == prefix + "database":
