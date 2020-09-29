@@ -94,6 +94,23 @@ async def on_ready():
   await client.change_presence(activity=discord.Streaming(name=" | " + data["prefix"] + "help", url="https://www.twitch.tv/xzennara/about"))  
 
 @client.event
+async def on_raw_reaction_add(payload):
+  with open("database.json", 'r') as f:
+      data = json.load(f)
+      f.close()
+  #make sure its not initial reaction
+  if payload.member != client.user:
+    #check if key exists in database
+    if "role" + str(payload.guild_id) + str(payload.channel_id) + str(payload.message_id) in data:
+      #check if it is correct reaction emoji
+      if str(payload.emoji.name) == str(data["role" + str(payload.guild_id) + str(payload.channel_id) + str(payload.message_id)]['reaction']):
+        #give role
+        role = payload.member.guild.get_role(int(data["role" + str(payload.guild_id) + str(payload.channel_id) + str(payload.message_id)]['role']))
+        await payload.member.add_roles(role, atomic=False)
+    
+
+
+@client.event
 async def on_message(message):
     global user
     global bumped
@@ -118,6 +135,32 @@ async def on_message(message):
     #add role reaction message
     if messagecontent.startswith(prefix + 'rr'):
       if str(message.guild.id) == guild_id:
+        try:
+          #get variables
+          sCont = messagecontent.split()
+          RRchannelID = sCont[1]
+          RRmessageID = sCont[2]
+          RRreaction = sCont[3]
+          RRroleID = sCont[4]
+
+          #get channel, message, role
+          for channel in message.guild.channels:
+            if str(channel.id) == str(RRchannelID):
+              channel2 = channel
+              break
+          msg = await channel2.fetch_message(int(RRmessageID))
+
+          #add to data
+          if "role" + str(channel2.id) + str(msg.id) not in data:
+            role = message.guild.get_role(int(RRroleID))
+            roleID = role.id
+            #give starter reaction
+            await msg.add_reaction(RRreaction)
+            placement = "role" + str(message.guild.id) + str(channel2.id) + str(msg.id)
+            data[placement] = {'server': str(message.guild.id), 'channel': str(RRchannelID), 'message': str(RRmessageID), 'reaction': RRreaction, 'role': str(roleID)}
+        except:
+          pass
+
 
     #update database
     if messagecontent == prefix + "database":
@@ -359,7 +402,7 @@ async def on_message(message):
     if messagecontent == prefix + 'help reactions':
       embed = discord.Embed(color=0x593695)
       embed.set_author(name=client.user.name + " Reactions Help", icon_url=client.user.avatar_url)
-      embed.add_field(name="`"+prefix+ "rr <channelID> <messageID> <reaction> <role>`", value="Give a role when user reacts to message", inline=False)
+      embed.add_field(name="`"+prefix+ "rr <channelID> <messageID> <:reaction:> <roleID>`", value="Give a role when user reacts to message", inline=False)
       embed.add_field(name="`"+prefix+ "delrr <channelID> <messageID>`", value="Remove a reaction role", inline=False)
       embed.add_field(name="`"+prefix+ "rolereactions`", value="Lists all role reaction messages", inline=False)
       embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
