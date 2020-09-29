@@ -101,6 +101,9 @@ async def on_message(message):
     #get messages and add
     data["messages"] += 1
 
+    #set message content to lowercase
+    messagecontent = message.content.lower()
+
     #put users in database
     if str(message.author.id) not in data:
       data[str(message.author.id)] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
@@ -117,7 +120,7 @@ async def on_message(message):
     nowTime = str(datetime.strptime(str(nowDT[1][0 : len(nowDT[1]) - 7]), "%H:%M:%S").strftime("%I:%M %p"))
 
     #edit invites
-    if message.content.startswith(prefix + "editinvites"):
+    if messagecontent.startswith(prefix + "editinvites"):
       #run in try in case of error
       try:
         #get user (member object)
@@ -126,7 +129,7 @@ async def on_message(message):
         #get previous invites amount
         prevInvites = data[str(user.id)]['invites']
 
-        editBumpAmount = int(message.content.split()[2])
+        editBumpAmount = int(messagecontent.split()[2])
         data[str(user.id)]['invites'] = editBumpAmount
 
         #send embed
@@ -138,7 +141,7 @@ async def on_message(message):
         pass
 
     #edit amounts
-    if message.content.startswith(prefix + "edit"):
+    if messagecontent.startswith(prefix + "edit"):
       #run in try's in case of error
       #get user (member object)
       try:
@@ -147,18 +150,18 @@ async def on_message(message):
         user = message.author
       try:      
         #get type
-        editType = message.content.split()[1].lower()
+        editType = messagecontent.split()[1]
 
         #get previous invites amount
         prevAmount = data[str(user.id)][str(editType)]
 
-        editAmount = int(message.content.split()[2])
+        editAmount = int(messagecontent.split()[2])
 
         if editType == "invites" or editType == "leaves" or editType == "bumps":
           data[str(user.id)][str(editType)] = editAmount
 
           #send embed
-          embed = discord.Embed(color=0x593695, description="User now has **" + str(editAmount) + "** " + editType + "s!" + " (Original: **" + str(prevAmount) + "**)")
+          embed = discord.Embed(color=0x593695, description="User now has **" + str(editAmount) + "** " + editType + "!" + " (Original: **" + str(prevAmount) + "**)")
           embed.set_author(name="@" + user.name + "#" + str(user.discriminator), icon_url=user.avatar_url)
           embed.set_footer(text=nowDate + " at " + nowTime)
           await message.channel.send(embed=embed)
@@ -166,7 +169,7 @@ async def on_message(message):
         pass
 
     #help
-    if message.content == prefix + 'help':
+    if messagecontent == prefix + 'help':
       embed = discord.Embed(color=0x593695)
       embed.set_author(name=client.user.name + " Help", icon_url=client.user.avatar_url)
       start = "`" + prefix + "help"
@@ -179,7 +182,7 @@ async def on_message(message):
       await message.channel.send(embed=embed)
 
     #add counter
-    if message.content.startswith(prefix + "addcounter"):
+    if messagecontent.startswith(prefix + "addcounter"):
       guild = client.get_guild(int(guild_id))
 
       foundCategory = False
@@ -206,39 +209,39 @@ async def on_message(message):
 
       cont = False
       #get channel creation type
-      if message.content == prefix + "addcounter members":
+      if messagecontent == prefix + "addcounter members":
         channelName = "Members"
         channelType = guild.member_count - bots
         cont = True
-      if message.content == prefix + "addcounter bots":
+      if messagecontent == prefix + "addcounter bots":
         channelName = "Bots"
         channelType = bots
         cont = True
-      if message.content == prefix + "addcounter channels":
+      if messagecontent == prefix + "addcounter channels":
         channelName = "Channels"
         channelType = total_channels + 1
         cont = True
-      if message.content == prefix + "addcounter textchannels":
+      if messagecontent == prefix + "addcounter textchannels":
         channelName = "Text Channels"
         channelType = total_text_channels
         cont = True
-      if message.content == prefix + "addcounter voicechannels":
+      if messagecontent == prefix + "addcounter voicechannels":
         channelName = "Voice Channels"
         channelType = total_voice_channels + 1
         cont = True
-      if message.content == prefix + "addcounter categories":
+      if messagecontent == prefix + "addcounter categories":
         channelName = "Categories"
         channelType = len(guild.categories)
         cont = True
-      if message.content == prefix + "addcounter bans":
+      if messagecontent == prefix + "addcounter bans":
         channelName = "Bans"
         channelType = len(await guild.bans())
         cont = True
-      if message.content == prefix + "addcounter roles":
+      if messagecontent == prefix + "addcounter roles":
         channelName = "Roles"
         channelType = len(guild.roles)
         cont = True
-      if message.content == prefix + "addcounter messages":
+      if messagecontent == prefix + "addcounter messages":
         channelName = "Messages"
         count = 0
 
@@ -273,16 +276,16 @@ async def on_message(message):
           await channelObject.set_permissions(guild.default_role, connect = False)
       
     #delete counter
-    if message.content.startswith(prefix + "delcounter"):
+    if messagecontent.startswith(prefix + "delcounter"):
       for channel in message.guild.voice_channels:
         try: 
-          if channel.name.lower().startswith(str(message.content.split()[1].lower())):
+          if channel.name.lower().startswith(str(messagecontent.split()[1]):
             await channel.delete()
         except:
           break 
 
     #check bump disboard
-    if message.content == '!d bump':
+    if messagecontent == '!d bump':
       bumped = True
       #get user (member object)
       user = message.author
@@ -294,9 +297,9 @@ async def on_message(message):
       bumped = False
 
     #disboard bumps
-    if message.content.startswith(prefix + 'd bumps'):
+    if messagecontent.startswith(prefix + 'd bumps'):
       #get user (member object)
-      if (message.content == prefix + 'd bumps'):
+      if (messagecontent == prefix + 'd bumps'):
         user = message.author
       else:
         user = message.guild.get_member(message.mentions[0].id)
@@ -311,7 +314,7 @@ async def on_message(message):
       await message.channel.send(embed=embed)
 
     #help invites (InviteManager)
-    if message.content == prefix + 'help invites':
+    if messagecontent == prefix + 'help invites':
       embed = discord.Embed(color=0x593695)
       embed.set_author(name=client.user.name + " Invites Help", icon_url=client.user.avatar_url)
       embed.add_field(name="`"+prefix+ "invites [member]`", value="Shows how many invites the user has", inline=False)
@@ -321,7 +324,7 @@ async def on_message(message):
       await message.channel.send(embed=embed)
 
     #help reactions (Zira)
-    if message.content == prefix + 'help reactions':
+    if messagecontent == prefix + 'help reactions':
       embed = discord.Embed(color=0x593695)
       embed.set_author(name=client.user.name + " Reactions Help", icon_url=client.user.avatar_url)
       embed.add_field(name="`"+prefix+ "rr <channelID> <messageID> <reaction> <role>`", value="Give a role when user reacts to message", inline=False)
@@ -330,7 +333,7 @@ async def on_message(message):
       await message.channel.send(embed=embed)
 
     #help stats (Server Stats)
-    if message.content == prefix + 'help counters':
+    if messagecontent == prefix + 'help counters':
       embed = discord.Embed(color=0x593695)
       embed.set_author(name=client.user.name + " Counters Help", icon_url=client.user.avatar_url)
       embed.add_field(name="`"+prefix+ "addcounter <tracker>`", value="Make a new server counter", inline=False)
@@ -339,7 +342,7 @@ async def on_message(message):
       await message.channel.send(embed=embed)
 
     #help commands
-    if message.content == prefix + 'help commands':
+    if messagecontent == prefix + 'help commands':
       embed = discord.Embed(color=0x593695)
       embed.set_author(name=client.user.name + " Commands Help", icon_url=client.user.avatar_url)
       embed.add_field(name="`"+prefix+ "database`", value="Retrieve past info and store in database", inline=False)
@@ -349,7 +352,7 @@ async def on_message(message):
       await message.channel.send(embed=embed)
 
     #help disboard
-    if message.content == prefix + 'help disboard':
+    if messagecontent == prefix + 'help disboard':
       embed = discord.Embed(color=0x593695)
       embed.set_author(name=client.user.name + " Disboard Help", icon_url=client.user.avatar_url)
       embed.add_field(name="`"+prefix+ "d leaderboard`", value="Show the disboard bump leaderboard", inline=False)
@@ -359,14 +362,14 @@ async def on_message(message):
       await message.channel.send(embed=embed)
     
     #change prefix
-    if message.content.startswith(prefix + 'prefix '):
-      data["prefix"] = message.content.split()[1]
+    if messagecontent.startswith(prefix + 'prefix '):
+      data["prefix"] = messagecontent.split()[1]
       await client.change_presence(activity=discord.Streaming(name=" | " + data["prefix"] + "help", url="https://www.twitch.tv/xzennara/about"))
 
     #only run on guild_id server
-    if message.content.startswith(prefix + 'invites') and str(message.guild.id) == guild_id:
+    if messagecontent.startswith(prefix + 'invites') and str(message.guild.id) == guild_id:
       #get user (member object)
-      if (message.content == prefix + 'invites'):
+      if (messagecontent == prefix + 'invites'):
         user = message.author
       else:
         user = message.guild.get_member(message.mentions[0].id)
@@ -382,9 +385,9 @@ async def on_message(message):
 
       await message.channel.send(embed=embed)
 
-    if message.content.startswith(prefix + 'info'):
+    if messagecontent.startswith(prefix + 'info'):
         #get user (member object)
-        if (message.content == prefix + 'info'):
+        if (messagecontent == prefix + 'info'):
           user = message.author
         else:
           user = message.guild.get_member(message.mentions[0].id)
