@@ -278,13 +278,13 @@ async def on_message(message):
 
     #edit bumps
     if message.content.startswith(prefix + "d editbumps"):
-      #get user (member object)
-      user = message.guild.get_member(message.mentions[0].id)
-      
-      #get previous bumps amount
-      prevBumps = data[str(user.id)]['bumps']
-
       try:
+        #get user (member object)
+        user = message.guild.get_member(message.mentions[0].id)
+      
+        #get previous bumps amount
+        prevBumps = data[str(user.id)]['bumps']
+
         editBumpAmount = int(message.content.split()[3])
         data[str(user.id)]['bumps'] = editBumpAmount
 
