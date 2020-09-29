@@ -101,6 +101,16 @@ async def on_message(message):
     #get messages and add
     data["messages"] += 1
 
+    #put users in database
+    if str(message.author.id) not in data:
+      data[str(message.author.id)] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
+
+    try:
+      if str(message.guild.get_member(message.mentions[0].id)) not in data:
+        data[str(message.guild.get_member(message.mentions[0].id).id)] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
+    except:
+      pass
+
     #split current datetime
     nowDT = str(datetime.now()).split()
     nowDate = nowDT[0]
@@ -280,8 +290,6 @@ async def on_message(message):
     elif bumped == True:
       if str(message.author.id) == "302050872383242240": #disboard bot ID
         if str(message.embeds[0].colour) == "#24b7b7":
-          if str(user.id) not in data:
-            data[str(user.id)] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
           data[str(user.id)]['bumps'] += 1
       bumped = False
 
@@ -293,9 +301,7 @@ async def on_message(message):
       else:
         user = message.guild.get_member(message.mentions[0].id)
 
-      #check if user is in database
-      if str(user.id) not in data:
-        data[str(user.id)] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
+      #change database
       bumps = data[str(user.id)]['bumps']
 
       #send embed
@@ -366,8 +372,6 @@ async def on_message(message):
         user = message.guild.get_member(message.mentions[0].id)
 
       #check if user is in database
-      if str(user.id) not in data:
-        data[str(user.id)] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
       Invites = data[str(user.id)]['invites']
       Leaves = data[str(user.id)]['leaves']
       totalInvites = Invites - Leaves
@@ -405,8 +409,6 @@ async def on_message(message):
 
         #join code and owner, only run on guild_id server
         if str(message.guild.id) == guild_id:
-          if str(user.id) not in data:
-            data[str(user.id)] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
           jCode = data[str(user.id)]['joinCode']
 
           embed.add_field(name="Join Code", value=jCode, inline=True)
