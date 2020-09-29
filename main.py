@@ -127,6 +127,34 @@ async def on_message(message):
       except:
         pass
 
+    #edit amounts
+    if message.content.startswith(prefix + "edit"):
+      #run in try's in case of error
+      #get user (member object)
+      try:
+        user = message.guild.get_member(message.mentions[0].id)
+      except:
+        user = message.author
+      try:      
+        #get type
+        editType = message.content.split()[1].lower()
+
+        #get previous invites amount
+        prevAmount = data[str(user.id)][str(editType)]
+
+        editAmount = int(message.content.split()[2])
+
+        if editType == "invites" or editType == "leaves" or editType == "bumps":
+          data[str(user.id)][str(editType)] = editAmount
+
+          #send embed
+          embed = discord.Embed(color=0x593695, description="User now has **" + str(editAmount) + "** " + editType + "s!" + " (Original: **" + str(prevAmount) + "**)")
+          embed.set_author(name="@" + user.name + "#" + str(user.discriminator), icon_url=user.avatar_url)
+          embed.set_footer(text=nowDate + " at " + nowTime)
+          await message.channel.send(embed=embed)
+      except:
+        pass
+
     #help
     if message.content == prefix + 'help':
       embed = discord.Embed(color=0x593695)
@@ -276,34 +304,13 @@ async def on_message(message):
       embed.set_footer(text=nowDate + " at " + nowTime)
       await message.channel.send(embed=embed)
 
-    #edit bumps
-    if message.content.startswith(prefix + "d editbumps"):
-      try:
-        #get user (member object)
-        user = message.guild.get_member(message.mentions[0].id)
-      
-        #get previous bumps amount
-        prevBumps = data[str(user.id)]['bumps']
-
-        editBumpAmount = int(message.content.split()[3])
-        data[str(user.id)]['bumps'] = editBumpAmount
-
-        #send embed
-        embed = discord.Embed(color=0x593695, description="User now has **" + str(data[str(user.id)]['bumps']) + "** bumps! (Original: **" + str(prevBumps) + "**)")
-        embed.set_author(name="@" + user.name + "#" + str(user.discriminator), icon_url=user.avatar_url)
-        embed.set_footer(text=nowDate + " at " + nowTime)
-        await message.channel.send(embed=embed)
-      except:
-        pass
-
     #help invites (InviteManager)
     if message.content == prefix + 'help invites':
       embed = discord.Embed(color=0x593695)
       embed.set_author(name=client.user.name + " Invites Help", icon_url=client.user.avatar_url)
       embed.add_field(name="`"+prefix+ "invites [member]`", value="Shows how many invites the user has", inline=False)
       embed.add_field(name="`"+prefix+ "leaderboard`", value="Shows the invites leaderboard", inline=False)
-      embed.add_field(name="`"+prefix+ "editinvites <member> <amount>`", value="Set invites of a user", inline=False)
-      embed.add_field(name="`"+prefix+ "editleaves <member> <amount>`", value="Set leaves of a user", inline=False)
+      embed.add_field(name="`"+prefix+ "edit <invites|leaves> <amount> [member]`", value="Set invites or leaves of a user", inline=False)
       embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
       await message.channel.send(embed=embed)
 
@@ -341,7 +348,7 @@ async def on_message(message):
       embed.set_author(name=client.user.name + " Disboard Help", icon_url=client.user.avatar_url)
       embed.add_field(name="`"+prefix+ "d leaderboard`", value="Show the disboard bump leaderboard", inline=False)
       embed.add_field(name="`"+prefix+ "d bumps [member]`", value="Show how many bumps a user has", inline=False)
-      embed.add_field(name="`"+prefix+ "d editbumps <member> <amount>`", value="Set bumps of a member", inline=False)
+      embed.add_field(name="`"+prefix+ "edit bumps <amount> [member]`", value="Set bumps of a member", inline=False)
       embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
       await message.channel.send(embed=embed)
     
