@@ -119,11 +119,12 @@ async def on_raw_reaction_remove(payload):
       #give role
       role = client.get_guild(int(payload.guild_id)).get_role(int(data["role" + str(payload.guild_id) + str(payload.channel_id) + str(payload.message_id)]['role']))
       await client.get_guild(int(payload.guild_id)).get_member(payload.user_id).remove_roles(role, atomic=True)
-    
-
 
 @client.event
 async def on_message(message):
+    sales = {"test": {'apple': 2, 'orange': 3, 'grapes': 4 }}
+
+    print(sales.items())
     global user
     global bumped
     #get prefix
@@ -143,6 +144,28 @@ async def on_message(message):
     nowDT = str(datetime.now()).split()
     nowDate = nowDT[0]
     nowTime = str(datetime.strptime(str(nowDT[1][0 : len(nowDT[1]) - 7]), "%H:%M:%S").strftime("%I:%M %p"))
+
+    #delete rr
+    if messagecontent.startswith(prefix + "delrr"):
+      try:
+        #get messageID
+        channelID = messagecontent.split()[1]
+        messageID = messagecontent.split()[2]
+
+        #get channel, message, role
+        for channel in message.guild.channels:
+          if str(channel.id) == str(channelID):
+            channel2 = channel
+            break
+        msg = await channel2.fetch_message(int(messageID))
+
+        print('test')
+        if "role" + str(message.guild.id) + str(channelID) + str(messageID) in data:
+          print('test2')
+          await msg.remove_reaction(data["role" + str(message.guild.id) + str(channelID) + str(messageID)]['reaction'], client.user)
+          del data["role" + str(message.guild.id) + str(channelID) + str(messageID)]
+      except:
+        pass
 
     if messagecontent == prefix + "reactions":  
       #display all role reaction messages
@@ -171,7 +194,7 @@ async def on_message(message):
           RRreaction = sCont[3]
           RRroleID = sCont[4]
 
-          #get channel, message, role
+          #get channel, message
           for channel in message.guild.channels:
             if str(channel.id) == str(RRchannelID):
               channel2 = channel
