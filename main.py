@@ -62,7 +62,7 @@ async def checkCounters():
       if channel.name.startswith("Members"):
         await channel.edit(name="Members: " + str(guild.member_count - bots))
       if channel.name.startswith("Bots"):
-        await channel.edit(name="Bots: " + str(guild.member_count - bots))
+        await channel.edit(name="Bots: " + str(bots))
       if channel.name.startswith("Channels"):
         await channel.edit(name="Channels: " + str(len(guild.text_channels) + len(guild.voice_channels) - len(guild.categories)))
       if channel.name.startswith("Text Channels"):
