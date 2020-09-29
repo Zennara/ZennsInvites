@@ -78,6 +78,11 @@ async def checkCounters():
       if channel.name.startswith("Messages"):
         await channel.edit(name="Messages: " + str(data['messages']))
 
+async def incorrectServer(message):
+  embed = discord.Embed(color=0x593695, description="Command not available in " + message.guild.name + ".")
+  embed.set_author(name="@" + client.user.name + "#" + client.user.discriminator, icon_url=client.user.avatar_url)
+  await message.channel.send(embed=embed)
+
 @client.event
 async def on_ready():
   global bumped
@@ -98,8 +103,9 @@ async def on_message(message):
       f.close()
     prefix = data["prefix"]
 
-    #get messages and add
-    data["messages"] += 1
+    if str(message.guild.id) == guild_id:
+      #get messages and add
+      data["messages"] += 1
 
     #set message content to lowercase
     messagecontent = message.content.lower()
@@ -111,68 +117,75 @@ async def on_message(message):
 
     #update database
     if messagecontent == prefix + "database":
-      if str(message.author.id) not in data:
-        #loading message
-        embed = discord.Embed(color=0x593695, description="**Loading Users Into Database...**")
-        embed.set_author(name="@" + client.user.name + "#" + client.user.discriminator, icon_url=client.user.avatar_url)
-        embed.set_footer(text=nowDate + " at " + nowTime)
-        message2 = await message.channel.send(embed=embed)
+      if str(message.guild.id) == guild_id: 
+        if str(message.author.id) not in data:
+          #loading message
+          embed = discord.Embed(color=0x593695, description="**Loading Users Into Database...**")
+          embed.set_author(name="@" + client.user.name + "#" + client.user.discriminator, icon_url=client.user.avatar_url)
+          embed.set_footer(text=nowDate + " at " + nowTime)
+          message2 = await message.channel.send(embed=embed)
 
-        #invites
-        for member in message.guild.members:
-          totalInvites = 0
-          for i in await message.guild.invites():
-            if i.inviter == member:
-              totalInvites += i.uses
-          #add member to database
-          if str(member.id) not in data:
-            data[str(member.id)] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
-          data[str(member.id)]['invites'] = totalInvites
+          #invites
+          for member in message.guild.members:
+            totalInvites = 0
+            for i in await message.guild.invites():
+              if i.inviter == member:
+                totalInvites += i.uses
+            #add member to database
+            if str(member.id) not in data:
+              data[str(member.id)] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
+            data[str(member.id)]['invites'] = totalInvites
 
-        await message2.delete()
+          await message2.delete()
+        else:
+          embed = discord.Embed(color=0x593695, description="**Database has already been uploaded.**")
+          embed.set_author(name="@" + client.user.name + "#" + client.user.discriminator, icon_url=client.user.avatar_url)
+          embed.set_footer(text=nowDate + " at " + nowTime)
+          await message.channel.send(embed=embed)
       else:
-        embed = discord.Embed(color=0x593695, description="**Database has already been uploaded.**")
-        embed.set_author(name="@" + client.user.name + "#" + client.user.discriminator, icon_url=client.user.avatar_url)
-        embed.set_footer(text=nowDate + " at " + nowTime)
-        await message.channel.send(embed=embed)
+        await incorrectServer(message)
 
-    #put users in database
-    if str(message.author.id) not in data:
-      data[str(message.author.id)] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
+    if str(message.guild.id) == guild_id: 
+      #put users in database
+      if str(message.author.id) not in data:
+        data[str(message.author.id)] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
 
-    try:
-      if str(message.guild.get_member(message.mentions[0].id)) not in data:
-        data[str(message.guild.get_member(message.mentions[0].id).id)] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
-    except:
-      pass
+      try:
+        if str(message.guild.get_member(message.mentions[0].id)) not in data:
+          data[str(message.guild.get_member(message.mentions[0].id).id)] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
+      except:
+        pass
 
     #edit amounts
     if messagecontent.startswith(prefix + "edit"):
-      #run in try's in case of error
-      #get user (member object)
-      try:
-        user = message.guild.get_member(message.mentions[0].id)
-      except:
-        user = message.author
-      try:      
-        #get type
-        editType = messagecontent.split()[1]
+      if str(message.guild.id) == guild_id:
+        #run in try's in case of error
+        #get user (member object)
+        try:
+          user = message.guild.get_member(message.mentions[0].id)
+        except:
+          user = message.author
+        try:      
+          #get type
+          editType = messagecontent.split()[1]
 
-        #get previous invites amount
-        prevAmount = data[str(user.id)][str(editType)]
+          #get previous invites amount
+          prevAmount = data[str(user.id)][str(editType)]
 
-        editAmount = int(messagecontent.split()[2])
+          editAmount = int(messagecontent.split()[2])
 
-        if editType == "invites" or editType == "leaves" or editType == "bumps":
-          data[str(user.id)][str(editType)] = editAmount
+          if editType == "invites" or editType == "leaves" or editType == "bumps":
+            data[str(user.id)][str(editType)] = editAmount
 
-          #send embed
-          embed = discord.Embed(color=0x593695, description="User now has **" + str(editAmount) + "** " + editType + "!" + " (Original: **" + str(prevAmount) + "**)")
-          embed.set_author(name="@" + user.name + "#" + str(user.discriminator), icon_url=user.avatar_url)
-          embed.set_footer(text=nowDate + " at " + nowTime)
-          await message.channel.send(embed=embed)
-      except:
-        pass
+            #send embed
+            embed = discord.Embed(color=0x593695, description="User now has **" + str(editAmount) + "** " + editType + "!" + " (Original: **" + str(prevAmount) + "**)")
+            embed.set_author(name="@" + user.name + "#" + str(user.discriminator), icon_url=user.avatar_url)
+            embed.set_footer(text=nowDate + " at " + nowTime)
+            await message.channel.send(embed=embed)
+        except:
+          pass
+      else:
+        await incorrectServer(message)
 
     #help
     if messagecontent == prefix + 'help':
@@ -187,108 +200,114 @@ async def on_message(message):
       embed.set_footer(text="______________________\nMade By Zennara#8377")
       await message.channel.send(embed=embed)
 
-    #add counter
     if messagecontent.startswith(prefix + "addcounter"):
-      guild = client.get_guild(int(guild_id))
+      #add counter
+      if str(message.guild.id) == guild_id:
+        guild = client.get_guild(int(guild_id))
 
-      foundCategory = False
-      #find category
-      for category in guild.categories:
-        if category.name == str(message.guild.name) + " Stats":
-          categoryObject = category
-          foundCategory = True
-          break
-      #create category
-      if foundCategory == False:
-        categoryObject = await guild.create_category(str(message.guild.name) + " Stats", overwrites=None, reason=None)
-
-      #get amount of bots
-      bots = 0
-      for member in guild.members:
-        if member.bot:
-          bots += 1
-      
-      #get channels/ categories
-      total_text_channels = len(guild.text_channels)
-      total_voice_channels = len(guild.voice_channels)
-      total_channels = total_text_channels  + total_voice_channels - len(guild.categories)
-
-      cont = False
-      #get channel creation type
-      if messagecontent == prefix + "addcounter members":
-        channelName = "Members"
-        channelType = guild.member_count - bots
-        cont = True
-      if messagecontent == prefix + "addcounter bots":
-        channelName = "Bots"
-        channelType = bots
-        cont = True
-      if messagecontent == prefix + "addcounter channels":
-        channelName = "Channels"
-        channelType = total_channels + 1
-        cont = True
-      if messagecontent == prefix + "addcounter textchannels":
-        channelName = "Text Channels"
-        channelType = total_text_channels
-        cont = True
-      if messagecontent == prefix + "addcounter voicechannels":
-        channelName = "Voice Channels"
-        channelType = total_voice_channels + 1
-        cont = True
-      if messagecontent == prefix + "addcounter categories":
-        channelName = "Categories"
-        channelType = len(guild.categories)
-        cont = True
-      if messagecontent == prefix + "addcounter bans":
-        channelName = "Bans"
-        channelType = len(await guild.bans())
-        cont = True
-      if messagecontent == prefix + "addcounter roles":
-        channelName = "Roles"
-        channelType = len(guild.roles)
-        cont = True
-      if messagecontent == prefix + "addcounter messages":
-        channelName = "Messages"
-        count = 0
-
-        #loading message
-        embed = discord.Embed(color=0x593695)
-        embed.add_field(name="@" + client.user.name + "#" + client.user.discriminator, value="**Loading...**", inline=False)
-        embed.set_footer(text=nowDate + " at " + nowTime)
-        message2 = await message.channel.send(embed=embed)
-
-        #get amount of messages
-        for channel in guild.text_channels:
-          count += len(await channel.history(limit=None).flatten())
-        channelType = count
-        cont = True
-
-        #store amount of messages
-        data["messages"] = count
-
-        await message2.delete()
-        
-      foundChannel = False
-      if cont:
-        #find channel
-        for channel in guild.channels:
-          if channel.name.startswith(channelName + ":"):
-            channelObject = channel
-            foundChannel = True
+        foundCategory = False
+        #find category
+        for category in guild.categories:
+          if category.name == str(message.guild.name) + " Stats":
+            categoryObject = category
+            foundCategory = True
             break
-        #create channel
-        if foundChannel == False:
-          channelObject = await guild.create_voice_channel(f"{channelName}: {channelType}",   overwrites=None, category=categoryObject, reason=None)
-          await channelObject.set_permissions(guild.default_role, connect = False)
+        #create category
+        if foundCategory == False:
+          categoryObject = await guild.create_category(str(message.guild.name) + " Stats", overwrites=None, reason=None)
+
+        #get amount of bots
+        bots = 0
+        for member in guild.members:
+          if member.bot:
+            bots += 1
+      
+        #get channels/ categories
+        total_text_channels = len(guild.text_channels)
+        total_voice_channels = len(guild.voice_channels)
+        total_channels = total_text_channels  + total_voice_channels - len(guild.categories)
+
+        cont = False
+        #get channel creation type
+        if messagecontent == prefix + "addcounter members":
+          channelName = "Members"
+          channelType = guild.member_count - bots
+          cont = True
+        if messagecontent == prefix + "addcounter bots":
+          channelName = "Bots"
+          channelType = bots
+          cont = True
+        if messagecontent == prefix + "addcounter channels":
+          channelName = "Channels"
+          channelType = total_channels + 1
+          cont = True
+        if messagecontent == prefix + "addcounter textchannels":
+          channelName = "Text Channels"
+          channelType = total_text_channels
+          cont = True
+        if messagecontent == prefix + "addcounter voicechannels":
+          channelName = "Voice Channels"
+          channelType = total_voice_channels + 1
+          cont = True
+        if messagecontent == prefix + "addcounter categories":
+          channelName = "Categories"
+          channelType = len(guild.categories)
+          cont = True
+        if messagecontent == prefix + "addcounter bans":
+          channelName = "Bans"
+          channelType = len(await guild.bans())
+          cont = True
+        if messagecontent == prefix + "addcounter roles":
+          channelName = "Roles"
+          channelType = len(guild.roles)
+          cont = True
+        if messagecontent == prefix + "addcounter messages":
+          channelName = "Messages"
+          count = 0
+
+          #loading message
+          embed = discord.Embed(color=0x593695)
+          embed.add_field(name="@" + client.user.name + "#" + client.user.discriminator, value="**Loading...**", inline=False)
+          embed.set_footer(text=nowDate + " at " + nowTime)
+          message2 = await message.channel.send(embed=embed)
+
+          #get amount of messages
+          for channel in guild.text_channels:
+            count += len(await channel.history(limit=None).flatten())
+          channelType = count
+          cont = True
+
+          #store amount of messages
+          data["messages"] = count
+
+          await message2.delete()
+        
+        foundChannel = False
+        if cont:
+          #find channel
+          for channel in guild.channels:
+            if channel.name.startswith(channelName + ":"):
+              channelObject = channel
+              foundChannel = True
+              break
+          #create channel
+          if foundChannel == False:
+            channelObject = await guild.create_voice_channel(f"{channelName}: {channelType}",   overwrites=None, category=categoryObject, reason=None)
+            await channelObject.set_permissions(guild.default_role, connect = False)
+      else:
+        await incorrectServer(message)
       
     #delete counter
     if messagecontent.startswith(prefix + "delcounter"):
-      for channel in message.guild.voice_channels:
-        try: 
-          if channel.name.lower().startswith(str(messagecontent.split()[1])):
-            await channel.delete()
-        except:
-          break 
+      if str(message.guild.id) == guild_id: 
+        for channel in message.guild.voice_channels:
+          try: 
+            if channel.name.lower().startswith(str(messagecontent.split()[1])):
+              await channel.delete()
+          except:
+            break 
+      else:
+        await incorrectServer(message)
 
     #check bump disboard
     if messagecontent == '!d bump':
@@ -304,20 +323,23 @@ async def on_message(message):
 
     #disboard bumps
     if messagecontent.startswith(prefix + 'd bumps'):
-      #get user (member object)
-      if (messagecontent == prefix + 'd bumps'):
-        user = message.author
+      if str(message.guild.id) == guild_id: 
+        #get user (member object)
+        if (messagecontent == prefix + 'd bumps'):
+          user = message.author
+        else:
+          user = message.guild.get_member(message.mentions[0].id)
+
+        #change database
+        bumps = data[str(user.id)]['bumps']
+
+        #send embed
+        embed = discord.Embed(color=0x593695, description="User has bumped the server **" + str(bumps) + "** times!")
+        embed.set_author(name="@" + user.name + "#" + str(user.discriminator), icon_url=user.avatar_url)
+        embed.set_footer(text=nowDate + " at " + nowTime)
+        await message.channel.send(embed=embed)
       else:
-        user = message.guild.get_member(message.mentions[0].id)
-
-      #change database
-      bumps = data[str(user.id)]['bumps']
-
-      #send embed
-      embed = discord.Embed(color=0x593695, description="User has bumped the server **" + str(bumps) + "** times!")
-      embed.set_author(name="@" + user.name + "#" + str(user.discriminator), icon_url=user.avatar_url)
-      embed.set_footer(text=nowDate + " at " + nowTime)
-      await message.channel.send(embed=embed)
+        await incorrectServer(message)
 
     #help invites (InviteManager)
     if messagecontent == prefix + 'help invites':
@@ -373,23 +395,26 @@ async def on_message(message):
       await client.change_presence(activity=discord.Streaming(name=" | " + data["prefix"] + "help", url="https://www.twitch.tv/xzennara/about"))
 
     #only run on guild_id server
-    if messagecontent.startswith(prefix + 'invites') and str(message.guild.id) == guild_id:
-      #get user (member object)
-      if (messagecontent == prefix + 'invites'):
-        user = message.author
+    if messagecontent.startswith(prefix + 'invites'):
+      if str(message.guild.id) == guild_id: 
+        #get user (member object)
+        if (messagecontent == prefix + 'invites'):
+          user = message.author
+        else:
+          user = message.guild.get_member(message.mentions[0].id)
+
+        #check if user is in database
+        Invites = data[str(user.id)]['invites']
+        Leaves = data[str(user.id)]['leaves']
+        totalInvites = Invites - Leaves
+
+        embed = discord.Embed(color=0x593695, description="User has **" + str(totalInvites) + "** invites! (**" + str(Invites) + "** regular, **-" + str(Leaves) + "** leaves)")
+        embed.set_author(name="@" + user.name + "#" + str(user.discriminator), icon_url=user.avatar_url)
+        embed.set_footer(text=nowDate + " at " + nowTime)
+
+        await message.channel.send(embed=embed)
       else:
-        user = message.guild.get_member(message.mentions[0].id)
-
-      #check if user is in database
-      Invites = data[str(user.id)]['invites']
-      Leaves = data[str(user.id)]['leaves']
-      totalInvites = Invites - Leaves
-
-      embed = discord.Embed(color=0x593695, description="User has **" + str(totalInvites) + "** invites! (**" + str(Invites) + "** regular, **-" + str(Leaves) + "** leaves)")
-      embed.set_author(name="@" + user.name + "#" + str(user.discriminator), icon_url=user.avatar_url)
-      embed.set_footer(text=nowDate + " at " + nowTime)
-
-      await message.channel.send(embed=embed)
+        await incorrectServer(message)
 
     if messagecontent.startswith(prefix + 'info'):
         #get user (member object)
@@ -460,16 +485,17 @@ async def on_member_join(member):
     data = json.load(f)
     f.close()
 
-  #append join code
-  if str(member.id) not in data:
-    data[str(member.id)] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': joinCode, 'inviter': codeOwner}
-  data[str(member.id)]['joinCode'] = joinCode
-  data[str(member.id)]['inviter'] = codeOwner
+  if str(member.guild.id) == guild_id: 
+    #append join code
+    if str(member.id) not in data:
+      data[str(member.id)] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': joinCode, 'inviter': codeOwner}
+    data[str(member.id)]['joinCode'] = joinCode
+    data[str(member.id)]['inviter'] = codeOwner
 
-  #add to invites
-  if codeOwner not in data:
-    data[codeOwner] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
-  data[codeOwner]['invites'] += 1
+    #add to invites
+    if codeOwner not in data:
+      data[codeOwner] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
+    data[codeOwner]['invites'] += 1
 
   #write new data to files
   with open("database.json", 'w') as f:
@@ -484,12 +510,13 @@ async def on_member_remove(member):
   #declare user
   with open("database.json", 'r') as f:
     data = json.load(f)
-    f.close()
+    f.close() 
 
-  #add to leaves
-  if str(member.id) in data:
-    if data[str(member.id)]['inviter'] != "null":
-      data[data[str(member.id)]['inviter']]['leaves'] += 1
+  if str(member.guild.id) == guild_id:
+    #add to leaves
+    if str(member.id) in data:
+      if data[str(member.id)]['inviter'] != "null":
+        data[data[str(member.id)]['inviter']]['leaves'] += 1
 
   #write new data to files
   with open("database.json", 'w') as f:
