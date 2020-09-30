@@ -8,6 +8,8 @@ import os
 import asyncio
 import json
 from datetime import datetime
+from operator import itemgetter
+import math
 
 #declare client
 client = discord.Client()
@@ -142,6 +144,44 @@ async def on_message(message):
     nowDate = nowDT[0]
     nowTime = str(datetime.strptime(str(nowDT[1][0 : len(nowDT[1]) - 7]), "%H:%M:%S").strftime("%I:%M %p"))
 
+    #invite leaderboard
+    if messagecontent.startswith(prefix + "leaderboard"):
+      if str(message.guild.id) == guild_id:
+        #make new dictionary to sort
+        tempdata = {}
+        for key in data.keys():
+          if not key.startswith('role') and key != "prefix" and key != "messages":
+            tempdata[key] = data[key]['invites'] - data[key]['leaves']
+        #sort data
+        order = sorted(tempdata.items(), key=lambda x: x[1], reverse=True)
+
+        #get page number
+        page = 1
+        page = int(page)
+        try:
+          page = messagecontent.split()[1]
+          page = int(page)
+        except:
+          pass
+
+        if int(page) >= 1 and int(page) <= math.ceil(len(message.guild.members) / 10):
+          #store all the users in inputText to later print
+          inputText = ""
+          count = 1
+          for i in order:
+            if count <= page * 10 and count >= page * 10 - 9:
+              inputText += "\n`[" + str(count) +"]` **" + str(message.guild.get_member(int(i[0])).name) + "** - **" + str(i[1]) + "** invites (**" + str(data[i[0]]['invites']) + "** regular, **-" + str(data[i[0]]['leaves']) + "** leaves)"
+            count += 1
+
+          #print embed
+          embed = discord.Embed(color=0x593695, description=inputText)
+          embed.set_footer(text="Page " + str(page) + "/" + str(math.ceil(len(message.guild.members) / 10)) + " ● " + nowDate + " at " + nowTime)
+          embed.set_author(name="Invite Leaderboard", icon_url=message.guild.icon_url) 
+          await message.channel.send(embed=embed)
+      else:
+        await incorrectServer(message)  
+      
+
     #delete rr
     if messagecontent.startswith(prefix + "delrr"):
       try:
@@ -181,7 +221,6 @@ async def on_message(message):
 
     #add role reaction message
     if messagecontent.startswith(prefix + 'rr'):
-      if str(message.guild.id) == guild_id:
         try:
           #get variables
           sCont = messagecontent.split()
