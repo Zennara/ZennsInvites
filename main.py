@@ -757,6 +757,15 @@ async def on_member_join(member):
     if codeOwner not in data:
       data[codeOwner] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
     data[codeOwner]['invites'] += 1
+  
+  #check for iroles
+  for key in data.keys():
+    #check for irole keys
+    if key.startswith('irole'):
+      #check codeowner invites
+      if data[data[str(member.id)]['inviter']]['invites'] - data[data[str(member.id)]['inviter']]['leaves'] >= data[key]['amount']:
+        #give role
+        await member.guild.get_member(int(data[str(member.id)]['inviter'])).add_roles((member.guild.get_role(int(data[key]['roleID']))), atomic=True)
 
   #write new data to files
   with open("database.json", 'w') as f:
@@ -778,6 +787,15 @@ async def on_member_remove(member):
     if str(member.id) in data:
       if data[str(member.id)]['inviter'] != "null":
         data[data[str(member.id)]['inviter']]['leaves'] += 1
+
+  #check for iroles
+  for key in data.keys():
+    #check for irole keys
+    if key.startswith('irole'):
+      #check codeowner invites
+      if data[codeOwner]['invites'] - data[codeOwner]['leaves'] < data[key]['amount']:
+        #remove role
+        await member.guild.get_member(int(codeOwner)).remove_roles((member.guild.get_role(int(data[key]['roleID']))), atomic=True)
 
   #write new data to files
   with open("database.json", 'w') as f:
