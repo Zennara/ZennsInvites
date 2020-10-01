@@ -82,7 +82,7 @@ async def checkCounters():
 
 async def incorrectServer(message):
   embed = discord.Embed(color=0x593695, description="Command not available in " + message.guild.name + ".")
-  embed.set_author(name="@" + client.user.name + "#" + client.user.discriminator, icon_url=client.user.avatar_url)
+  embed.set_author(name="❌ | @" + client.user.name)
   await message.channel.send(embed=embed)
 
 @client.event
@@ -144,13 +144,61 @@ async def on_message(message):
     nowDate = nowDT[0]
     nowTime = str(datetime.strptime(str(nowDT[1][0 : len(nowDT[1]) - 7]), "%H:%M:%S").strftime("%I:%M %p"))
 
+    #add invite role
+    if messagecontent.startswith(prefix + "addirole"):
+      if str(message.guild.id) == guild_id:
+        try:
+          #get data
+          content = messagecontent.split()
+          iCount = int(content[1])
+          iRole = message.guild.get_role(int(content[2]))
+
+          #save to data
+          if "irole" + str(message.guild.id) + str(iRole.id) not in data:
+            data['irole' + str(message.guild.id) + str(iRole.id)] = {"amount": int(iCount), "roleID": str(iRole.id)}
+
+            #print embed
+            embed = discord.Embed(color=0x593695, description="Invite role-reward added.")
+            embed.set_author(name="✔️ | @" + client.user.name)
+            await message.channel.send(embed=embed)
+          else:
+            embed = discord.Embed(color=0x593695, description="Role already used")
+            embed.set_author(name="❌ | @" + client.user.name)
+            await message.channel.send(embed=embed)
+        except:
+          pass
+      else:
+        await incorrectServer(message)
+      
+    #delete invite role
+    if messagecontent.startswith(prefix + "delirole"):
+      if str(message.guild.id) == guild_id:
+        try:
+          #getdata
+          deliRole = message.guild.get_role(int(messagecontent.split()[1]))
+
+          if "irole" + str(message.guild.id) + str(deliRole.id) in data:
+            #delete key
+            del data["irole" + str(message.guild.id) + str(deliRole.id)]
+
+            #print embed
+            embed = discord.Embed(color=0x593695, description="Invite role-reward deleted.")
+            embed.set_author(name="✔️ | @" + client.user.name)
+            await message.channel.send(embed=embed)
+          else:
+            embed = discord.Embed(color=0x593695, description="Invite role-reward does not exist.")
+            embed.set_author(name="❌ | @" + client.user.name)
+            await message.channel.send(embed=embed)
+        except:
+          pass
+
     #invite leaderboard
     if messagecontent.startswith(prefix + "leaderboard"):
       if str(message.guild.id) == guild_id:
         #make new dictionary to sort
         tempdata = {}
         for key in data.keys():
-          if not key.startswith('role') and key != "prefix" and key != "messages":
+          if not key.startswith('role') and not key.startswith('irole') and key != "prefix" and key != "messages":
             tempdata[key] = data[key]['invites'] - data[key]['leaves']
         #sort data
         order = sorted(tempdata.items(), key=lambda x: x[1], reverse=True)
@@ -287,7 +335,7 @@ async def on_message(message):
         if str(message.author.id) not in data:
           #loading message
           embed = discord.Embed(color=0x593695, description="**Loading Users Into Database...**")
-          embed.set_author(name="@" + client.user.name + "#" + client.user.discriminator, icon_url=client.user.avatar_url)
+          embed.set_author(name="@" + client.user.name, icon_url=client.user.avatar_url)
           embed.set_footer(text=nowDate + " at " + nowTime)
           message2 = await message.channel.send(embed=embed)
 
@@ -305,7 +353,7 @@ async def on_message(message):
           await message2.delete()
         else:
           embed = discord.Embed(color=0x593695, description="**Database has already been uploaded.**")
-          embed.set_author(name="@" + client.user.name + "#" + client.user.discriminator, icon_url=client.user.avatar_url)
+          embed.set_author(name="❌ | @" + client.user.name)
           embed.set_footer(text=nowDate + " at " + nowTime)
           await message.channel.send(embed=embed)
       else:
@@ -433,7 +481,7 @@ async def on_message(message):
 
           #loading message
           embed = discord.Embed(color=0x593695)
-          embed.add_field(name="@" + client.user.name + "#" + client.user.discriminator, value="**Loading...**", inline=False)
+          embed.add_field(name="@" + client.user.name, value="**Loading...**", inline=False)
           embed.set_footer(text=nowDate + " at " + nowTime)
           message2 = await message.channel.send(embed=embed)
 
