@@ -180,6 +180,40 @@ async def on_message(message):
           await message.channel.send(embed=embed)
       else:
         await incorrectServer(message)  
+
+    #disboard bump leaderboard
+    if messagecontent.startswith(prefix + "d leaderboard"):
+      if str(message.guild.id) == guild_id:
+        #make new dictionary to sort
+        tempdata = {}
+        for key in data.keys():
+          if not key.startswith('role') and key != "prefix" and key != "messages":
+            tempdata[key] = data[key]['bumps']
+        #sort data
+        order = sorted(tempdata.items(), key=lambda x: x[1], reverse=True)
+
+        #get page number
+        try:
+          page = messagecontent.split()[2]
+        except:
+          page = 1
+
+        if int(page) >= 1 and int(page) <= math.ceil(len(message.guild.members) / 10) and str(page).isdigit():
+          #store all the users in inputText to later print
+          inputText = ""
+          count = 1
+          for i in order:
+            if count <= page * 10 and count >= page * 10 - 9:
+              inputText += "\n`[" + str(count) +"]` **" + str(message.guild.get_member(int(i[0])).name) + "** - **" + str(i[1]) + "** bumps"
+            count += 1
+
+          #print embed
+          embed = discord.Embed(color=0x593695, description=inputText)
+          embed.set_footer(text="Page " + str(page) + "/" + str(math.ceil(len(message.guild.members) / 10)) + " ● " + nowDate + " at " + nowTime)
+          embed.set_author(name="Disboard Bumps Leaderboard", icon_url=message.guild.icon_url) 
+          await message.channel.send(embed=embed)
+      else:
+        await incorrectServer(message)
       
 
     #delete rr
@@ -480,6 +514,8 @@ async def on_message(message):
       embed.add_field(name="`"+prefix+ "invites [member]`", value="Shows how many invites the user has", inline=False)
       embed.add_field(name="`"+prefix+ "leaderboard`", value="Shows the invites leaderboard", inline=False)
       embed.add_field(name="`"+prefix+ "edit <invites|leaves> <amount> [member]`", value="Set invites or leaves of a user", inline=False)
+      embed.add_field(name="`"+prefix+ "addirole <invites> <roleID>", value="Add a new invite role reward", inline=False)
+      embed.add_field(name="`"+prefix+ "delirole <invites> <roleID>", value="Delete an invite role reward", inline=False)
       embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
       await message.channel.send(embed=embed)
 
