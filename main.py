@@ -254,7 +254,7 @@ async def on_message(message):
         #make new dictionary to sort
         tempdata = {}
         for key in data.keys():
-          if not key.startswith('role') and key != "prefix" and key != "messages":
+          if not key.startswith('role') and not key.startswith('irole') and key != "prefix" and key != "messages":
             tempdata[key] = data[key]['bumps']
         #sort data
         order = sorted(tempdata.items(), key=lambda x: x[1], reverse=True)
@@ -308,14 +308,14 @@ async def on_message(message):
       #display all role reaction messages
       embed = discord.Embed(color=0x593695, description="**Messages with Reaction Roles**")
 
-      #get all RR messages
+      #get all invite role rewards
       count = 0
       for k in data.keys():
         if k.startswith('role'):
           count += 1
           embed.add_field(name="Message "+str(count), value="**Role:** <@&" + str(data[k]['role']) + ">\n**Emoji:** " + str(data[k]['reaction']) + "\n**Channel: ** <#" + str(data[k]['channel']) + ">\n**Message ID:** " + str(data[k]['message']) + "[\nJump to message](https://discordapp.com/channels/"+str(message.guild.id)+"/"+str(data[k]['channel'])+"/"+str(data[k]['message'])+")")
-          #[Click here](https://discordapp.com/channels/[server_id]/[channel_id]?jump=[message_id])
 
+      #print embed
       embed.set_author(name=message.guild.name, icon_url=message.guild.icon_url)
       embed.set_footer(text=nowDate + " at " + nowTime)
       await message.channel.send(embed=embed)
@@ -368,6 +368,24 @@ async def on_message(message):
             if str(member.id) not in data:
               data[str(member.id)] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
             data[str(member.id)]['invites'] = totalInvites
+
+          #disboard bumps
+          bumped = False
+          bumpedAuthor = ""
+          for messages in await message.channel.history(limit=None, oldest_first=True).flatten():
+            #check if previous message was bump
+            if bumped == True:
+              #check if bump was from Disboard bot
+              if str(messages.author.id) == "302050872383242240": #disboard bot ID
+                #check if succesful bump (blue color)
+                if str(messages.embeds[0].colour) != "#24b7b7":
+                  data[str(bumpedAuthor)]['bumps'] += 1
+              bumped = False  
+
+            #check if message was bump
+            if messages.content == "!d bump":
+              bumped = True
+              bumpedAuthor = message.author.id
 
           await message2.delete()
         else:
