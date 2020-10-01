@@ -155,7 +155,7 @@ async def on_message(message):
 
           #save to data
           if "irole" + str(message.guild.id) + str(iRole.id) not in data:
-            data['irole' + str(message.guild.id) + str(iRole.id)] = {"amount": int(iCount), "roleID": str(iRole.id)}
+            data['irole' + str(message.guild.id) + str(iRole.id)] = {"server": str(message.guild.id), "amount": int(iCount), "roleID": str(iRole.id)}
 
             #print embed
             embed = discord.Embed(color=0x593695, description="Invite role-reward added.")
@@ -191,6 +191,25 @@ async def on_message(message):
             await message.channel.send(embed=embed)
         except:
           pass
+      else:
+        await incorrectServer(message)
+
+    #show all invite role-rewards
+    if messagecontent == prefix + "iroles":
+      if str(message.guild.id) == guild_id:
+        #get all RR messages
+        count = 0
+        embed = discord.Embed(color=0x593695, description="**Invite Role-Rewards**")
+        for k in data.keys():
+          if k.startswith('irole'):
+            count += 1
+            embed.add_field(name="Reward "+str(count), value="**Role:** <@&" + str(data[k]['roleID']) + ">\n**Invites:** " + str(data[k]['amount']))
+
+        embed.set_author(name=message.guild.name, icon_url=message.guild.icon_url)
+        embed.set_footer(text=nowDate + " at " + nowTime)
+        await message.channel.send(embed=embed) 
+      else:
+        await incorrectServer(message)
 
     #invite leaderboard
     if messagecontent.startswith(prefix + "leaderboard"):
@@ -292,8 +311,8 @@ async def on_message(message):
       #get all RR messages
       count = 0
       for k in data.keys():
-        count += 1
         if k.startswith('role'):
+          count += 1
           embed.add_field(name="Message "+str(count), value="**Role:** <@&" + str(data[k]['role']) + ">\n**Emoji:** " + str(data[k]['reaction']) + "\n**Channel: ** <#" + str(data[k]['channel']) + ">\n**Message ID:** " + str(data[k]['message']) + "[\nJump to message](https://discordapp.com/channels/"+str(message.guild.id)+"/"+str(data[k]['channel'])+"/"+str(data[k]['message'])+")")
           #[Click here](https://discordapp.com/channels/[server_id]/[channel_id]?jump=[message_id])
 
@@ -562,8 +581,9 @@ async def on_message(message):
       embed.add_field(name="`"+prefix+ "invites [member]`", value="Shows how many invites the user has", inline=False)
       embed.add_field(name="`"+prefix+ "leaderboard`", value="Shows the invites leaderboard", inline=False)
       embed.add_field(name="`"+prefix+ "edit <invites|leaves> <amount> [member]`", value="Set invites or leaves of a user", inline=False)
-      embed.add_field(name="`"+prefix+ "addirole <invites> <roleID>", value="Add a new invite role reward", inline=False)
-      embed.add_field(name="`"+prefix+ "delirole <invites> <roleID>", value="Delete an invite role reward", inline=False)
+      embed.add_field(name="`"+prefix+ "addirole <invites> <roleID>`", value="Add a new invite role reward", inline=False)
+      embed.add_field(name="`"+prefix+ "delirole <invites> <roleID>`", value="Delete an invite role reward", inline=False)
+      embed.add_field(name="`"+prefix+ "iroles`", value="Display all invite role rewards", inline=False)
       embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
       await message.channel.send(embed=embed)
 
