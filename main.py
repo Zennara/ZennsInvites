@@ -370,6 +370,12 @@ async def on_message(message):
             data[str(member.id)]['invites'] = totalInvites
 
           #disboard bumps
+          #update embed
+          embed = discord.Embed(color=0x593695, description="**Loading Previous Disboard Bumps**")
+          embed.set_author(name="@" + client.user.name, icon_url=client.user.avatar_url)
+          embed.set_footer(text=nowDate + " at " + nowTime)
+          await message2.edit(embed=embed)
+
           bumped = False
           bumpedAuthor = ""
           for messages in await message.channel.history(limit=None, oldest_first=True).flatten():
@@ -378,7 +384,7 @@ async def on_message(message):
               #check if bump was from Disboard bot
               if str(messages.author.id) == "302050872383242240": #disboard bot ID
                 #check if succesful bump (blue color)
-                if str(messages.embeds[0].colour) != "#24b7b7":
+                if str(messages.embeds[0].colour) == "#24b7b7":
                   data[str(bumpedAuthor)]['bumps'] += 1
               bumped = False  
 
