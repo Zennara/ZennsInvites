@@ -85,6 +85,17 @@ async def incorrectServer(message):
   embed.set_author(name="❌ | @" + client.user.name)
   await message.channel.send(embed=embed)
 
+async def incorrectRank(message):
+  embed = discord.Embed(color=0x593695, description="insufficient role in the server heirarchy.")
+  embed.set_author(name="❌ | @" + client.user.name)
+  await message.channel.send(embed=embed)
+
+def checkRole(message, data):
+  if message.author.top_role >= message.guild.get_role(int(data["admin" + str(message.guild.id)]['role'])) or message.author == message.guild.owner or message.author.id == "427968672980533269":
+    return True
+  else:
+    return False
+
 @client.event
 async def on_ready():
   global bumped
@@ -144,53 +155,78 @@ async def on_message(message):
     nowDate = nowDT[0]
     nowTime = str(datetime.strptime(str(nowDT[1][0 : len(nowDT[1]) - 7]), "%H:%M:%S").strftime("%I:%M %p"))
 
+    #add code admin
+    if messagecontent.startswith(prefix + "codeadmin"):
+      if checkRole(message, data):
+        try:
+          #get role
+          codeRole = message.guild.get_role(int(messagecontent.split()[1]))
+
+          #write to database
+          data["admin" + str(message.guild.id)] = {"server": str(message.guild.id), "role": str(codeRole.id)}
+
+          #print embed
+          embed = discord.Embed(color=0x593695, description="All members with the role " + codeRole.mention + " and higher can use code admin commands.")
+          embed.set_author(name="✔️ | @" + client.user.name)
+          await message.channel.send(embed=embed)
+        except:
+          pass
+      else:
+        await incorrectRank(message)
+
     #add invite role
     if messagecontent.startswith(prefix + "addirole"):
       if str(message.guild.id) == guild_id:
-        try:
-          #get data
-          content = messagecontent.split()
-          iCount = int(content[1])
-          iRole = message.guild.get_role(int(content[2]))
+        if checkRole(message, data):
+          try:
+            #get data
+            content = messagecontent.split()
+            iCount = int(content[1])
+            iRole = message.guild.get_role(int(content[2]))
 
-          #save to data
-          if "irole" + str(message.guild.id) + str(iRole.id) not in data:
-            data['irole' + str(message.guild.id) + str(iRole.id)] = {"server": str(message.guild.id), "amount": int(iCount), "roleID": str(iRole.id)}
+            #save to data
+            if "irole" + str(message.guild.id) + str(iRole.id) not in data:
+              data['irole' + str(message.guild.id) + str(iRole.id)] = {"server": str(message.guild.id), "amount": int(iCount), "roleID": str(iRole.id)}
 
-            #print embed
-            embed = discord.Embed(color=0x593695, description="Invite role-reward added.")
-            embed.set_author(name="✔️ | @" + client.user.name)
-            await message.channel.send(embed=embed)
-          else:
-            embed = discord.Embed(color=0x593695, description="Role already used")
-            embed.set_author(name="❌ | @" + client.user.name)
-            await message.channel.send(embed=embed)
-        except:
-          pass
+              #print embed
+              embed = discord.Embed(color=0x593695, description="Invite role-reward added.")
+              embed.set_author(name="✔️ | @" + client.user.name)
+              await message.channel.send(embed=embed)
+            else:
+              embed = discord.Embed(color=0x593695, description="Role already used")
+              embed.set_author(name="❌ | @" + client.user.name)
+              await message.channel.send(embed=embed)
+          except:
+            pass
+        else:
+          await incorrectRank(message)
       else:
         await incorrectServer(message)
       
     #delete invite role
     if messagecontent.startswith(prefix + "delirole"):
       if str(message.guild.id) == guild_id:
-        try:
-          #getdata
-          deliRole = message.guild.get_role(int(messagecontent.split()[1]))
+        if checkRole(message, data):
+          try:
+            #getdata
+            deliRole = message.guild.get_role(int(messagecontent.split()[1]))
 
-          if "irole" + str(message.guild.id) + str(deliRole.id) in data:
-            #delete key
-            del data["irole" + str(message.guild.id) + str(deliRole.id)]
+            if "irole" + str(message.guild.id) + str(deliRole.id) in data:
+              #delete key
+              del data["irole" + str(message.guild.id) + str(deliRole.id)]
 
-            #print embed
-            embed = discord.Embed(color=0x593695, description="Invite role-reward deleted.")
-            embed.set_author(name="✔️ | @" + client.user.name)
-            await message.channel.send(embed=embed)
-          else:
-            embed = discord.Embed(color=0x593695, description="Invite role-reward does not exist.")
-            embed.set_author(name="❌ | @" + client.user.name)
-            await message.channel.send(embed=embed)
-        except:
-          pass
+              #print embed
+              embed = discord.Embed(color=0x593695, description="Invite role-reward deleted.")
+              embed.set_author(name="✔️ | @" + client.user.name)
+              await message.channel.send(embed=embed)
+            else:
+              embed = discord.Embed(color=0x593695, description="Invite role-reward does not exist.")
+              embed.set_author(name="❌ | @" + client.user.name)
+              await message.channel.send(embed=embed)
+          except:
+            pass
+        else:
+          await incorrectRank(message)
       else:
         await incorrectServer(message)
 
@@ -285,24 +321,27 @@ async def on_message(message):
 
     #delete rr
     if messagecontent.startswith(prefix + "delrr"):
-      try:
-        #get messageID
-        channelID = messagecontent.split()[1]
-        messageID = messagecontent.split()[2]
+      if checkRole(message, data):
+        try:
+          #get messageID
+          channelID = messagecontent.split()[1]
+          messageID = messagecontent.split()[2]
 
-        #get channel, message, role
-        for channel in message.guild.channels:
-          if str(channel.id) == str(channelID):
-            channel2 = channel
-            break
-        msg = await channel2.fetch_message(int(messageID))
+          #get channel, message, role
+          for channel in message.guild.channels:
+            if str(channel.id) == str(channelID):
+              channel2 = channel
+              break
+          msg = await channel2.fetch_message(int(messageID))
 
-        #delete role
-        if "role" + str(message.guild.id) + str(channelID) + str(messageID) in data:
-          await msg.remove_reaction(data["role" + str(message.guild.id) + str(channelID) + str(messageID)]['reaction'], client.user)
-          del data["role" + str(message.guild.id) + str(channelID) + str(messageID)]
-      except:
-        pass
+          #delete role
+          if "role" + str(message.guild.id) + str(channelID) + str(messageID) in data:
+            await msg.remove_reaction(data["role" + str(message.guild.id) + str(channelID) + str(messageID)]['reaction'], client.user)
+            del data["role" + str(message.guild.id) + str(channelID) + str(messageID)]
+        except:
+          pass
+      else:
+        await incorrectRank(message)
 
     if messagecontent == prefix + "reactions":  
       #display all role reaction messages
@@ -322,6 +361,7 @@ async def on_message(message):
 
     #add role reaction message
     if messagecontent.startswith(prefix + 'rr'):
+      if checkRole(message, data):
         try:
           #get variables
           sCont = messagecontent.split()
@@ -347,58 +387,63 @@ async def on_message(message):
             data[placement] = {'server': str(message.guild.id), 'channel': str(RRchannelID), 'message': str(RRmessageID), 'reaction': RRreaction, 'role': str(roleID)}
         except:
           pass
+      else:
+        await incorrectRank(message)
 
     #update database
     if messagecontent == prefix + "database":
-      if str(message.guild.id) == guild_id: 
-        if str(message.author.id) not in data:
-          #loading message
-          embed = discord.Embed(color=0x593695, description="**Loading Users Into Database...**")
-          embed.set_author(name="@" + client.user.name, icon_url=client.user.avatar_url)
-          embed.set_footer(text=nowDate + " at " + nowTime)
-          message2 = await message.channel.send(embed=embed)
+      if str(message.guild.id) == guild_id:
+        if checkRole(message, data):
+          if str(message.author.id) not in data:
+            #loading message
+            embed = discord.Embed(color=0x593695, description="**Loading Users Into Database...**")
+            embed.set_author(name="@" + client.user.name, icon_url=client.user.avatar_url)
+            embed.set_footer(text=nowDate + " at " + nowTime)
+            message2 = await message.channel.send(embed=embed)
 
-          #invites
-          for member in message.guild.members:
-            totalInvites = 0
-            for i in await message.guild.invites():
-              if i.inviter == member:
-                totalInvites += i.uses
-            #add member to database
-            if str(member.id) not in data:
-              data[str(member.id)] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
-            data[str(member.id)]['invites'] = totalInvites
+            #invites
+            for member in message.guild.members:
+              totalInvites = 0
+              for i in await message.guild.invites():
+                if i.inviter == member:
+                  totalInvites += i.uses
+              #add member to database
+              if str(member.id) not in data:
+                data[str(member.id)] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
+              data[str(member.id)]['invites'] = totalInvites
 
-          #disboard bumps
-          #update embed
-          embed = discord.Embed(color=0x593695, description="**Loading Previous Disboard Bumps**")
-          embed.set_author(name="@" + client.user.name, icon_url=client.user.avatar_url)
-          embed.set_footer(text=nowDate + " at " + nowTime)
-          await message2.edit(embed=embed)
+            #disboard bumps
+            #update embed
+            embed = discord.Embed(color=0x593695, description="**Loading Previous Disboard Bumps**")
+            embed.set_author(name="@" + client.user.name, icon_url=client.user.avatar_url)
+            embed.set_footer(text=nowDate + " at " + nowTime)
+            await message2.edit(embed=embed)
 
-          bumped = False
-          bumpedAuthor = ""
-          for messages in await message.channel.history(limit=None, oldest_first=True).flatten():
-            #check if previous message was bump
-            if bumped == True:
-              #check if bump was from Disboard bot
-              if str(messages.author.id) == "302050872383242240": #disboard bot ID
-                #check if succesful bump (blue color)
-                if str(messages.embeds[0].colour) == "#24b7b7":
-                  data[str(bumpedAuthor)]['bumps'] += 1
-              bumped = False  
+            bumped = False
+            bumpedAuthor = ""
+            for messages in await message.channel.history(limit=None, oldest_first=True).flatten():
+              #check if previous message was bump
+              if bumped == True:
+                #check if bump was from Disboard bot
+                if str(messages.author.id) == "302050872383242240": #disboard bot ID
+                  #check if succesful bump (blue color)
+                  if str(messages.embeds[0].colour) == "#24b7b7":
+                    data[str(bumpedAuthor)]['bumps'] += 1
+                bumped = False  
 
-            #check if message was bump
-            if messages.content == "!d bump":
-              bumped = True
-              bumpedAuthor = message.author.id
+              #check if message was bump
+              if messages.content == "!d bump":
+                bumped = True
+                bumpedAuthor = message.author.id
 
-          await message2.delete()
+            await message2.delete()
+          else:
+            embed = discord.Embed(color=0x593695, description="**Database has already been uploaded.**")
+            embed.set_author(name="❌ | @" + client.user.name)
+            embed.set_footer(text=nowDate + " at " + nowTime)
+            await message.channel.send(embed=embed)
         else:
-          embed = discord.Embed(color=0x593695, description="**Database has already been uploaded.**")
-          embed.set_author(name="❌ | @" + client.user.name)
-          embed.set_footer(text=nowDate + " at " + nowTime)
-          await message.channel.send(embed=embed)
+          await incorrectRank(message)
       else:
         await incorrectServer(message)
 
@@ -416,31 +461,34 @@ async def on_message(message):
     #edit amounts
     if messagecontent.startswith(prefix + "edit"):
       if str(message.guild.id) == guild_id:
-        #run in try's in case of error
-        #get user (member object)
-        try:
-          user = message.guild.get_member(message.mentions[0].id)
-        except:
-          user = message.author
-        try:      
-          #get type
-          editType = messagecontent.split()[1]
+        if checkRole(message, data):
+          #run in try's in case of error
+          #get user (member object)
+          try:
+            user = message.guild.get_member(message.mentions[0].id)
+          except:
+            user = message.author
+          try:      
+            #get type
+            editType = messagecontent.split()[1]
 
-          #get previous invites amount
-          prevAmount = data[str(user.id)][str(editType)]
+            #get previous invites amount
+            prevAmount = data[str(user.id)][str(editType)]
 
-          editAmount = int(messagecontent.split()[2])
+            editAmount = int(messagecontent.split()[2])
 
-          if editType == "invites" or editType == "leaves" or editType == "bumps":
-            data[str(user.id)][str(editType)] = editAmount
+            if editType == "invites" or editType == "leaves" or editType == "bumps":
+              data[str(user.id)][str(editType)] = editAmount
 
-            #send embed
-            embed = discord.Embed(color=0x593695, description="User now has **" + str(editAmount) + "** " + editType + "!" + " (Original: **" + str(prevAmount) + "**)")
-            embed.set_author(name="@" + user.name + "#" + str(user.discriminator), icon_url=user.avatar_url)
-            embed.set_footer(text=nowDate + " at " + nowTime)
-            await message.channel.send(embed=embed)
-        except:
-          pass
+              #send embed
+              embed = discord.Embed(color=0x593695, description="User now has **" + str(editAmount) + "** " + editType + "!" + " (Original: **" + str(prevAmount) + "**)")
+              embed.set_author(name="@" + user.name + "#" + str(user.discriminator), icon_url=user.avatar_url)
+              embed.set_footer(text=nowDate + " at " + nowTime)
+              await message.channel.send(embed=embed)
+          except:
+            pass
+        else:
+          await incorrectRank(message)
       else:
         await incorrectServer(message)
 
@@ -460,109 +508,115 @@ async def on_message(message):
     if messagecontent.startswith(prefix + "addcounter"):
       #add counter
       if str(message.guild.id) == guild_id:
-        guild = client.get_guild(int(guild_id))
+        if checkRole(message, data):
+          guild = client.get_guild(int(guild_id))
 
-        foundCategory = False
-        #find category
-        for category in guild.categories:
-          if category.name == str(message.guild.name) + " Stats":
-            categoryObject = category
-            foundCategory = True
-            break
-        #create category
-        if foundCategory == False:
-          categoryObject = await guild.create_category(str(message.guild.name) + " Stats", overwrites=None, reason=None)
-
-        #get amount of bots
-        bots = 0
-        for member in guild.members:
-          if member.bot:
-            bots += 1
-      
-        #get channels/ categories
-        total_text_channels = len(guild.text_channels)
-        total_voice_channels = len(guild.voice_channels)
-        total_channels = total_text_channels  + total_voice_channels - len(guild.categories)
-
-        cont = False
-        #get channel creation type
-        if messagecontent == prefix + "addcounter members":
-          channelName = "Members"
-          channelType = guild.member_count - bots
-          cont = True
-        if messagecontent == prefix + "addcounter bots":
-          channelName = "Bots"
-          channelType = bots
-          cont = True
-        if messagecontent == prefix + "addcounter channels":
-          channelName = "Channels"
-          channelType = total_channels + 1
-          cont = True
-        if messagecontent == prefix + "addcounter textchannels":
-          channelName = "Text Channels"
-          channelType = total_text_channels
-          cont = True
-        if messagecontent == prefix + "addcounter voicechannels":
-          channelName = "Voice Channels"
-          channelType = total_voice_channels + 1
-          cont = True
-        if messagecontent == prefix + "addcounter categories":
-          channelName = "Categories"
-          channelType = len(guild.categories)
-          cont = True
-        if messagecontent == prefix + "addcounter bans":
-          channelName = "Bans"
-          channelType = len(await guild.bans())
-          cont = True
-        if messagecontent == prefix + "addcounter roles":
-          channelName = "Roles"
-          channelType = len(guild.roles)
-          cont = True
-        if messagecontent == prefix + "addcounter messages":
-          channelName = "Messages"
-          count = 0
-
-          #loading message
-          embed = discord.Embed(color=0x593695)
-          embed.add_field(name="@" + client.user.name, value="**Loading...**", inline=False)
-          embed.set_footer(text=nowDate + " at " + nowTime)
-          message2 = await message.channel.send(embed=embed)
-
-          #get amount of messages
-          for channel in guild.text_channels:
-            count += len(await channel.history(limit=None).flatten())
-          channelType = count
-          cont = True
-
-          #store amount of messages
-          data["messages"] = count
-
-          await message2.delete()
-        
-        foundChannel = False
-        if cont:
-          #find channel
-          for channel in guild.channels:
-            if channel.name.startswith(channelName + ":"):
-              channelObject = channel
-              foundChannel = True
+          foundCategory = False
+          #find category
+          for category in guild.categories:
+            if category.name == str(message.guild.name) + " Stats":
+              categoryObject = category
+              foundCategory = True
               break
-          #create channel
-          if foundChannel == False:
-            channelObject = await guild.create_voice_channel(f"{channelName}: {channelType}",   overwrites=None, category=categoryObject, reason=None)
-            await channelObject.set_permissions(guild.default_role, connect = False)
+          #create category
+          if foundCategory == False:
+            categoryObject = await guild.create_category(str(message.guild.name) + " Stats", overwrites=None, reason=None)
+
+          #get amount of bots
+          bots = 0
+          for member in guild.members:
+            if member.bot:
+              bots += 1
+        
+          #get channels/ categories
+          total_text_channels = len(guild.text_channels)
+          total_voice_channels = len(guild.voice_channels)
+          total_channels = total_text_channels  + total_voice_channels - len(guild.categories)
+
+          cont = False
+          #get channel creation type
+          if messagecontent == prefix + "addcounter members":
+            channelName = "Members"
+            channelType = guild.member_count - bots
+            cont = True
+          if messagecontent == prefix + "addcounter bots":
+            channelName = "Bots"
+            channelType = bots
+            cont = True
+          if messagecontent == prefix + "addcounter channels":
+            channelName = "Channels"
+            channelType = total_channels + 1
+            cont = True
+          if messagecontent == prefix + "addcounter textchannels":
+            channelName = "Text Channels"
+            channelType = total_text_channels
+            cont = True
+          if messagecontent == prefix + "addcounter voicechannels":
+            channelName = "Voice Channels"
+            channelType = total_voice_channels + 1
+            cont = True
+          if messagecontent == prefix + "addcounter categories":
+            channelName = "Categories"
+            channelType = len(guild.categories)
+            cont = True
+          if messagecontent == prefix + "addcounter bans":
+            channelName = "Bans"
+            channelType = len(await guild.bans())
+            cont = True
+          if messagecontent == prefix + "addcounter roles":
+            channelName = "Roles"
+            channelType = len(guild.roles)
+            cont = True
+          if messagecontent == prefix + "addcounter messages":
+            channelName = "Messages"
+            count = 0
+
+            #loading message
+            embed = discord.Embed(color=0x593695)
+            embed.add_field(name="@" + client.user.name, value="**Loading...**", inline=False)
+            embed.set_footer(text=nowDate + " at " + nowTime)
+            message2 = await message.channel.send(embed=embed)
+
+            #get amount of messages
+            for channel in guild.text_channels:
+              count += len(await channel.history(limit=None).flatten())
+            channelType = count
+            cont = True
+
+            #store amount of messages
+            data["messages"] = count
+
+            await message2.delete()
+          
+          foundChannel = False
+          if cont:
+            #find channel
+            for channel in guild.channels:
+              if channel.name.startswith(channelName + ":"):
+                channelObject = channel
+                foundChannel = True
+                break
+            #create channel
+            if foundChannel == False:
+              channelObject = await guild.create_voice_channel(f"{channelName}: {channelType}",   overwrites=None, category=categoryObject, reason=None)
+              await channelObject.set_permissions(guild.default_role, connect = False)
+        else:
+          await incorrectRank(message)
       else:
         await incorrectServer(message)
       
     #delete counter
     if messagecontent.startswith(prefix + "delcounter"):
       if str(message.guild.id) == guild_id: 
-        for channel in message.guild.voice_channels:
-          try: 
-            if channel.name.lower().startswith(str(messagecontent.split()[1])):
-              await channel.delete()
-          except:
-            break 
+        if checkRole(message, data):
+          for channel in message.guild.voice_channels:
+            try: 
+              if channel.name.lower().startswith(str(messagecontent.split()[1])):
+                await channel.delete()
+            except:
+              break 
+        else:
+          await incorrectRank(message)
       else:
         await incorrectServer(message)
 
@@ -652,8 +706,11 @@ async def on_message(message):
     
     #change prefix
     if messagecontent.startswith(prefix + 'prefix '):
-      data["prefix"] = messagecontent.split()[1]
-      await client.change_presence(activity=discord.Streaming(name=" | " + data["prefix"] + "help", url="https://www.twitch.tv/xzennara/about"))
+      if checkRole(message, data):
+        data["prefix"] = messagecontent.split()[1]
+        await client.change_presence(activity=discord.Streaming(name=" | " + data["prefix"] + "help", url="https://www.twitch.tv/xzennara/about"))
+      else:
+        await incorrectRank(message)
 
     #only run on guild_id server
     if messagecontent.startswith(prefix + 'invites'):
