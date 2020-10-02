@@ -155,6 +155,124 @@ async def on_message(message):
     nowDate = nowDT[0]
     nowTime = str(datetime.strptime(str(nowDT[1][0 : len(nowDT[1]) - 7]), "%H:%M:%S").strftime("%I:%M %p"))
 
+    #setup server
+    if messagecontent == prefix + "setup":
+      if str(message.guild.id) == guild_id:
+        if message.author == message.guild.owner or message.author.id == "427968672980533269" :
+          if str(message.author.id) not in data:
+            #loading message
+            embed = discord.Embed(color=0x593695, description="**Loading Users Into Database...**")
+            embed.set_author(name="⌛ | @" + client.user.name, icon_url=client.user.avatar_url)
+            embed.set_footer(text=nowDate + " at " + nowTime)
+            message2 = await message.channel.send(embed=embed)
+            #members
+            for member in message.guild.members:
+              #add member to database
+              if str(member.id) not in data:
+                data[str(member.id)] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
+
+            #invites
+            embed = discord.Embed(color=0x593695, description="**Loading Previous Invites**")
+            embed.set_author(name="⌛ | @" + client.user.name, icon_url=client.user.avatar_url)
+            embed.set_footer(text=nowDate + " at " + nowTime)
+            await message2.edit(embed=embed)
+            for member in message.guild.members:
+              totalInvites = 0
+              for i in await message.guild.invites():
+                if i.inviter == member:
+                  totalInvites += i.uses
+              data[str(member.id)]['invites'] = totalInvites
+
+            while True:
+              embed = discord.Embed(color=0x593695, description="**Please enter the ID of your Disboard bumping channel.**\nEnter 0 to stop adding channels.")
+              embed.set_author(name="📝 | @" + client.user.name, icon_url=client.user.avatar_url)
+              embed.set_footer(text=nowDate + " at " + nowTime)
+              await message2.edit(embed=embed)
+
+              global done
+              global test
+              done = False
+              def check(m):
+                global done
+                global test
+                #check if user is done inputting channels
+                if m.content == "0":
+                  done = True
+                  passed = True
+                else:
+                  #define check for disboard bumping channel
+                  try:
+                    test = message.guild.get_channel(int(m.content))
+                    if test != None:
+                      passed = True
+                    else:
+                      passed = False
+                  except:
+                    passed = False
+                return passed == True and m.channel == message.channel
+
+              #wait for user input
+              msg = await client.wait_for('message', check=check)
+
+              #check if user is done inputting channels
+              if done:
+                break
+
+              #disboard bumps
+              embed = discord.Embed(color=0x593695, description="**Loading Previous Disboard Bumps**\nThis could take a while.")
+              embed.set_author(name="⌛ | @" + client.user.name, icon_url=client.user.avatar_url)
+              embed.set_footer(text=nowDate + " at " + nowTime)
+              await message2.edit(embed=embed)
+              bumped = False
+              bumpedAuthor = ""
+              for messages in await test.history(limit=None, oldest_first=True).flatten():
+                #check if previous message was bump
+                if bumped == True:
+                  #check if bump was from Disboard bot
+                  if str(messages.author.id) == "302050872383242240": #disboard bot ID
+                    #check if succesful bump (blue color)
+                    if str(messages.embeds[0].colour) == "#24b7b7":
+                      data[str(bumpedAuthor)]['bumps'] += 1
+                  bumped = False  
+                #check if message was bump
+                if messages.content == "!d bump":
+                  bumped = True
+                  bumpedAuthor = message.author.id
+
+            #code admin role
+            embed = discord.Embed(color=0x593695, description="**Please enter the ID of the lowest role in the hierarchy able to do server-managing bot commands.**")
+            embed.set_author(name="📝 | @" + client.user.name, icon_url=client.user.avatar_url)
+            embed.set_footer(text=nowDate + " at " + nowTime)
+            await message2.edit(embed=embed)
+
+            def check(m):
+              #define check for role
+              try:
+                test = message.guild.get_role(int(m.content))
+                if test != None:
+                  passed = True
+                else:
+                  passed = False
+              except:
+                passed = False
+              return passed == True and m.channel == message.channel
+
+            msg = await client.wait_for('message', check=check)
+
+            embed = discord.Embed(color=0x593695, description="**" + str(message.guild.name) + " Setup Complete**")
+            embed.set_author(name="✔️ | @" + client.user.name, icon_url=client.user.avatar_url)
+            embed.set_footer(text=nowDate + " at " + nowTime)
+            await message2.edit(embed=embed)
+          else:
+            embed = discord.Embed(color=0x593695, description="**Setup has already been completed.**")
+            embed.set_author(name="❌ | @" + client.user.name)
+            embed.set_footer(text=nowDate + " at " + nowTime)
+            await message.channel.send(embed=embed)
+        else:
+          await incorrectRank(message)
+      else:
+        await incorrectServer(message)
+
     #add code admin
     if messagecontent.startswith(prefix + "codeadmin"):
       if checkRole(message, data):
@@ -390,63 +508,6 @@ async def on_message(message):
       else:
         await incorrectRank(message)
 
-    #update database
-    if messagecontent == prefix + "database":
-      if str(message.guild.id) == guild_id:
-        if checkRole(message, data):
-          if str(message.author.id) not in data:
-            #loading message
-            embed = discord.Embed(color=0x593695, description="**Loading Users Into Database...**")
-            embed.set_author(name="@" + client.user.name, icon_url=client.user.avatar_url)
-            embed.set_footer(text=nowDate + " at " + nowTime)
-            message2 = await message.channel.send(embed=embed)
-
-            #invites
-            for member in message.guild.members:
-              totalInvites = 0
-              for i in await message.guild.invites():
-                if i.inviter == member:
-                  totalInvites += i.uses
-              #add member to database
-              if str(member.id) not in data:
-                data[str(member.id)] = {'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
-              data[str(member.id)]['invites'] = totalInvites
-
-            #disboard bumps
-            #update embed
-            embed = discord.Embed(color=0x593695, description="**Loading Previous Disboard Bumps**")
-            embed.set_author(name="@" + client.user.name, icon_url=client.user.avatar_url)
-            embed.set_footer(text=nowDate + " at " + nowTime)
-            await message2.edit(embed=embed)
-
-            bumped = False
-            bumpedAuthor = ""
-            for messages in await message.channel.history(limit=None, oldest_first=True).flatten():
-              #check if previous message was bump
-              if bumped == True:
-                #check if bump was from Disboard bot
-                if str(messages.author.id) == "302050872383242240": #disboard bot ID
-                  #check if succesful bump (blue color)
-                  if str(messages.embeds[0].colour) == "#24b7b7":
-                    data[str(bumpedAuthor)]['bumps'] += 1
-                bumped = False  
-
-              #check if message was bump
-              if messages.content == "!d bump":
-                bumped = True
-                bumpedAuthor = message.author.id
-
-            await message2.delete()
-          else:
-            embed = discord.Embed(color=0x593695, description="**Database has already been uploaded.**")
-            embed.set_author(name="❌ | @" + client.user.name)
-            embed.set_footer(text=nowDate + " at " + nowTime)
-            await message.channel.send(embed=embed)
-        else:
-          await incorrectRank(message)
-      else:
-        await incorrectServer(message)
-
     if str(message.guild.id) == guild_id: 
       #put users in database
       if str(message.author.id) not in data:
@@ -573,7 +634,7 @@ async def on_message(message):
 
             #loading message
             embed = discord.Embed(color=0x593695)
-            embed.add_field(name="@" + client.user.name, value="**Loading...**", inline=False)
+            embed.add_field(name="⌛ | @" + client.user.name, value="**Loading...**", inline=False)
             embed.set_footer(text=nowDate + " at " + nowTime)
             message2 = await message.channel.send(embed=embed)
 
