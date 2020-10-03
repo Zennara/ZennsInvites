@@ -160,7 +160,7 @@ async def on_message(message):
         data[str(message.guild.id) + str(message.author.id)] = {'server': str(message.guild.id), 'name': str(message.author.name) + "#" + str(message.author.discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
 
       try:
-        if str(message.guild.get_member(message.mentions[0].id)) not in data:
+        if str(message.guild.id) + str(message.guild.get_member(message.mentions[0].id)) not in data:
           data[str(message.guild.id) + str(message.guild.get_member(message.mentions[0].id).id)] = {'server': str(message.guild.id), 'name': str(message.guild.get_member(message.mentions[0].id).name) + "#" + str(message.guild.get_member(message.mentions[0].id).discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
       except:
         pass
@@ -404,7 +404,10 @@ async def on_message(message):
           count = 1
           for i in order:
             if count <= page * 10 and count >= page * 10 - 9:
-              inputText += "\n`[" + str(count) +"]` **" + str(message.guild.get_member(int(i[0][18:])).name) + "** - **" + str(i[1]) + "** invites (**" + str(data[i[0]]['invites']) + "** regular, **-" + str(data[i[0]]['leaves']) + "** leaves)"
+              try:
+                inputText += "\n`[" + str(count) +"]` **" + str(message.guild.get_member(int(i[0][18:])).name) + "** - **" + str(i[1]) + "** invites (**" + str(data[i[0]]['invites']) + "** regular, **-" + str(data[i[0]]['leaves']) + "** leaves)"
+              except:
+                inputText += "\n`[" + str(count) +"]` **" + str(data[str(message.guild.id) + str(i[0][18:])]['name'])[:-5] + "** - **" + str(i[1]) + "** invites (**" + str(data[str(message.guild.id) + str(i[0][18:])]['invites']) + "** regular, **-" + str(data[str(message.guild.id) + str(i[0][18:])]['leaves']) + "** leaves)"
             count += 1
 
           #print embed
@@ -438,7 +441,10 @@ async def on_message(message):
           count = 1
           for i in order:
             if count <= page * 10 and count >= page * 10 - 9:
-              inputText += "\n`[" + str(count) +"]` **" + str(message.guild.get_member(int(i[0][18:])).name) + "** - **" + str(i[1]) + "** bumps"
+              try:
+                inputText += "\n`[" + str(count) +"]` **" + str(message.guild.get_member(int(i[0][18:])).name) + "** - **" + str(i[1]) + "** bumps"
+              except:
+                inputText += "\n`[" + str(count) +"]` **" + str(data[str(message.guild.id) + str(i[0][18:])]) + "** - **" + str(i[1]) + "** bumps"
             count += 1
 
           #print embed
