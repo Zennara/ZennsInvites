@@ -8,14 +8,13 @@ import os
 import asyncio
 import json
 from datetime import datetime
-from operator import itemgetter
 import math
 
 #declare client
 client = discord.Client()
 
 #server-specific ids
-guild_id = "696583117502152774"
+guild_id = "566984586618470411"
 guild = client.get_guild(int(guild_id))
 
 #check invites and compare
@@ -169,7 +168,7 @@ async def on_message(message):
     #setup server
     if messagecontent == prefix + "setup":
       if str(message.guild.id) == guild_id:
-        if message.author == message.guild.owner or message.author.id == "427968672980533269" :
+        if message.author == message.guild.owner or str(message.author.id) == "427968672980533269" :
           if "admin" + str(message.guild.id) not in data:
             #loading message
             embed = discord.Embed(color=0x593695, description="**Loading Users Into Database...**")
@@ -704,11 +703,6 @@ async def on_message(message):
             try: 
               if channel.name.lower().startswith(str(messagecontent.split()[1])):
                 await channel.delete()
-
-                #print embed
-              embed = discord.Embed(color=0x593695, description=str(messagecontent.split()[1]).capitalize() + " counter deleted.")
-              embed.set_author(name="✔️ | @" + client.user.name)
-              await message.channel.send(embed=embed)
             except:
               break 
         else:
