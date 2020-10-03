@@ -470,6 +470,15 @@ async def on_message(message):
           if "role" + str(message.guild.id) + str(channelID) + str(messageID) in data:
             await msg.remove_reaction(data["role" + str(message.guild.id) + str(channelID) + str(messageID)]['reaction'], client.user)
             del data["role" + str(message.guild.id) + str(channelID) + str(messageID)]
+
+            #print embed
+            embed = discord.Embed(color=0x593695, description="Role reaction message deleted.")
+            embed.set_author(name="✔️ | @" + client.user.name)
+            await message.channel.send(embed=embed)
+          else:
+            embed = discord.Embed(color=0x593695, description="Role reaction message doesnt exist.")
+            embed.set_author(name="❌ | @" + client.user.name)
+            await message.channel.send(embed=embed)
         except:
           pass
       else:
@@ -517,6 +526,15 @@ async def on_message(message):
             await msg.add_reaction(RRreaction)
             placement = "role" + str(message.guild.id) + str(channel2.id) + str(msg.id)
             data[placement] = {'server': str(message.guild.id), 'channel': str(RRchannelID), 'message': str(RRmessageID), 'reaction': RRreaction, 'role': str(roleID)}
+
+            #print embed
+            embed = discord.Embed(color=0x593695, description="Role reaction message added.")
+            embed.set_author(name="✔️ | @" + client.user.name)
+            await message.channel.send(embed=embed)
+          else:
+            embed = discord.Embed(color=0x593695, description="Role reaction message already exists.")
+            embed.set_author(name="❌ | @" + client.user.name)
+            await message.channel.send(embed=embed)
         except:
           pass
       else:
@@ -664,6 +682,15 @@ async def on_message(message):
             if foundChannel == False:
               channelObject = await guild.create_voice_channel(f"{channelName}: {channelType}",   overwrites=None, category=categoryObject, reason=None)
               await channelObject.set_permissions(guild.default_role, connect = False)
+
+              #print embed
+              embed = discord.Embed(color=0x593695, description=channelName + " counter added.")
+              embed.set_author(name="✔️ | @" + client.user.name)
+              await message.channel.send(embed=embed)
+            else:
+              embed = discord.Embed(color=0x593695, description=channelName + " counter already exists.")
+              embed.set_author(name="❌ | @" + client.user.name)
+              await message.channel.send(embed=embed)
         else:
           await incorrectRank(message)
       else:
@@ -677,6 +704,11 @@ async def on_message(message):
             try: 
               if channel.name.lower().startswith(str(messagecontent.split()[1])):
                 await channel.delete()
+
+                #print embed
+              embed = discord.Embed(color=0x593695, description=str(messagecontent.split()[1]).capitalize() + " counter deleted.")
+              embed.set_author(name="✔️ | @" + client.user.name)
+              await message.channel.send(embed=embed)
             except:
               break 
         else:
@@ -875,7 +907,7 @@ async def on_member_join(member):
     data[str(member.guild.id) + str(member.id)]['inviter'] = codeOwner
 
     #add to invites
-    if codeOwner not in data:
+    if str(member.guild.id) + codeOwner not in data:
       data[str(member.guild.id) + codeOwner] = {'server': str(member.guild.id), 'name': str(member.guild.get_member(int(codeOwner)).name) + "#" + str(member.guild.get_member(int(codeOwner)).discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
     data[str(member.guild.id) + codeOwner]['invites'] += 1
   
@@ -914,7 +946,7 @@ async def on_member_remove(member):
     #check for irole keys
     if key.startswith('irole'):
       #check codeowner invites
-      if data[str(member.guild.id) + codeOwner]['invites'] - data[str(member.guild.id) + codeOwner]['leaves'] < data[key]['amount']:
+      if data[str(member.guild.id) + data[str(member.guild.id) + str(member.id)]['inviter']]['invites'] - data[str(member.guild.id) + data[str(member.guild.id) + str(member.id)]['inviter']]['leaves'] < data[key]['amount']:
         #remove role
         await member.guild.get_member(int(codeOwner)).remove_roles((member.guild.get_role(int(data[key]['roleID']))), atomic=True)
 
