@@ -160,7 +160,7 @@ async def on_message(message):
         data[str(message.guild.id) + str(message.author.id)] = {'server': str(message.guild.id), 'name': str(message.author.name) + "#" + str(message.author.discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
 
       try:
-        if str(message.guild.id) + str(message.guild.get_member(message.mentions[0].id)) not in data:
+        if str(message.guild.id) + str(message.guild.get_member(message.mentions[0].id).id) not in data:
           data[str(message.guild.id) + str(message.guild.get_member(message.mentions[0].id).id)] = {'server': str(message.guild.id), 'name': str(message.guild.get_member(message.mentions[0].id).name) + "#" + str(message.guild.get_member(message.mentions[0].id).discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
       except:
         pass
@@ -285,6 +285,9 @@ async def on_message(message):
           await incorrectRank(message)
       else:
         await incorrectServer(message)
+
+    #fetch disboard bumps
+    #if messagecontent.startswith(prefix + "fetch ")
 
     #add code admin
     if messagecontent.startswith(prefix + "codeadmin"):
@@ -724,7 +727,7 @@ async def on_message(message):
     #check disboard bot reply
     elif bumped == True:
       if str(message.guild.id) + str(message.author.id) == str(message.guild.id) + "302050872383242240": #disboard bot ID
-        if str(message.embeds[0].colour) == "#24b7b7":
+        if str(message.embeds[0].colour) != "#24b7b7":
           data[str(user.guild.id) + str(user.id)]['bumps'] += 1
       bumped = False
 
