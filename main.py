@@ -290,113 +290,125 @@ async def on_message(message):
 
     #fetch invites
     if messagecontent == prefix + "fetch invites":
-      def check(reaction, user):
-        return user == message.author and str(reaction.emoji) == '✅'
+      if str(message.guild.id) == guild_id:
+        if checkRole(message, data):
+          def check(reaction, user):
+            return user == message.author and str(reaction.emoji) == '✅'
 
-      embed = discord.Embed(color=0x593695, description="**WARNING: Doing so may result in data loss. Continue?**\nReact with ✅ or wait 30s")
-      embed.set_author(name="❔ | @" + client.user.name, icon_url=client.user.avatar_url)
-      embed.set_footer(text=nowDate + " at " + nowTime)
-      message2 = await message.channel.send(embed=embed)
-      await message2.add_reaction('✅')
+          embed = discord.Embed(color=0x593695, description="**WARNING: Doing so may result in data loss. Continue?**\nReact with ✅ or wait 30s")
+          embed.set_author(name="❔ | @" + client.user.name, icon_url=client.user.avatar_url)
+          embed.set_footer(text=nowDate + " at " + nowTime)
+          message2 = await message.channel.send(embed=embed)
+          await message2.add_reaction('✅')
 
-      try:
-        reaction, user = await client.wait_for('reaction_add', timeout=30.0, check=check)
-      except asyncio.TimeoutError:
-        await message2.delete()
+          try:
+            reaction, user = await client.wait_for('reaction_add', timeout=30.0, check=check)
+          except asyncio.TimeoutError:
+            await message2.delete()
+          else:
+            #invites
+            embed = discord.Embed(color=0x593695, description="**Loading Previous Invites**")
+            embed.set_author(name="⌛ | @" + client.user.name, icon_url=client.user.avatar_url)
+            embed.set_footer(text=nowDate + " at " + nowTime)
+            await message2.edit(embed=embed)
+            for member in message.guild.members:
+              totalInvites = 0
+              for i in await message.guild.invites():
+                if i.inviter == member:
+                  totalInvites += i.uses
+              data[str(message.guild.id) + str(member.id)]['invites'] = totalInvites
+
+            embed = discord.Embed(color=0x593695, description="**Previous Invites Fetched**")
+            embed.set_author(name="✔️ | @" + client.user.name, icon_url=client.user.avatar_url)
+            embed.set_footer(text=nowDate + " at " + nowTime)
+            await message2.edit(embed=embed)
+        else:
+          await incorrectRank(message)
       else:
-        #invites
-        embed = discord.Embed(color=0x593695, description="**Loading Previous Invites**")
-        embed.set_author(name="⌛ | @" + client.user.name, icon_url=client.user.avatar_url)
-        embed.set_footer(text=nowDate + " at " + nowTime)
-        await message2.edit(embed=embed)
-        for member in message.guild.members:
-          totalInvites = 0
-          for i in await message.guild.invites():
-            if i.inviter == member:
-              totalInvites += i.uses
-          data[str(message.guild.id) + str(member.id)]['invites'] = totalInvites
-
-        embed = discord.Embed(color=0x593695, description="**Previous Invites Fetched**")
-        embed.set_author(name="✔️ | @" + client.user.name, icon_url=client.user.avatar_url)
-        embed.set_footer(text=nowDate + " at " + nowTime)
-        await message2.edit(embed=embed)
+        await incorrectServer(message)
 
     #fetch disboard bumps
     if messagecontent == prefix + "fetch bumps":
-      def check(reaction, user):
-        return user == message.author and str(reaction.emoji) == '✅'
+      if str(message.guild.id) == guild_id:
+        if checkRole(message, data):
+          def check(reaction, user):
+            return user == message.author and str(reaction.emoji) == '✅'
 
-      embed = discord.Embed(color=0x593695, description="**WARNING: Doing so may result in data loss. Continue?**\nReact with ✅ or wait 30s")
-      embed.set_author(name="❔ | @" + client.user.name, icon_url=client.user.avatar_url)
-      embed.set_footer(text=nowDate + " at " + nowTime)
-      message2 = await message.channel.send(embed=embed)
-      await message2.add_reaction('✅')
-
-      try:
-        reaction, user = await client.wait_for('reaction_add', timeout=30.0, check=check)
-      except asyncio.TimeoutError:
-        await message2.delete()
-      else:
-        while True:
-          embed = discord.Embed(color=0x593695, description="**Please enter the ID of your Disboard bumping channel.**\nEnter 0 to stop adding channels.")
-          embed.set_author(name="📝 | @" + client.user.name, icon_url=client.user.avatar_url)
+          embed = discord.Embed(color=0x593695, description="**WARNING: Doing so may result in data loss. Continue?**\nReact with ✅ or wait 30s")
+          embed.set_author(name="❔ | @" + client.user.name, icon_url=client.user.avatar_url)
           embed.set_footer(text=nowDate + " at " + nowTime)
-          await message2.edit(embed=embed)
+          message2 = await message.channel.send(embed=embed)
+          await message2.add_reaction('✅')
 
-          done = False
-          def check(m):
-            global done
-            global test
-            #check if user is done inputting channels
-            if m.content == "0":
-              done = True
-              passed = True
-            else:
-              #define check for disboard bumping channel
-              try:
-                test = message.guild.get_channel(int(m.content))
-                if test != None:
+          try:
+            reaction, user = await client.wait_for('reaction_add', timeout=30.0, check=check)
+          except asyncio.TimeoutError:
+            await message2.delete()
+          else:
+            while True:
+              embed = discord.Embed(color=0x593695, description="**Please enter the ID of your Disboard bumping channel.**\nEnter 0 to stop adding channels.")
+              embed.set_author(name="📝 | @" + client.user.name, icon_url=client.user.avatar_url)
+              embed.set_footer(text=nowDate + " at " + nowTime)
+              await message2.edit(embed=embed)
+
+              done = False
+              def check(m):
+                global done
+                global test
+                #check if user is done inputting channels
+                if m.content == "0":
+                  done = True
                   passed = True
                 else:
-                  passed = False
-              except:
-                passed = False
-            return passed == True and m.channel == message.channel
+                  #define check for disboard bumping channel
+                  try:
+                    test = message.guild.get_channel(int(m.content))
+                    if test != None:
+                      passed = True
+                    else:
+                      passed = False
+                  except:
+                    passed = False
+                return passed == True and m.channel == message.channel
 
-          #wait for user input
-          msg = await client.wait_for('message', check=check)
+              #wait for user input
+              msg = await client.wait_for('message', check=check)
 
-          #check if user is done inputting channels
-          if done:
-            break
+              #check if user is done inputting channels
+              if done:
+                break
 
-          #disboard bumps
-          embed = discord.Embed(color=0x593695, description="**Loading Previous Disboard Bumps**\nThis could take a while.")
-          embed.set_author(name="⌛ | @" + client.user.name, icon_url=client.user.avatar_url)
-          embed.set_footer(text=nowDate + " at " + nowTime)
-          await message2.edit(embed=embed)
-          bumped = False
-          bumpedAuthor = ""
-          for messages in await test.history(limit=None, oldest_first=True).flatten():
-            #check if previous message was bump
-            if bumped == True:
-              #check if bump was from Disboard bot
-              if str(messages.guild.id) + str(messages.author.id) == str(messages.guild.id) + "302050872383242240": #disboard bot ID
-                #check if succesful bump (blue color)
-                if str(messages.embeds[0].colour) == "#24b7b7":
-                  if str(message.guild.id) + str(bumpedAuthor.id) not in data:
-                    data[str(message.guild.id) + str(bumpedAuthor.id)] = {'server': str(message.guild.id), 'name': str(bumpedAuthor.name) + "#" + str(bumpedAuthor.discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
-                  data[str(message.guild.id) + str(bumpedAuthor.id)]['bumps'] += 1
-              bumped = False  
-            #check if message was bump
-            if messages.content == "!d bump":
-              bumped = True
-              bumpedAuthor = messages.author
+              #disboard bumps
+              embed = discord.Embed(color=0x593695, description="**Loading Previous Disboard Bumps**\nThis could take a while.")
+              embed.set_author(name="⌛ | @" + client.user.name, icon_url=client.user.avatar_url)
+              embed.set_footer(text=nowDate + " at " + nowTime)
+              await message2.edit(embed=embed)
+              bumped = False
+              bumpedAuthor = ""
+              for messages in await test.history(limit=None, oldest_first=True).flatten():
+                #check if previous message was bump
+                if bumped == True:
+                  #check if bump was from Disboard bot
+                  if str(messages.guild.id) + str(messages.author.id) == str(messages.guild.id) + "302050872383242240": #disboard bot ID
+                    #check if succesful bump (blue color)
+                    if str(messages.embeds[0].colour) == "#24b7b7":
+                      if str(message.guild.id) + str(bumpedAuthor.id) not in data:
+                        data[str(message.guild.id) + str(bumpedAuthor.id)] = {'server': str(message.guild.id), 'name': str(bumpedAuthor.name) + "#" + str(bumpedAuthor.discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
+                      data[str(message.guild.id) + str(bumpedAuthor.id)]['bumps'] += 1
+                  bumped = False  
+                #check if message was bump
+                if messages.content == "!d bump":
+                  bumped = True
+                  bumpedAuthor = messages.author
 
-        embed = discord.Embed(color=0x593695, description="**Previous Invites Fetched**")
-        embed.set_author(name="✔️ | @" + client.user.name, icon_url=client.user.avatar_url)
-        embed.set_footer(text=nowDate + " at " + nowTime)
-        await message2.edit(embed=embed)
+            embed = discord.Embed(color=0x593695, description="**Previous Invites Fetched**")
+            embed.set_author(name="✔️ | @" + client.user.name, icon_url=client.user.avatar_url)
+            embed.set_footer(text=nowDate + " at " + nowTime)
+            await message2.edit(embed=embed)
+        else:
+          await incorrectRank(message)
+      else:
+        await incorrectServer(message)
 
     #add code admin
     if messagecontent.startswith(prefix + "codeadmin"):
@@ -870,6 +882,7 @@ async def on_message(message):
       embed.add_field(name="`"+prefix+ "addirole <invites> <roleID>`", value="Add a new invite role reward", inline=False)
       embed.add_field(name="`"+prefix+ "delirole <invites> <roleID>`", value="Delete an invite role reward", inline=False)
       embed.add_field(name="`"+prefix+ "iroles`", value="Display all invite role rewards", inline=False)
+      embed.add_field(name="`"+prefix+ "fetch invites`", value="Fetch all previous invites", inline=False)
       embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
       await message.channel.send(embed=embed)
 
@@ -909,6 +922,7 @@ async def on_message(message):
       embed.add_field(name="`"+prefix+ "d leaderboard`", value="Show the disboard bump leaderboard", inline=False)
       embed.add_field(name="`"+prefix+ "d bumps [member]`", value="Show how many bumps a user has", inline=False)
       embed.add_field(name="`"+prefix+ "edit bumps <amount> [member]`", value="Set bumps of a member", inline=False)
+      embed.add_field(name="`"+prefix+ "fetch bumps`", value="Fetch all previous bumps", inline=False)
       embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
       await message.channel.send(embed=embed)
     
