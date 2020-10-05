@@ -286,8 +286,38 @@ async def on_message(message):
       else:
         await incorrectServer(message)
 
-    #fetch disboard bumps
-    #if messagecontent.startswith(prefix + "fetch ")
+    #fetch invites bumps
+    if messagecontent == prefix + "fetch invites":
+      def check(reaction, user):
+        return user == message.author and str(reaction.emoji) == '✔️'
+
+      embed = discord.Embed(color=0x593695, description="**WARNING: Doing so may result in data loss. Continue?**\nReact with ✅ or wait 30s")
+      embed.set_author(name="❔ | @" + client.user.name, icon_url=client.user.avatar_url)
+      embed.set_footer(text=nowDate + " at " + nowTime)
+      message2 = await message.channel.send(embed=embed)
+      await message2.add_reaction('✅')
+
+      try:
+        reaction, user = await client.wait_for('reaction_add', timeout=30.0, check=check)
+      except asyncio.TimeoutError:
+        await message2.delete()
+      else:
+        #invites
+        embed = discord.Embed(color=0x593695, description="**Loading Previous Invites**")
+        embed.set_author(name="⌛ | @" + client.user.name, icon_url=client.user.avatar_url)
+        embed.set_footer(text=nowDate + " at " + nowTime)
+        await message2.edit(embed=embed)
+        for member in message.guild.members:
+          totalInvites = 0
+          for i in await message.guild.invites():
+            if i.inviter == member:
+              totalInvites += i.uses
+          data[str(message.guild.id) + str(member.id)]['invites'] = totalInvites
+
+        embed = discord.Embed(color=0x593695, description="**Previous Invites Fetched**")
+        embed.set_author(name="✔️ | @" + client.user.name, icon_url=client.user.avatar_url)
+        embed.set_footer(text=nowDate + " at " + nowTime)
+        await message2.edit(embed=embed)
 
     #add code admin
     if messagecontent.startswith(prefix + "codeadmin"):
@@ -727,7 +757,7 @@ async def on_message(message):
     #check disboard bot reply
     elif bumped == True:
       if str(message.guild.id) + str(message.author.id) == str(message.guild.id) + "302050872383242240": #disboard bot ID
-        if str(message.embeds[0].colour) != "#24b7b7":
+        if str(message.embeds[0].colour) == "#24b7b7":
           data[str(user.guild.id) + str(user.id)]['bumps'] += 1
       bumped = False
 
