@@ -345,6 +345,18 @@ async def on_message(message):
           except asyncio.TimeoutError:
             await message2.delete()
           else:
+            embed = discord.Embed(color=0x593695, description="**Clearing Bumps...**")
+            embed.set_author(name="⌛ | @" + client.user.name, icon_url=client.user.avatar_url)
+            embed.set_footer(text=nowDate + " at " + nowTime)
+            await message2.edit(embed=embed)
+
+            #clear bumps
+            for key in data.keys():
+              try:
+                data[key]['bumps'] = 0
+              except:
+                pass
+
             while True:
               embed = discord.Embed(color=0x593695, description="**Please enter the ID of your Disboard bumping channel.**\nEnter 0 to stop adding channels.")
               embed.set_author(name="📝 | @" + client.user.name, icon_url=client.user.avatar_url)
@@ -401,7 +413,7 @@ async def on_message(message):
                   bumped = True
                   bumpedAuthor = messages.author
 
-            embed = discord.Embed(color=0x593695, description="**Previous Invites Fetched**")
+            embed = discord.Embed(color=0x593695, description="**Previous Bumps Fetched**")
             embed.set_author(name="✔️ | @" + client.user.name, icon_url=client.user.avatar_url)
             embed.set_footer(text=nowDate + " at " + nowTime)
             await message2.edit(embed=embed)
@@ -492,7 +504,7 @@ async def on_message(message):
         count = 0
         embed = discord.Embed(color=0x593695, description="**Invite Role-Rewards**")
         for k in data.keys():
-          if k.startswith('irole'):
+          if k.startswith('irole' + str(message.guild.id)):
             count += 1
             embed.add_field(name="Reward "+str(count), value="**Role:** <@&" + str(data[k]['roleID']) + ">\n**Invites:** " + str(data[k]['amount']))
 
@@ -620,7 +632,7 @@ async def on_message(message):
       #get all invite role rewards
       count = 0
       for k in data.keys():
-        if k.startswith('role'):
+        if k.startswith('role' + str(message.guild.id)):
           count += 1
           embed.add_field(name="Message "+str(count), value="**Role:** <@&" + str(data[k]['role']) + ">\n**Emoji:** " + str(data[k]['reaction']) + "\n**Channel: ** <#" + str(data[k]['channel']) + ">\n**Message ID:** " + str(data[k]['message']) + "[\nJump to message](https://discordapp.com/channels/"+str(message.guild.id)+"/"+str(data[k]['channel'])+"/"+str(data[k]['message'])+")")
 
@@ -987,8 +999,8 @@ async def on_message(message):
 
           embed.add_field(name="Join Code", value=jCode, inline=True)
           if data[str(user.guild.id) + str(user.id)]['inviter'] != "null":
-            inviterMember = message.guild.get_member(int(data[str(user.guild.id) + str(user.id)]['inviter']))
-            embed.add_field(name="Owned By", value=inviterMember.name + "#" + inviterMember.discriminator, inline=True)
+            inviterMember = str(data[str(user.guild.id) + str(user.id)]['inviter'])
+            embed.add_field(name="Owned By", value=data[str(message.guild.id) + inviterMember]['name'], inline=True)
 
         #joined discord
         embed.add_field(name="Joined Discord at", value=createdDate + " at " + createdTime, inline=False)
