@@ -690,12 +690,12 @@ async def on_message(message):
             editType = messagecontent.split()[1]
 
             #get previous invites amount
-            prevAmount = data[str(user.guild.id) + str(user.id)][str(editType)]
+            prevAmount = data[str(message.guild.id) + str(user.id)][str(editType)]
 
             editAmount = int(messagecontent.split()[2])
 
             if editType == "invites" or editType == "leaves" or editType == "bumps":
-              data[str(user.guild.id) + str(user.id)][str(editType)] = editAmount
+              data[str(message.guild.id) + str(user.id)][str(editType)] = editAmount
 
               #send embed
               embed = discord.Embed(color=0x593695, description="User now has **" + str(editAmount) + "** " + editType + "!" + " (Original: **" + str(prevAmount) + "**)")
@@ -855,7 +855,7 @@ async def on_message(message):
     elif bumped == True:
       if str(message.guild.id) + str(message.author.id) == str(message.guild.id) + "302050872383242240": #disboard bot ID
         if str(message.embeds[0].colour) == "#24b7b7":
-          data[str(user.guild.id) + str(user.id)]['bumps'] += 1
+          data[str(message.guild.id) + str(user.id)]['bumps'] += 1
       bumped = False
 
     #disboard bumps
@@ -868,7 +868,7 @@ async def on_message(message):
           user = message.guild.get_member(message.mentions[0].id)
 
         #change database
-        bumps = data[str(user.guild.id) + str(user.id)]['bumps']
+        bumps = data[str(message.guild.id) + str(user.id)]['bumps']
 
         #send embed
         embed = discord.Embed(color=0x593695, description="User has bumped the server **" + str(bumps) + "** times!")
@@ -947,11 +947,21 @@ async def on_message(message):
         if (messagecontent == prefix + 'invites'):
           user = message.author
         else:
-          user = message.guild.get_member(message.mentions[0].id)
+          try:
+            if message.content[-18:].isdigit():
+              user = message.guild.get_member(int(message.content[-18:]))
+            else:
+              user = message.guild.get_member(int(message.content[-19:-1]))
+            test = user.id
+          except:
+            if message.content[-18:].isdigit():
+              user = await client.fetch_user(message.content[-18:])
+            else:
+              user = await client.fetch_user(message.content[-19:-1])
 
         #check if user is in database
-        Invites = data[str(user.guild.id) + str(user.id)]['invites']
-        Leaves = data[str(user.guild.id) + str(user.id)]['leaves']
+        Invites = data[str(message.guild.id) + str(user.id)]['invites']
+        Leaves = data[str(message.guild.id) + str(user.id)]['leaves']
         totalInvites = Invites - Leaves
 
         embed = discord.Embed(color=0x593695, description="User has **" + str(totalInvites) + "** invites! (**" + str(Invites) + "** regular, **-" + str(Leaves) + "** leaves)")
