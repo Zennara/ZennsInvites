@@ -682,7 +682,17 @@ async def on_message(message):
           #run in try's in case of error
           #get user (member object)
           try:
-            user = message.guild.get_member(message.mentions[0].id)
+            try:
+              if message.content[-18:].isdigit():
+                user = message.guild.get_member(int(message.content[-18:]))
+              else:
+                user = message.guild.get_member(int(message.content[-19:-1]))
+              test = user.id
+            except:
+              if message.content[-18:].isdigit():
+                user = await client.fetch_user(message.content[-18:])
+              else:
+                user = await client.fetch_user(message.content[-19:-1])
           except:
             user = message.author
           try:      
