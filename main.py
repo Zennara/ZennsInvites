@@ -580,7 +580,7 @@ async def on_message(message):
               try:
                 inputText += "\n`[" + str(count) +"]` **" + str(message.guild.get_member(int(i[0][18:])).name) + "** - **" + str(i[1]) + "** bumps"
               except:
-                inputText += "\n`[" + str(count) +"]` **" + str(data[str(message.guild.id) + str(i[0][18:])]['name']) + "** - **" + str(i[1]) + "** bumps"
+                inputText += "\n`[" + str(count) +"]` **" + str(data[str(message.guild.id) + str(i[0][18:])]['name'])[:-5] + "** - **" + str(i[1]) + "** bumps"
             count += 1
 
           #print embed
