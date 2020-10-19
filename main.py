@@ -865,7 +865,17 @@ async def on_message(message):
         if (messagecontent == prefix + 'd bumps'):
           user = message.author
         else:
-          user = message.guild.get_member(message.mentions[0].id)
+          try:
+            if message.content[-18:].isdigit():
+              user = message.guild.get_member(int(message.content[-18:]))
+            else:
+              user = message.guild.get_member(int(message.content[-19:-1]))
+            test = user.id
+          except:
+            if message.content[-18:].isdigit():
+              user = await client.fetch_user(message.content[-18:])
+            else:
+              user = await client.fetch_user(message.content[-19:-1])
 
         #change database
         bumps = data[str(message.guild.id) + str(user.id)]['bumps']
