@@ -966,8 +966,26 @@ async def on_message(message):
         #get user (member object)
         if (messagecontent == prefix + 'info'):
           user = message.author
+          joinedDT = str(user.joined_at).split()
+          joinedDate = joinedDT[0] + " at "
+          joinedTime = str(datetime.strptime(str(joinedDT[1][0 : len(joinedDT[1]) - 7]), "%H:%M:%S").strftime("%I:%M %p"))
         else:
-          user = message.guild.get_member(message.mentions[0].id)
+          try:
+            if message.content[-18:].isdigit():
+              user = message.guild.get_member(int(message.content[-18:]))
+            else:
+              user = message.guild.get_member(int(message.content[-19:-1]))
+            #split joined_at into date and time
+            joinedDT = str(user.joined_at).split()
+            joinedDate = joinedDT[0] + " at "
+            joinedTime = str(datetime.strptime(str(joinedDT[1][0 : len(joinedDT[1]) - 7]), "%H:%M:%S").strftime("%I:%M %p"))
+          except:
+            if message.content[-18:].isdigit():
+              user = await client.fetch_user(message.content[-18:])
+            else:
+              user = await client.fetch_user(message.content[-19:-1])
+            joinedDate = "No longer in the server."
+            joinedTime = ""
 
         #set embed
         embed = discord.Embed(color=0x593695)
@@ -980,32 +998,30 @@ async def on_message(message):
         createdDate = createDT[0]
         createdTime = str(datetime.strptime(str(createDT[1][0 : len(createDT[1]) - 7]), "%H:%M:%S").strftime("%I:%M %p"))
 
-        #split joined_at into date and time
-        joinedDT = str(user.joined_at).split()
-        joinedDate = joinedDT[0]
-        joinedTime = str(datetime.strptime(str(joinedDT[1][0 : len(joinedDT[1]) - 7]), "%H:%M:%S").strftime("%I:%M %p"))
-
-        embed.add_field(name="Joined Server at", value=joinedDate + " at " + joinedTime, inline=False)
+        embed.add_field(name="Joined Server at", value=joinedDate + joinedTime, inline=False)
 
         #join code and owner, only run on guild_id server
         if str(message.guild.id) == guild_id:
-          jCode = data[str(user.guild.id) + str(user.id)]['joinCode']
+          jCode = data[str(message.guild.id) + str(user.id)]['joinCode']
 
           embed.add_field(name="Join Code", value=jCode, inline=True)
-          if data[str(user.guild.id) + str(user.id)]['inviter'] != "null":
-            inviterMember = str(data[str(user.guild.id) + str(user.id)]['inviter'])
+          if data[str(message.guild.id) + str(user.id)]['inviter'] != "null":
+            inviterMember = str(data[str(message.guild.id) + str(user.id)]['inviter'])
             embed.add_field(name="Owned By", value=data[str(message.guild.id) + inviterMember]['name'], inline=True)
 
         #joined discord
         embed.add_field(name="Joined Discord at", value=createdDate + " at " + createdTime, inline=False)
 
-        #if boosting display since when
-        if (str(user.premium_since) != "None"):
-          #split premium_since into date and time
-          premiumDT = str(user.premium_since).split()
-          premiumDate = premiumDT[0]
-          premiumTime = str(datetime.strptime(str(premiumDT[1][0 : len(premiumDT[1]) - 7]), "%H:%M:%S").strftime("%I:%M %p"))
-          embed.add_field(name="Boosting Server since", value=premiumDate + " at " + premiumTime, inline=False)
+        try:
+          #if boosting display since when
+          if (str(user.premium_since) != "None"):
+            #split premium_since into date and time
+            premiumDT = str(user.premium_since).split()
+            premiumDate = premiumDT[0]
+            premiumTime = str(datetime.strptime(str(premiumDT[1][0 : len(premiumDT[1]) - 7]), "%H:%M:%S").strftime("%I:%M %p"))
+            embed.add_field(name="Boosting Server since", value=premiumDate + " at " + premiumTime, inline=False)
+        except:
+          pass
 
         #requested by
         embed.set_footer(text="Requested by " + message.author.name + "#" + message.author.discriminator + "\nID: " + str(message.author.id))
