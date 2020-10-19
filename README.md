@@ -31,4 +31,3 @@ ZennDev is able to track bumps, as well as fetch previous bumps of your server f
 | delcounter    | \<tracker>                                        | Removes a Server Stats channel             | no      |
 | d leaderboard | [page]                                            | Shows the disboard bump leaderboard        | yes     |
 | d bumps       | [member]                                          | Returns the users total server bumps       | yes     |
-|               |                                                   |                                            | no      |
