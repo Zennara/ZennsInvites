@@ -14,7 +14,7 @@ ZennDev is able to track bumps, as well as fetch previous bumps of your server f
 |---------------|---------------------------------------------------|--------------------------------------------|---------|
 | help          | [type]                                            | Displays the help page                     | yes     |
 | setup         | none                                              | Sets the server up for the first time      | no      |
-| prefix        | <prefix>                                          | Changes the bot prefix                     | no      |
+| prefix        | \<prefix>                                         | Changes the bot prefix                     | no      |
 | info          | [member]                                          | Shows data about the member                | yes     |
 | invites       | [member]                                          | Returns the amount of invites a member has | yes     |
 | leaves        | [member]                                          | Returns the amount of leaves a member has  | yes     |
