@@ -11,7 +11,8 @@ from datetime import datetime
 import math
 
 #declare client
-client = discord.Client()
+intents = discord.Intents.all()
+client = discord.Client(intents=intents)
 
 #server-specific ids
 guild_id = "566984586618470411"
@@ -130,7 +131,7 @@ async def on_raw_reaction_remove(payload):
     if str(payload.emoji.name) == str(data["role" + str(payload.guild_id) + str(payload.channel_id) + str(payload.message_id)]['reaction']):
       #give role
       role = client.get_guild(int(payload.guild_id)).get_role(int(data["role" + str(payload.guild_id) + str(payload.channel_id) + str(payload.message_id)]['role']))
-      await client.get_guild(int(payload.guild_id)).get_member(payload.user_id).remove_roles(role, atomic=True)
+      await client.get_guild(int(payload.guild_id)).get_member(int(payload.user_id)).remove_roles(role, atomic=True)
 
 @client.event
 async def on_message(message):
