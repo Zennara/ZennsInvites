@@ -313,6 +313,7 @@ async def on_message(message):
             embed.set_footer(text=nowDate + " at " + nowTime)
             await message2.edit(embed=embed)
             for member in message.guild.members:
+              totalInvites = data[str(message.guild.id) + str(member.id)]['invites']
               for i in await message.guild.invites():
                 if i.inviter == member:
                   totalInvites = 0
