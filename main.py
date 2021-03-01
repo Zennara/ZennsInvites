@@ -68,33 +68,32 @@ async def checkCounters():
     #discord API limits rates to twice every 10m for channel edits
     await asyncio.sleep(600)
 
-    guild = client.get_guild(int(guild_id))
-    #get amount of bots
-    bots = 0
-    for member in guild.members:
-      if member.bot:
-        bots += 1
-
     #update channels
-    for channel in guild.voice_channels:
-      if channel.name.startswith("Members"):
-        await channel.edit(name="Members: " + str(guild.member_count - bots))
-      if channel.name.startswith("Bots"):
-        await channel.edit(name="Bots: " + str(bots))
-      if channel.name.startswith("Channels"):
-        await channel.edit(name="Channels: " + str(len(guild.text_channels) + len(guild.voice_channels) - len(guild.categories)))
-      if channel.name.startswith("Text Channels"):
-        await channel.edit(name="Text Channels: " + str(len(guild.text_channels)))
-      if channel.name.startswith("Voice Channels"):
-        await channel.edit(name="Voice Channels: " + str(len(guild.voice_channels)))
-      if channel.name.startswith("Categories"):
-        await channel.edit(name="Categories: " + str(len(guild.categories)))
-      if channel.name.startswith("Roles"):
-        await channel.edit(name="Roles: " + str(len(guild.roles)))
-      if channel.name.startswith("Bans"):
-        await channel.edit(name="Bans: " + str(len(await guild.bans())))
-      if channel.name.startswith("Messages"):
-        await channel.edit(name="Messages: " + str(data['messages']))
+    for guild in client.guilds:
+      #get amount of bots
+      bots = 0
+      for member in guild.members:
+        if member.bot:
+          bots += 1
+      for channel in guild.voice_channels:
+        if channel.name.startswith("Members"):
+          await channel.edit(name="Members: " + str(guild.member_count - bots))
+        if channel.name.startswith("Bots"):
+          await channel.edit(name="Bots: " + str(bots))
+        if channel.name.startswith("Channels"):
+          await channel.edit(name="Channels: " + str(len(guild.text_channels) + len(guild.voice_channels) - len(guild.categories)))
+        if channel.name.startswith("Text Channels"):
+          await channel.edit(name="Text Channels: " + str(len(guild.text_channels)))
+        if channel.name.startswith("Voice Channels"):
+          await channel.edit(name="Voice Channels: " + str(len(guild.voice_channels)))
+        if channel.name.startswith("Categories"):
+          await channel.edit(name="Categories: " + str(len(guild.categories)))
+        if channel.name.startswith("Roles"):
+          await channel.edit(name="Roles: " + str(len(guild.roles)))
+        if channel.name.startswith("Bans"):
+          await channel.edit(name="Bans: " + str(len(await guild.bans())))
+        if channel.name.startswith("Messages"):
+          await channel.edit(name="Messages: " + str(data['messages']))
 
 async def incorrectServer(message):
   embed = discord.Embed(color=0x593695, description="Command not available in " + message.guild.name + ".")
@@ -162,12 +161,12 @@ async def on_message(message):
 
     if str(message.guild.id) == guild_id: 
       #put users in database
-      if str(message.guild.id) + str(message.author.id) not in data.keys():
-        data[str(message.guild.id) + str(message.author.id)] = {'server': str(message.guild.id), 'name': str(message.author.name) + "#" + str(message.author.discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
+      if str(message.author.id) not in data.keys():
+        data[str(message.author.id)] = {'server': str(message.guild.id), 'name': str(message.author.name) + "#" + str(message.author.discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
 
       try:
-        if str(message.guild.id) + str(message.guild.get_member(message.mentions[0].id).id) not in data.keys():
-          data[str(message.guild.id) + str(message.guild.get_member(message.mentions[0].id).id)] = {'server': str(message.guild.id), 'name': str(message.guild.get_member(message.mentions[0].id).name) + "#" + str(message.guild.get_member(message.mentions[0].id).discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
+        if str(message.guild.get_member(message.mentions[0].id).id) not in data.keys():
+          data[str(message.guild.get_member(message.mentions[0].id).id)] = {'server': str(message.guild.id), 'name': str(message.guild.get_member(message.mentions[0].id).name) + "#" + str(message.guild.get_member(message.mentions[0].id).discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
       except:
         pass
 
@@ -184,8 +183,8 @@ async def on_message(message):
             #members
             for member in message.guild.members:
               #add member to database
-              if str(message.guild.id) + str(member.id) not in data.keys():
-                data[str(message.guild.id) + str(member.id)] = {'server': str(message.guild.id), 'name': str(member.name) + "#" + str(member.discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
+              if str(member.id) not in data.keys():
+                data[str(member.id)] = {'server': str(message.guild.id), 'name': str(member.name) + "#" + str(member.discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
 
             #invites
             embed = discord.Embed(color=0x593695, description="**Loading Previous Invites**")
@@ -197,10 +196,10 @@ async def on_message(message):
               for i in await message.guild.invites():
                 if i.inviter == member:
                   totalInvites += i.uses
-              tmp = data[str(message.guild.id) + str(member.id)];
-              del data[str(message.guild.id) + str(member.id)]
-              tmp[str(message.guild.id) + str(member.id)]['invites'] = totalInvites
-              data[str(message.guild.id) + str(member.id)] = tmp
+              tmp = data[str(member.id)];
+              del data[str(member.id)]
+              tmp[str(member.id)]['invites'] = totalInvites
+              data[str(member.id)] = tmp
 
             while True:
               embed = discord.Embed(color=0x593695, description="**Please enter the ID of your Disboard bumping channel.**\nEnter 0 to stop adding channels.")
@@ -248,15 +247,15 @@ async def on_message(message):
                 #check if previous message was bump
                 if bumped == True:
                   #check if bump was from Disboard bot
-                  if str(messages.guild.id) + str(messages.author.id) == str(messages.guild.id) + "302050872383242240": #disboard bot ID
+                  if str(messages.author.id) == "302050872383242240": #disboard bot ID
                     #check if succesful bump (blue color)
                     if str(messages.embeds[0].colour) == "#24b7b7":
-                      if str(message.guild.id) + str(bumpedAuthor.id) not in data.keys():
-                        data[str(message.guild.id) + str(bumpedAuthor.id)] = {'server': str(message.guild.id), 'name': str(bumpedAuthor.name) + "#" + str(bumpedAuthor.discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
-                      tmp = data[str(message.guild.id) + str(bumpedAuthor.id)]
-                      del data[str(message.guild.id) + str(bumpedAuthor.id)]
-                      tmp[str(message.guild.id) + str(bumpedAuthor.id)]['bumps'] += 1
-                      data[str(message.guild.id) + str(bumpedAuthor.id)] = tmp
+                      if str(bumpedAuthor.id) not in data.keys():
+                        data[str(bumpedAuthor.id)] = {'server': str(message.guild.id), 'name': str(bumpedAuthor.name) + "#" + str(bumpedAuthor.discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
+                      tmp = data[str(bumpedAuthor.id)]
+                      del data[str(bumpedAuthor.id)]
+                      tmp[str(bumpedAuthor.id)]['bumps'] += 1
+                      data[str(bumpedAuthor.id)] = tmp
                   bumped = False  
                 #check if message was bump
                 if messages.content == "!d bump":
@@ -326,17 +325,17 @@ async def on_message(message):
             count = 0
             for member in message.guild.members:
               totalInvites = 0
-              if str(message.guild.id) + str(member.id) not in data.keys():
-                data[str(message.guild.id) + str(member.id)] = {'server': str(message.guild.id), 'name': str(member.name) + "#" + str(member.discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
+              if str(member.id) not in data.keys():
+                data[str(member.id)] = {'server': str(message.guild.id), 'name': str(member.name) + "#" + str(member.discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
               count += 1
               print("member passed | " + str(member.id) + " | " + str(count));
               for i in await message.guild.invites():
                 if i.inviter == member:
                   totalInvites += i.uses
-              tmp = data[str(message.guild.id) + str(member.id)]
-              del data[str(message.guild.id) + str(member.id)]
-              tmp[str(message.guild.id) + str(member.id)]['invites'] = totalInvites
-              data[str(message.guild.id) + str(member.id)] = tmp
+              tmp = data[str(member.id)]
+              del data[str(member.id)]
+              tmp[str(member.id)]['invites'] = totalInvites
+              data[str(member.id)] = tmp
 
             embed = discord.Embed(color=0x593695, description="**Previous Invites Fetched**")
             embed.set_author(name="✔️ | @" + client.user.name, icon_url=client.user.avatar_url)
@@ -424,15 +423,15 @@ async def on_message(message):
                 #check if previous message was bump
                 if bumped == True:
                   #check if bump was from Disboard bot
-                  if str(messages.guild.id) + str(messages.author.id) == str(messages.guild.id) + "302050872383242240": #disboard bot ID
+                  if str(messages.author.id) == "302050872383242240": #disboard bot ID
                     #check if succesful bump (blue color)
                     if str(messages.embeds[0].colour) == "#24b7b7":
-                      if str(message.guild.id) + str(bumpedAuthor.id) not in data.keys():
-                        data[str(message.guild.id) + str(bumpedAuthor.id)] = {'server': str(message.guild.id), 'name': str(bumpedAuthor.name) + "#" + str(bumpedAuthor.discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
-                      tmp = data[str(message.guild.id) + str(bumpedAuthor.id)]
-                      del data[str(message.guild.id) + str(bumpedAuthor.id)]
-                      tmp[str(message.guild.id) + str(bumpedAuthor.id)]['bumps'] += 1
-                      data[str(message.guild.id) + str(bumpedAuthor.id)] = tmp
+                      if str(bumpedAuthor.id) not in data.keys():
+                        data[str(bumpedAuthor.id)] = {'server': str(message.guild.id), 'name': str(bumpedAuthor.name) + "#" + str(bumpedAuthor.discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
+                      tmp = data[str(bumpedAuthor.id)]
+                      del data[str(bumpedAuthor.id)]
+                      tmp[str(bumpedAuthor.id)]['bumps'] += 1
+                      data[str(bumpedAuthor.id)] = tmp
                   bumped = False  
                 #check if message was bump
                 if messages.content == "!d bump":
@@ -566,7 +565,7 @@ async def on_message(message):
           count = 1
           for i in order:
             if count <= page * 10 and count >= page * 10 - 9:
-              inputText += "\n`[" + str(count) +"]` <@" + str(i[0][18:]) + "> - **" + str(i[1]) + "** invites (**" + str(data[str(message.guild.id) + str(i[0][18:])]['invites']) + "** regular, **-" + str(data[str(message.guild.id) + str(i[0][18:])]['leaves']) + "** leaves)"
+              inputText += "\n`[" + str(count) +"]` <@" + str(i[0][18:]) + "> - **" + str(i[1]) + "** invites (**" + str(data[str(i[0][18:])]['invites']) + "** regular, **-" + str(data[str(i[0][18:])]['leaves']) + "** leaves)"
             count += 1
 
           #print embed
@@ -727,7 +726,7 @@ async def on_message(message):
             editType = messagecontent.split()[1]
 
             #get previous invites amount
-            prevAmount = data[str(message.guild.id) + str(user.id)][str(editType)]
+            prevAmount = data[str(user.id)][str(editType)]
             print(prevAmount)
 
             editAmount = int(messagecontent.split()[2])
@@ -735,11 +734,12 @@ async def on_message(message):
             if editType == "invites" or editType == "leaves" or editType == "bumps":
               print(editAmount)
               #data[str(message.guild.id) + str(user.id)][str(editType)] = "5"
-              tmp = data[str(message.guild.id) + str(user.id)]
-              del data[str(message.guild.id) + str(user.id)]
-              tmp[editType] = editAmount
-              data[str(message.guild.id) + str(user.id)] = tmp
-              print("|" + str(data[str(message.guild.id) + str(user.id)][str(editType)]))
+
+              tmp = data[str(user.id)]
+              del data[str(user.id)]
+              tmp[str(user.id)][editType] = editAmount
+              data[str(user.id)] = tmp
+              print("|" + str(data[str(user.id)][str(editType)]))
 
               #send embed
               embed = discord.Embed(color=0x593695, description="User now has **" + str(editAmount) + "** " + editType + "!" + " (Original: **" + str(prevAmount) + "**)")
@@ -898,12 +898,12 @@ async def on_message(message):
       user = message.author
     #check disboard bot reply
     elif bumped == True:
-      if str(message.guild.id) + str(message.author.id) == str(message.guild.id) + "302050872383242240": #disboard bot ID
+      if str(message.author.id) == "302050872383242240": #disboard bot ID
         if str(message.embeds[0].colour) == "#24b7b7":
-          tmp = data[str(message.guild.id) + str(user.id)]
-          del data[str(message.guild.id) + str(user.id)]
-          tmp[str(message.guild.id) + str(user.id)]['bumps'] += 1
-          data[str(message.guild.id) + str(user.id)] = tmp
+          tmp = data[str(user.id)]
+          del data[str(user.id)]
+          tmp[str(user.id)]['bumps'] += 1
+          data[str(user.id)] = tmp
       bumped = False
 
     #disboard bumps
@@ -926,7 +926,7 @@ async def on_message(message):
               user = await client.fetch_user(message.content[-19:-1])
 
         #change database
-        bumps = data[str(message.guild.id) + str(user.id)]['bumps']
+        bumps = data[str(user.id)]['bumps']
         print(str(bumps))
 
         #send embed
@@ -1022,8 +1022,8 @@ async def on_message(message):
               user = await client.fetch_user(message.content[-19:-1])
 
         #check if user is in database
-        Invites = data[str(message.guild.id) + str(user.id)]['invites']
-        Leaves = data[str(message.guild.id) + str(user.id)]['leaves']
+        Invites = data[str(user.id)]['invites']
+        Leaves = data[str(user.id)]['leaves']
         totalInvites = Invites - Leaves
 
         embed = discord.Embed(color=0x593695, description="User has **" + str(totalInvites) + "** invites! (**" + str(Invites) + "** regular, **-" + str(Leaves) + "** leaves)")
@@ -1074,12 +1074,12 @@ async def on_message(message):
 
         #join code and owner, only run on guild_id server
         if str(message.guild.id) == guild_id:
-          jCode = data[str(message.guild.id) + str(user.id)]['joinCode']
+          jCode = data[str(user.id)]['joinCode']
 
           embed.add_field(name="Join Code", value=jCode, inline=True)
-          if data[str(message.guild.id) + str(user.id)]['inviter'] != "null":
-            inviterMember = str(data[str(message.guild.id) + str(user.id)]['inviter'])
-            embed.add_field(name="Owned By", value=data[str(message.guild.id) + inviterMember]['name'], inline=True)
+          if data[str(user.id)]['inviter'] != "null":
+            inviterMember = str(data[str(user.id)]['inviter'])
+            embed.add_field(name="Owned By", value=data[inviterMember]['name'], inline=True)
 
         #joined discord
         embed.add_field(name="Joined Discord at", value=createdDate + " at " + createdTime, inline=False)
@@ -1111,35 +1111,35 @@ async def on_member_join(member):
 
   if str(member.guild.id) == guild_id: 
     #append join code
-    if str(member.guild.id) + str(member.id) not in data.keys():
-      data[str(member.guild.id) + str(member.id)] = {'server': str(member.guild.id), 'name': str(member.name) + "#" + str(member.discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': joinCode, 'inviter': codeOwner}
+    if str(member.id) not in data.keys():
+      data[str(member.id)] = {'server': str(member.guild.id), 'name': str(member.name) + "#" + str(member.discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': joinCode, 'inviter': codeOwner}
 
-    tmp = data[str(member.guild.id) + str(member.id)]
-    del data[str(member.guild.id) + str(member.id)]
-    tmp[str(member.guild.id) + str(member.id)]['joinCode'] = joinCode
-    data[str(member.guild.id) + str(member.id)] = tmp
+    tmp = data[str(member.id)]
+    del data[str(member.id)]
+    tmp[str(member.id)]['joinCode'] = joinCode
+    data[str(member.id)] = tmp
 
-    tmp = data[str(member.guild.id) + str(member.id)]
-    del data[str(member.guild.id) + str(member.id)]
-    data[str(member.guild.id) + str(member.id)]['inviter'] = codeOwner
-    data[str(member.guild.id) + str(member.id)] = tmp
+    tmp = data[str(member.id)]
+    del data[str(member.id)]
+    data[str(member.id)]['inviter'] = codeOwner
+    data[str(member.id)] = tmp
 
     #add to invites
-    if str(member.guild.id) + codeOwner not in data.keys():
-      data[str(member.guild.id) + codeOwner] = {'server': str(member.guild.id), 'name': str(member.guild.get_member(int(codeOwner)).name) + "#" + str(member.guild.get_member(int(codeOwner)).discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
-    tmp = data[str(member.guild.id) + codeOwner]
-    del data[str(member.guild.id) + codeOwner]
-    tmp[str(member.guild.id) + codeOwner]['invites'] += 1
-    data[str(member.guild.id) + codeOwner] = tmp
+    if codeOwner not in data.keys():
+      data[codeOwner] = {'server': str(member.guild.id), 'name': str(member.guild.get_member(int(codeOwner)).name) + "#" + str(member.guild.get_member(int(codeOwner)).discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
+    tmp = data[codeOwner]
+    del data[codeOwner]
+    tmp[codeOwner]['invites'] += 1
+    data[codeOwner] = tmp
   
   #check for iroles
   for key in data.keys():
     #check for irole keys
     if key.startswith('irole'):
       #check codeowner invites
-      if data[str(member.guild.id) + data[str(member.guild.id) + str(member.id)]['inviter']]['invites'] - data[str(member.guild.id) + data[str(member.guild.id) + str(member.id)]['inviter']]['leaves'] >= data[key]['amount']:
+      if data[data[str(member.id)]['inviter']]['invites'] - data[data[str(member.id)]['inviter']]['leaves'] >= data[key]['amount']:
         #give role
-        await member.guild.get_member(int(data[str(member.guild.id) + str(member.id)]['inviter'])).add_roles((member.guild.get_role(int(data[key]['roleID']))), atomic=True)
+        await member.guild.get_member(int(data[str(member.id)]['inviter'])).add_roles((member.guild.get_role(int(data[key]['roleID']))), atomic=True)
 
 @client.event
 async def on_member_remove(member):
@@ -1148,19 +1148,19 @@ async def on_member_remove(member):
 
   if str(member.guild.id) == guild_id:
     #add to leaves
-    if str(member.guild.id) + str(member.id) in data:
-      if data[str(member.guild.id) + str(member.id)]['inviter'] != "null":
-        tmp = data[str(member.guild.id) + data[str(member.guild.id) + str(member.id)]]
-        del data[str(member.guild.id) + data[str(member.guild.id) + str(member.id)]]
-        tmp[str(member.guild.id) + data[str(member.guild.id) + str(member.id)]['inviter']]['leaves'] += 1
-        data[str(member.guild.id) + data[str(member.guild.id) + str(member.id)]] = tmp
+    if str(member.id) in data:
+      if data[str(member.id)]['inviter'] != "null":
+        tmp = data[data[str(member.id)]['inviter']]
+        del data[data[str(member.id)]['inviter']]
+        tmp[data[str(member.id)]['inviter']]['leaves'] += 1
+        data[data[str(member.id)]['inviter']] = tmp
 
   #check for iroles
   for key in data.keys():
     #check for irole keys
     if key.startswith('irole'):
       #check codeowner invites
-      if data[str(member.guild.id) + data[str(member.guild.id) + str(member.id)]['inviter']]['invites'] - data[str(member.guild.id) + data[str(member.guild.id) + str(member.id)]['inviter']]['leaves'] < data[key]['amount']:
+      if data[data[str(member.id)]['inviter']]['invites'] - data[data[str(member.id)]['inviter']]['leaves'] < data[key]['amount']:
         #remove role
         await member.guild.get_member(int(codeOwner)).remove_roles((member.guild.get_role(int(data[key]['roleID']))), atomic=True)
   
