@@ -13,8 +13,6 @@ import math
 from replit import db
 data = db
 
-#temp
-
 #declare client
 intents = discord.Intents.all()
 client = discord.Client(intents=intents)
@@ -26,7 +24,7 @@ print(os.getenv("REPLIT_DB_URL"))
 #print(data["566984586618470411434547908415586311"]["invites"])
 
 #dump data in database.json
-DUMP = True
+DUMP = False
 if DUMP:
   data2 = {}
   count = 0
@@ -37,6 +35,8 @@ if DUMP:
 
   with open("database.json", 'w') as f:
     json.dump(str(data2), f)
+
+#data["admin684524717167607837"] = {"server": "684524717167607837", "role": "684535492619927587"}
 
 
 #check invites and compare
@@ -646,7 +646,7 @@ async def on_message(message):
       await message.channel.send(embed=embed)
 
     #add role reaction message
-    if messagecontent.startswith(prefix + 'rr'):
+    if messagecontent.startswith(prefix + "rr"):
       if checkRole(message, data):
         try:
           #get variables
@@ -681,6 +681,7 @@ async def on_message(message):
             embed.set_author(name="❌ | @" + client.user.name)
             await message.channel.send(embed=embed)
         except:
+          print("error")
           pass
       else:
         await incorrectRank(message)
@@ -717,8 +718,12 @@ async def on_message(message):
 
             if editType == "invites" or editType == "leaves" or editType == "bumps":
               print(editAmount)
-              data[str(message.guild.id) + str(user.id)][str(editType)] = "5"
-              print(str(data[str(message.guild.id) + str(user.id)][str(editType)]))
+              #data[str(message.guild.id) + str(user.id)][str(editType)] = "5"
+              tmp = data[str(message.guild.id) + str(user.id)]
+              del data[str(message.guild.id) + str(user.id)]
+              tmp["invites"] = editAmount
+              data[str(message.guild.id) + str(user.id)] = tmp
+              print("|" + str(data[str(message.guild.id) + str(user.id)][str(editType)]))
 
               #send embed
               embed = discord.Embed(color=0x593695, description="User now has **" + str(editAmount) + "** " + editType + "!" + " (Original: **" + str(prevAmount) + "**)")
