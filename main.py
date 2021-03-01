@@ -45,7 +45,7 @@ if DUMP:
   with open("database.json", 'w') as f:
     json.dump(str(data2), f)
 
-#data["admin684524717167607837"] = {"server": "684524717167607837", "role": "684535492619927587"}
+data["admin566984586618470411"] = {"server": "566984586618470411", "role": "572579922103500800"}
 
 
 #check invites and compare
@@ -207,7 +207,7 @@ async def on_message(message):
                   totalInvites += i.uses
               tmp = data[str(member.id)];
               del data[str(member.id)]
-              tmp[str(member.id)]['invites'] = totalInvites
+              tmp['invites'] = totalInvites
               data[str(member.id)] = tmp
 
             while True:
@@ -263,7 +263,7 @@ async def on_message(message):
                         data[str(bumpedAuthor.id)] = {'server': str(message.guild.id), 'name': str(bumpedAuthor.name) + "#" + str(bumpedAuthor.discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
                       tmp = data[str(bumpedAuthor.id)]
                       del data[str(bumpedAuthor.id)]
-                      tmp[str(bumpedAuthor.id)]['bumps'] += 1
+                      tmp['bumps'] += 1
                       data[str(bumpedAuthor.id)] = tmp
                   bumped = False  
                 #check if message was bump
@@ -341,10 +341,17 @@ async def on_message(message):
               for i in await message.guild.invites():
                 if i.inviter == member:
                   totalInvites += i.uses
-              tmp = data[str(member.id)]
-              del data[str(member.id)]
-              tmp[str(member.id)]['invites'] = totalInvites
-              data[str(member.id)] = tmp
+              try:
+                tmp = data[str(member.id)]
+                del data[str(member.id)]
+                tmp['invites'] = totalInvites
+                data[str(member.id)] = tmp
+              except:
+                embed = discord.Embed(color=0x593695, description="<@!" + str(member.id) + ">")
+                embed.set_author(name="❌ | @" + client.user.name, icon_url=client.user.avatar_url)
+                embed.set_footer(text=nowDate + " at " + nowTime)
+                await message.channel.send(embed=embed)
+
 
             embed = discord.Embed(color=0x593695, description="**Previous Invites Fetched**")
             embed.set_author(name="✔️ | @" + client.user.name, icon_url=client.user.avatar_url)
@@ -383,7 +390,7 @@ async def on_message(message):
               try:
                 tmp = data[key]
                 del data[key]
-                tmp[key]['bumps'] = 0
+                tmp['bumps'] = 0
                 data[key] = tmp
               except:
                 pass
@@ -439,7 +446,7 @@ async def on_message(message):
                         data[str(bumpedAuthor.id)] = {'server': str(message.guild.id), 'name': str(bumpedAuthor.name) + "#" + str(bumpedAuthor.discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
                       tmp = data[str(bumpedAuthor.id)]
                       del data[str(bumpedAuthor.id)]
-                      tmp[str(bumpedAuthor.id)]['bumps'] += 1
+                      tmp['bumps'] += 1
                       data[str(bumpedAuthor.id)] = tmp
                   bumped = False  
                 #check if message was bump
@@ -746,7 +753,7 @@ async def on_message(message):
 
               tmp = data[str(user.id)]
               del data[str(user.id)]
-              tmp[str(user.id)][editType] = editAmount
+              tmp[editType] = editAmount
               data[str(user.id)] = tmp
               print("|" + str(data[str(user.id)][str(editType)]))
 
@@ -911,7 +918,7 @@ async def on_message(message):
         if str(message.embeds[0].colour) == "#24b7b7":
           tmp = data[str(user.id)]
           del data[str(user.id)]
-          tmp[str(user.id)]['bumps'] += 1
+          tmp['bumps'] += 1
           data[str(user.id)] = tmp
       bumped = False
 
@@ -1005,7 +1012,7 @@ async def on_message(message):
       if checkRole(message, data):
         tmp = data["prefix"]
         del data["prefix"]
-        tmp["prefix"] = messagecontent.split()[1]
+        tmp = messagecontent.split()[1]
         data["prefix"] = tmp
         await client.change_presence(activity=discord.Streaming(name=" | " + data["prefix"] + "help", url="https://www.twitch.tv/xzennara/about"))
       else:
@@ -1125,12 +1132,12 @@ async def on_member_join(member):
 
     tmp = data[str(member.id)]
     del data[str(member.id)]
-    tmp[str(member.id)]['joinCode'] = joinCode
+    tmp['joinCode'] = joinCode
     data[str(member.id)] = tmp
 
     tmp = data[str(member.id)]
     del data[str(member.id)]
-    data[str(member.id)]['inviter'] = codeOwner
+    tmp['inviter'] = codeOwner
     data[str(member.id)] = tmp
 
     #add to invites
@@ -1138,7 +1145,7 @@ async def on_member_join(member):
       data[codeOwner] = {'server': str(member.guild.id), 'name': str(member.guild.get_member(int(codeOwner)).name) + "#" + str(member.guild.get_member(int(codeOwner)).discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
     tmp = data[codeOwner]
     del data[codeOwner]
-    tmp[codeOwner]['invites'] += 1
+    tmp['invites'] += 1
     data[codeOwner] = tmp
   
   #check for iroles
@@ -1161,7 +1168,7 @@ async def on_member_remove(member):
       if data[str(member.id)]['inviter'] != "null":
         tmp = data[data[str(member.id)]['inviter']]
         del data[data[str(member.id)]['inviter']]
-        tmp[data[str(member.id)]['inviter']]['leaves'] += 1
+        tmp['leaves'] += 1
         data[data[str(member.id)]['inviter']] = tmp
 
   #check for iroles
