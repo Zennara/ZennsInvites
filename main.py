@@ -23,6 +23,15 @@ guild = client.get_guild(int(guild_id))
 print(os.getenv("REPLIT_DB_URL"))
 #print(data["566984586618470411434547908415586311"]["invites"])
 
+#delete database
+CLEAR = False
+if CLEAR:
+  count = 0
+  for key in data.keys():
+    del data[key]
+    count += 1
+    print(count)
+
 #dump data in database.json
 DUMP = False
 if DUMP:
