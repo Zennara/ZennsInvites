@@ -148,8 +148,9 @@ async def on_message(message):
     prefix = data["prefix"]
 
     if str(message.guild.id) == guild_id:
+      print()
       #get messages and add
-      data["messages"] += 1
+      #data["messages"] += 1
 
     #set message content to lowercase
     messagecontent = message.content.lower()
@@ -196,7 +197,10 @@ async def on_message(message):
               for i in await message.guild.invites():
                 if i.inviter == member:
                   totalInvites += i.uses
-              data[str(message.guild.id) + str(member.id)]['invites'] = totalInvites
+              tmp = data[str(message.guild.id) + str(member.id)];
+              del data[str(message.guild.id) + str(member.id)]
+              tmp[str(message.guild.id) + str(member.id)]['invites'] = totalInvites
+              data[str(message.guild.id) + str(member.id)] = tmp
 
             while True:
               embed = discord.Embed(color=0x593695, description="**Please enter the ID of your Disboard bumping channel.**\nEnter 0 to stop adding channels.")
@@ -249,7 +253,10 @@ async def on_message(message):
                     if str(messages.embeds[0].colour) == "#24b7b7":
                       if str(message.guild.id) + str(bumpedAuthor.id) not in data.keys():
                         data[str(message.guild.id) + str(bumpedAuthor.id)] = {'server': str(message.guild.id), 'name': str(bumpedAuthor.name) + "#" + str(bumpedAuthor.discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
-                      data[str(message.guild.id) + str(bumpedAuthor.id)]['bumps'] += 1
+                      tmp = data[str(message.guild.id) + str(bumpedAuthor.id)]
+                      del data[str(message.guild.id) + str(bumpedAuthor.id)]
+                      tmp[str(message.guild.id) + str(bumpedAuthor.id)]['bumps'] += 1
+                      data[str(message.guild.id) + str(bumpedAuthor.id)] = tmp
                   bumped = False  
                 #check if message was bump
                 if messages.content == "!d bump":
@@ -326,7 +333,10 @@ async def on_message(message):
               for i in await message.guild.invites():
                 if i.inviter == member:
                   totalInvites += i.uses
-              data[str(message.guild.id) + str(member.id)]['invites'] = totalInvites
+              tmp = data[str(message.guild.id) + str(member.id)]
+              del data[str(message.guild.id) + str(member.id)]
+              tmp[str(message.guild.id) + str(member.id)]['invites'] = totalInvites
+              data[str(message.guild.id) + str(member.id)] = tmp
 
             embed = discord.Embed(color=0x593695, description="**Previous Invites Fetched**")
             embed.set_author(name="✔️ | @" + client.user.name, icon_url=client.user.avatar_url)
@@ -363,7 +373,10 @@ async def on_message(message):
             #clear bumps
             for key in data.keys():
               try:
-                data[key]['bumps'] = 0
+                tmp = data[key]
+                del data[key]
+                tmp[key]['bumps'] = 0
+                data[key] = tmp
               except:
                 pass
 
@@ -416,7 +429,10 @@ async def on_message(message):
                     if str(messages.embeds[0].colour) == "#24b7b7":
                       if str(message.guild.id) + str(bumpedAuthor.id) not in data.keys():
                         data[str(message.guild.id) + str(bumpedAuthor.id)] = {'server': str(message.guild.id), 'name': str(bumpedAuthor.name) + "#" + str(bumpedAuthor.discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
-                      data[str(message.guild.id) + str(bumpedAuthor.id)]['bumps'] += 1
+                      tmp = data[str(message.guild.id) + str(bumpedAuthor.id)]
+                      del data[str(message.guild.id) + str(bumpedAuthor.id)]
+                      tmp[str(message.guild.id) + str(bumpedAuthor.id)]['bumps'] += 1
+                      data[str(message.guild.id) + str(bumpedAuthor.id)] = tmp
                   bumped = False  
                 #check if message was bump
                 if messages.content == "!d bump":
@@ -721,7 +737,7 @@ async def on_message(message):
               #data[str(message.guild.id) + str(user.id)][str(editType)] = "5"
               tmp = data[str(message.guild.id) + str(user.id)]
               del data[str(message.guild.id) + str(user.id)]
-              tmp["invites"] = editAmount
+              tmp[editType] = editAmount
               data[str(message.guild.id) + str(user.id)] = tmp
               print("|" + str(data[str(message.guild.id) + str(user.id)][str(editType)]))
 
@@ -752,6 +768,7 @@ async def on_message(message):
 
     if messagecontent.startswith(prefix + "addcounter"):
       #add counter
+      #here
       if str(message.guild.id) == guild_id:
         if checkRole(message, data):
           guild = client.get_guild(int(guild_id))
@@ -883,7 +900,10 @@ async def on_message(message):
     elif bumped == True:
       if str(message.guild.id) + str(message.author.id) == str(message.guild.id) + "302050872383242240": #disboard bot ID
         if str(message.embeds[0].colour) == "#24b7b7":
-          data[str(message.guild.id) + str(user.id)]['bumps'] += 1
+          tmp = data[str(message.guild.id) + str(user.id)]
+          del data[str(message.guild.id) + str(user.id)]
+          tmp[str(message.guild.id) + str(user.id)]['bumps'] += 1
+          data[str(message.guild.id) + str(user.id)] = tmp
       bumped = False
 
     #disboard bumps
@@ -974,7 +994,10 @@ async def on_message(message):
     #change prefix
     if messagecontent.startswith(prefix + 'prefix '):
       if checkRole(message, data):
-        data["prefix"] = messagecontent.split()[1]
+        tmp = data["prefix"]
+        del data["prefix"]
+        tmp["prefix"] = messagecontent.split()[1]
+        data["prefix"] = tmp
         await client.change_presence(activity=discord.Streaming(name=" | " + data["prefix"] + "help", url="https://www.twitch.tv/xzennara/about"))
       else:
         await incorrectRank(message)
@@ -1090,13 +1113,24 @@ async def on_member_join(member):
     #append join code
     if str(member.guild.id) + str(member.id) not in data.keys():
       data[str(member.guild.id) + str(member.id)] = {'server': str(member.guild.id), 'name': str(member.name) + "#" + str(member.discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': joinCode, 'inviter': codeOwner}
-    data[str(member.guild.id) + str(member.id)]['joinCode'] = joinCode
+
+    tmp = data[str(member.guild.id) + str(member.id)]
+    del data[str(member.guild.id) + str(member.id)]
+    tmp[str(member.guild.id) + str(member.id)]['joinCode'] = joinCode
+    data[str(member.guild.id) + str(member.id)] = tmp
+
+    tmp = data[str(member.guild.id) + str(member.id)]
+    del data[str(member.guild.id) + str(member.id)]
     data[str(member.guild.id) + str(member.id)]['inviter'] = codeOwner
+    data[str(member.guild.id) + str(member.id)] = tmp
 
     #add to invites
     if str(member.guild.id) + codeOwner not in data.keys():
       data[str(member.guild.id) + codeOwner] = {'server': str(member.guild.id), 'name': str(member.guild.get_member(int(codeOwner)).name) + "#" + str(member.guild.get_member(int(codeOwner)).discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
-    data[str(member.guild.id) + codeOwner]['invites'] += 1
+    tmp = data[str(member.guild.id) + codeOwner]
+    del data[str(member.guild.id) + codeOwner]
+    tmp[str(member.guild.id) + codeOwner]['invites'] += 1
+    data[str(member.guild.id) + codeOwner] = tmp
   
   #check for iroles
   for key in data.keys():
@@ -1116,7 +1150,10 @@ async def on_member_remove(member):
     #add to leaves
     if str(member.guild.id) + str(member.id) in data:
       if data[str(member.guild.id) + str(member.id)]['inviter'] != "null":
-        data[str(member.guild.id) + data[str(member.guild.id) + str(member.id)]['inviter']]['leaves'] += 1
+        tmp = data[str(member.guild.id) + data[str(member.guild.id) + str(member.id)]]
+        del data[str(member.guild.id) + data[str(member.guild.id) + str(member.id)]]
+        tmp[str(member.guild.id) + data[str(member.guild.id) + str(member.id)]['inviter']]['leaves'] += 1
+        data[str(member.guild.id) + data[str(member.guild.id) + str(member.id)]] = tmp
 
   #check for iroles
   for key in data.keys():
