@@ -451,7 +451,6 @@ async def on_message(message):
                     if str(messages.embeds[0].colour) == "#24b7b7":
                       if str(bumpedAuthor.id) not in data.keys():
                         data[str(bumpedAuthor.id)] = {'server': str(message.guild.id), 'name': str(bumpedAuthor.name) + "#" + str(bumpedAuthor.discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
-                      print('test')
                       tmp = data[str(bumpedAuthor.id)]
                       del data[str(bumpedAuthor.id)]
                       tmp['bumps'] += 1
@@ -575,14 +574,11 @@ async def on_message(message):
         tmp = dict(data)
         #make new dictionary to sort
         tempdata = {}
-        print("1")
         for key in tmp.keys():
           if not key.startswith('role') and not key.startswith('irole') and not key.startswith('admin')and key != "prefix" and key != "messages":
             tempdata[key] = tmp[key]['invites'] - tmp[key]['leaves']
         #sort data
-        print("2")
         order = sorted(tempdata.items(), key=lambda x: x[1], reverse=True)
-        print("||" + str(order))
 
         #get page number
         page = 1
@@ -768,19 +764,16 @@ async def on_message(message):
 
             #get previous invites amount
             prevAmount = data[str(user.id)][str(editType)]
-            print(prevAmount)
 
             editAmount = int(messagecontent.split()[2])
 
             if editType == "invites" or editType == "leaves" or editType == "bumps":
-              print(editAmount)
               #data[str(message.guild.id) + str(user.id)][str(editType)] = "5"
 
               tmp = data[str(user.id)]
               del data[str(user.id)]
               tmp[editType] = editAmount
               data[str(user.id)] = tmp
-              print("|" + str(data[str(user.id)][str(editType)]))
 
               #send embed
               embed = discord.Embed(color=0x593695, description="User now has **" + str(editAmount) + "** " + editType + "!" + " (Original: **" + str(prevAmount) + "**)")
@@ -968,7 +961,6 @@ async def on_message(message):
 
         #change database
         bumps = data[str(user.id)]['bumps']
-        print(str(bumps))
 
         #send embed
         embed = discord.Embed(color=0x593695, description="User has bumped the server **" + str(bumps) + "** times!")
