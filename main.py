@@ -9,6 +9,7 @@ import asyncio
 import json
 from datetime import datetime
 import math
+import time
 
 from replit import db
 data = db
@@ -45,9 +46,9 @@ if DUMP:
   with open("database.json", 'w') as f:
     json.dump(str(data2), f)
 
-DBFIX = False
+DBFIX = True
 if DBFIX:
-  #data["admin684524717167607837"] = {"server": "684524717167607837", "role": "684535492619927587"}
+  data["admin684524717167607837"] = {"server": "684524717167607837", "role": "684535492619927587"}
   data["prefix"] = "cm/"
 
 
@@ -197,6 +198,7 @@ async def on_message(message):
               #add member to database
               if str(member.id) not in data.keys():
                 data[str(member.id)] = {'server': str(message.guild.id), 'name': str(member.name) + "#" + str(member.discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
+              time.sleep(0.1)
 
             #invites
             embed = discord.Embed(color=0x593695, description="**Loading Previous Invites**")
@@ -368,6 +370,8 @@ async def on_message(message):
     #fetch disboard bumps
     if messagecontent == prefix + "fetch bumps":
       if str(message.guild.id) == guild_id:
+        tmp2 = {}
+        tmp2 = dict(data)
         if checkRole(message, data):
           def check(reaction, user):
             return user == message.author and str(reaction.emoji) == '✅'
@@ -447,6 +451,7 @@ async def on_message(message):
                     if str(messages.embeds[0].colour) == "#24b7b7":
                       if str(bumpedAuthor.id) not in data.keys():
                         data[str(bumpedAuthor.id)] = {'server': str(message.guild.id), 'name': str(bumpedAuthor.name) + "#" + str(bumpedAuthor.discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
+                      print('test')
                       tmp = data[str(bumpedAuthor.id)]
                       del data[str(bumpedAuthor.id)]
                       tmp['bumps'] += 1
@@ -561,13 +566,23 @@ async def on_message(message):
     #invite leaderboard
     if messagecontent.startswith(prefix + "leaderboard"):
       if str(message.guild.id) == guild_id:
+        embed = discord.Embed(color=0x593695, description="Loading . . .\n*This may take up to 25s*")
+        embed.set_footer(text="Page " + "?" + "/" + str(math.ceil(len(message.guild.members) / 10)) + " ● " + nowDate + " at " + nowTime)
+        embed.set_author(name="Invite Leaderboard", icon_url=message.guild.icon_url) 
+        message2 = await message.channel.send(embed=embed)
+          
+        tmp = {}
+        tmp = dict(data)
         #make new dictionary to sort
         tempdata = {}
-        for key in data.keys():
-          if not key.startswith('role') and not key.startswith('irole') and not key.startswith('admin')and key != "prefix" and key != "messages" and key.startswith(str(message.guild.id)):
-            tempdata[key] = data[key]['invites'] - data[key]['leaves']
+        print("1")
+        for key in tmp.keys():
+          if not key.startswith('role') and not key.startswith('irole') and not key.startswith('admin')and key != "prefix" and key != "messages":
+            tempdata[key] = tmp[key]['invites'] - tmp[key]['leaves']
         #sort data
+        print("2")
         order = sorted(tempdata.items(), key=lambda x: x[1], reverse=True)
+        print("||" + str(order))
 
         #get page number
         page = 1
@@ -584,25 +599,32 @@ async def on_message(message):
           count = 1
           for i in order:
             if count <= page * 10 and count >= page * 10 - 9:
-              inputText += "\n`[" + str(count) +"]` <@" + str(i[0][18:]) + "> - **" + str(i[1]) + "** invites (**" + str(data[str(i[0][18:])]['invites']) + "** regular, **-" + str(data[str(i[0][18:])]['leaves']) + "** leaves)"
+              inputText += "\n`[" + str(count) +"]` <@!" + str(i[0]) + "> - **" + str(i[1]) + "** invites (**" + str(tmp[str(i[0])]['invites']) + "** regular, **-" + str(tmp[str(i[0])]['leaves']) + "** leaves)"
             count += 1
 
           #print embed
           embed = discord.Embed(color=0x593695, description=inputText)
           embed.set_footer(text="Page " + str(page) + "/" + str(math.ceil(len(message.guild.members) / 10)) + " ● " + nowDate + " at " + nowTime)
           embed.set_author(name="Invite Leaderboard", icon_url=message.guild.icon_url) 
-          await message.channel.send(embed=embed)
+          await message2.edit(embed=embed)
       else:
         await incorrectServer(message)  
 
     #disboard bump leaderboard
     if messagecontent.startswith(prefix + "d leaderboard"):
       if str(message.guild.id) == guild_id:
+        embed = discord.Embed(color=0x593695, description="Loading . . .\n*This may take up to 25s*")
+        embed.set_footer(text="Page " + "?" + "/" + str(math.ceil(len(message.guild.members) / 10)) + " ● " + nowDate + " at " + nowTime)
+        embed.set_author(name="Disboard Bumps Leaderboard", icon_url=message.guild.icon_url) 
+        message2 = await message.channel.send(embed=embed)
+
+        tmp = {}
+        tmp = dict(data)
         #make new dictionary to sort
         tempdata = {}
-        for key in data.keys():
-          if not key.startswith('role') and not key.startswith('irole') and not key.startswith('admin') and key != "prefix" and key != "messages" and key.startswith(str(message.guild.id)):
-            tempdata[key] = data[key]['bumps']
+        for key in tmp.keys():
+          if not key.startswith('role') and not key.startswith('irole') and not key.startswith('admin') and key != "prefix" and key != "messages":
+            tempdata[key] = tmp[key]['bumps']
         #sort data
         order = sorted(tempdata.items(), key=lambda x: x[1], reverse=True)
 
@@ -618,14 +640,14 @@ async def on_message(message):
           count = 1
           for i in order:
             if count <= page * 10 and count >= page * 10 - 9:
-              inputText += "\n`[" + str(count) +"]` <@" + str(i[0][18:]) + "> - **" + str(i[1]) + "** bumps"
+              inputText += "\n`[" + str(count) +"]` <@!" + str(i[0]) + "> - **" + str(i[1]) + "** bumps"
             count += 1
 
           #print embed
           embed = discord.Embed(color=0x593695, description=inputText)
           embed.set_footer(text="Page " + str(page) + "/" + str(math.ceil(len(message.guild.members) / 10)) + " ● " + nowDate + " at " + nowTime)
           embed.set_author(name="Disboard Bumps Leaderboard", icon_url=message.guild.icon_url) 
-          await message.channel.send(embed=embed)
+          await message2.edit(embed=embed)
       else:
         await incorrectServer(message)
       
