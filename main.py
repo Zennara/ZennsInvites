@@ -198,7 +198,7 @@ async def on_message(message):
               #add member to database
               if str(member.id) not in data.keys():
                 data[str(member.id)] = {'server': str(message.guild.id), 'name': str(member.name) + "#" + str(member.discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
-              time.sleep(0.1)
+              await asyncio.sleep(0.1)
 
             #invites
             embed = discord.Embed(color=0x593695, description="**Loading Previous Invites**")
