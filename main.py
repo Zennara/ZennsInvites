@@ -159,8 +159,7 @@ async def on_message(message):
     #get prefix
     prefix = data["prefix"]
 
-    if str(message.guild.id) == guild_id:
-      print()
+    #if str(message.guild.id) == guild_id:
       #get messages and add
       #data["messages"] += 1
 
@@ -312,6 +311,104 @@ async def on_message(message):
           await incorrectRank(message)
       else:
         await incorrectServer(message)
+
+    #reports
+    if messagecontent == prefix + "report":   
+      def check(m):
+        if (message.author.id == m.author.id and m.guild == None):
+          return True
+        else:
+          return False
+
+      async def reportmsg():
+        embed = discord.Embed(color=0x593695, description="**Report started**\nUse cm/cancel in DM to cancel the report.")
+        embed.set_author(name="✅ | @" + client.user.name, icon_url=client.user.avatar_url)
+        embed.set_footer(text=nowDate + " at " + nowTime)
+        await message.author.send(embed=embed)
+
+        embed = discord.Embed(color=0x593695, description="**In-game name of attacker:**")
+        embed.set_author(name="📝 | @" + client.user.name, icon_url=client.user.avatar_url)
+        embed.set_footer(text=nowDate + " at " + nowTime)
+        message2 = await message.author.send(embed=embed)
+        inGameName = await client.wait_for('message', check=check)
+        if inGameName.content == "cm/cancel":
+          print("test123")
+          return
+
+        embed.description="**Steam Name or Link:**\nType *NA* if unavailable."
+        await message2.edit(embed=embed)
+        steamName = await client.wait_for('message', check=check)
+        if steamName.content == "cm/cancel":
+          return
+
+        embed.description="**Discord Name and Tag:**\nType *NA* if unavailable."
+        await message2.edit(embed=embed)
+        discordName = await client.wait_for('message', check=check)
+        if discordName.content == "cm/cancel":
+          return
+
+        embed.description="**What game did the event take place?**"
+        await message2.edit(embed=embed)
+        game = await client.wait_for('message', check=check)
+        if game.content == "cm/cancel":
+          return
+
+        embed.description="**Description of the event:**"
+        await message2.edit(embed=embed)
+        description = await client.wait_for('message', check=check)
+        if description.content == "cm/cancel":
+          return
+
+        embed.description="**Were you using a mod?**\nIf so, which one?"
+        await message2.edit(embed=embed)
+        modName = await client.wait_for('message', check=check)
+        if modName.content == "cm/cancel":
+          return
+
+        embed = discord.Embed(color=0x593695, description="**Thank you for your report.**")
+        embed.set_author(name="✅ | @" + client.user.name, icon_url=client.user.avatar_url)
+        embed.set_footer(text=nowDate + " at " + nowTime)
+        await message2.edit(embed=embed)
+
+        embed = discord.Embed(color=0x593695, description="**IGN: **" + inGameName.content + "\n**Steam: **" + steamName.content + "\n**Discord: **" + discordName.content)
+        embed.add_field(name="Game", value=game.content)
+        embed.add_field(name="Mod", value=modName.content)
+        embed.add_field(name="Description", value=description.content, inline = False)
+        embed.set_author(name="✖ | @" + client.user.name, icon_url=client.user.avatar_url)
+        embed.set_footer(text=nowDate + " at " + nowTime + "\nReport by: " + message.author.name + "#" + message.author.discriminator)
+        await message.author.send(embed=embed)
+
+        if "report" in data.keys():
+          channel = await client.fetch_channel(int(data["report"]["channel"]))
+          await channel.send(embed=embed)
+        else:
+          embed = discord.Embed(color=0x593695, description="**Failed to send report**\nContact an admin if you think this is a mistake.")
+          embed.set_author(name="❌ | @" + client.user.name, icon_url=client.user.avatar_url)
+          embed.set_footer(text=nowDate + " at " + nowTime)
+          await message2.edit(embed=embed)
+
+      await reportmsg()
+
+    #create report channel
+    if messagecontent.startswith(prefix + "reportchannel"):
+      if checkRole(message, data):
+        try:
+          #get role
+          reportChannel = await client.fetch_channel(int(messagecontent.split()[1]))
+
+          #write to database
+          if "report" in data.keys():
+            del data["report"]
+          data["report"] = {"server": str(message.guild.id), "channel": str(reportChannel.id)}
+
+          #print embed
+          embed = discord.Embed(color=0x593695, description="Reports will now go to " + reportChannel.mention)
+          embed.set_author(name="✔️ | @" + client.user.name)
+          await message.channel.send(embed=embed)
+        except:
+          pass
+      else:
+        await incorrectRank(message)
 
     #fetch invites
     if messagecontent == prefix + "fetch invites":
@@ -575,7 +672,7 @@ async def on_message(message):
         #make new dictionary to sort
         tempdata = {}
         for key in tmp.keys():
-          if not key.startswith('role') and not key.startswith('irole') and not key.startswith('admin')and key != "prefix" and key != "messages":
+          if not key.startswith('role') and not key.startswith('irole') and not key.startswith('admin')and key != "prefix" and key != "messages" and not key.startswith("report"):
             tempdata[key] = tmp[key]['invites'] - tmp[key]['leaves']
         #sort data
         order = sorted(tempdata.items(), key=lambda x: x[1], reverse=True)
@@ -619,7 +716,7 @@ async def on_message(message):
         #make new dictionary to sort
         tempdata = {}
         for key in tmp.keys():
-          if not key.startswith('role') and not key.startswith('irole') and not key.startswith('admin') and key != "prefix" and key != "messages":
+          if not key.startswith('role') and not key.startswith('irole') and not key.startswith('admin') and key != "prefix" and key != "messages" and not key.startswith("report"):
             tempdata[key] = tmp[key]['bumps']
         #sort data
         order = sorted(tempdata.items(), key=lambda x: x[1], reverse=True)
@@ -796,6 +893,7 @@ async def on_message(message):
       embed.add_field(name="Invites", value=start + " invites`", inline=False)
       embed.add_field(name="Role Reactions", value=start + " reactions`", inline=False)
       embed.add_field(name="Disboard", value=start + " disboard`", inline=False)
+      embed.add_field(name="Reports", value=start + " reports`", inline=False)
       embed.add_field(name="Commands", value=start + " commands`", inline=False)
       embed.set_footer(text="______________________\nMade By Zennara#8377")
       await message.channel.send(embed=embed)
@@ -1021,6 +1119,15 @@ async def on_message(message):
       embed.add_field(name="`"+prefix+ "d bumps [member]`", value="Show how many bumps a user has", inline=False)
       embed.add_field(name="`"+prefix+ "edit bumps <amount> [member]`", value="Set bumps of a member", inline=False)
       embed.add_field(name="`"+prefix+ "fetch bumps`", value="Fetch all previous bumps", inline=False)
+      embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
+      await message.channel.send(embed=embed)
+
+    #help reports
+    if messagecontent == prefix + 'help reports':
+      embed = discord.Embed(color=0x593695)
+      embed.set_author(name=client.user.name + " Reports Help", icon_url=client.user.avatar_url)
+      embed.add_field(name="`"+prefix+ "report`", value="Start a report", inline=False)
+      embed.add_field(name="`"+prefix+ "reportchannel`", value="Changes the reports channel", inline=False)
       embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
       await message.channel.send(embed=embed)
     
