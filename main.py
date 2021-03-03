@@ -889,12 +889,12 @@ async def on_message(message):
       embed = discord.Embed(color=0x593695)
       embed.set_author(name=client.user.name + " Help", icon_url=client.user.avatar_url)
       start = "`" + prefix + "help"
-      embed.add_field(name="Counters", value=start + " counters`", inline=False)
-      embed.add_field(name="Invites", value=start + " invites`", inline=False)
-      embed.add_field(name="Role Reactions", value=start + " reactions`", inline=False)
-      embed.add_field(name="Disboard", value=start + " disboard`", inline=False)
-      embed.add_field(name="Reports", value=start + " reports`", inline=False)
-      embed.add_field(name="Commands", value=start + " commands`", inline=False)
+      embed.add_field(name="Counters", value=start + " counters`", inline=True)
+      embed.add_field(name="Invites", value=start + " invites`", inline=True)
+      embed.add_field(name="Role Reactions", value=start + " reactions`", inline=True)
+      embed.add_field(name="Disboard", value=start + " disboard`", inline=True)
+      embed.add_field(name="Reports", value=start + " reports`", inline=True)
+      embed.add_field(name="Commands", value=start + " commands`", inline=True)
       embed.set_footer(text="______________________\nMade By Zennara#8377")
       await message.channel.send(embed=embed)
 
@@ -1108,6 +1108,7 @@ async def on_message(message):
       embed.add_field(name="`"+prefix+ "setup`", value="Setup the server", inline=False)
       embed.add_field(name="`"+prefix+ "info [member]`", value="Show info about a member", inline=False)
       embed.add_field(name="`"+prefix+ "prefix <prefix>`", value="Change the command prefix", inline=False)
+      embed.add_field(name="`"+prefix+ "codeadmin <roleID>`", value="Change the admin rank ID", inline=False)
       embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
       await message.channel.send(embed=embed)
 
