@@ -312,6 +312,43 @@ async def on_message(message):
       else:
         await incorrectServer(message)
 
+    #poll
+    if message.content.startswith(prefix + "poll"):
+      numemojis = ["0️⃣", "1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣", "6️⃣", "7️⃣", "8️⃣", "9️⃣"]
+      try:
+        msg = message.content.split("\"")
+
+        await message.delete()
+
+        count = 0
+        print(len(msg))
+        if len(msg) > 3:
+          options = ""
+          for i in range(len(msg)):
+            if i > 1 and i%2 != 0:
+              options = options + "\n" + numemojis[count] + " " + msg[i]
+              count += 1
+        else:
+          options = ""
+        
+        embed = discord.Embed(color=0x593695, description=options)
+        embed.set_author(name="📊 | " + msg[1])
+        embed.set_footer(text=nowDate + " at " + nowTime)
+        pollmsg = await message.channel.send(embed=embed)
+
+        if len(msg) < 4:
+          await pollmsg.add_reaction('👍')
+          await pollmsg.add_reaction('👎')
+        else:
+          for i in range(0, int((len(msg) - 3) / 2)):
+            await pollmsg.add_reaction(numemojis[i])
+
+      except:
+        embed = discord.Embed(color=0x593695, description="**Invalid Poll Usage**\nRefer to syntax at cm/help polls")
+        embed.set_author(name="❌ | @" + client.user.name, icon_url=client.user.avatar_url)
+        embed.set_footer(text=nowDate + " at " + nowTime)
+        await message.channel.send(embed=embed)
+
     #reports
     if messagecontent == prefix + "report":   
       def check(m):
@@ -1109,6 +1146,7 @@ async def on_message(message):
       embed.add_field(name="`"+prefix+ "info [member]`", value="Show info about a member", inline=False)
       embed.add_field(name="`"+prefix+ "prefix <prefix>`", value="Change the command prefix", inline=False)
       embed.add_field(name="`"+prefix+ "codeadmin <roleID>`", value="Change the admin rank ID", inline=False)
+      embed.add_field(name="`"+prefix+ "poll <\"desc\"> [\"option\"]`", value="Change the command prefix", inline=False)
       embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
       await message.channel.send(embed=embed)
 
