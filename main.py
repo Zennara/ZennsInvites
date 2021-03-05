@@ -10,6 +10,7 @@ import json
 from datetime import datetime
 import math
 import time
+import requests
 
 from replit import db
 data = db
@@ -50,7 +51,6 @@ DBFIX = True
 if DBFIX:
   data["admin684524717167607837"] = {"server": "684524717167607837", "role": "684535492619927587"}
   data["prefix"] = "cm/"
-
 
 #check invites and compare
 invites = {}
@@ -107,6 +107,22 @@ async def checkCounters():
           await channel.edit(name="Bans: " + str(len(await guild.bans())))
         if channel.name.startswith("Messages"):
           await channel.edit(name="Messages: " + str(data['messages']))
+        if channel.name.startswith("CMZ Players"):
+          header = {"Client-ID": "F07D7ED5C43A695B3EBB01C28B6A18E5"}
+          game_players_url = 'https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?format=json&appid=253430'
+          game_players = requests.get(game_players_url, headers=header)
+          await channel.edit(name="CMZ Players: " + str(game_players.json()['response']['player_count']))
+
+#header = {"Client-ID": "F07D7ED5C43A695B3EBB01C28B6A18E5"}
+#appIDs = ["253430", "675210", "414550"]
+#game_players = [0,0,0]
+#for i in range(0, 3):
+#  game_players_url = 'https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?format=json&appid=' + appIDs[i]
+#  game_players[i] = requests.get(game_players_url, headers=header)
+
+#print("CMZ: " + str(game_players[0].json()['response']['player_count']))
+#print("CMW: " + str(game_players[1].json()['response']['player_count']))
+#print("Death Toll: " + str(game_players[2].json()['response']['player_count']))
 
 async def incorrectServer(message):
   embed = discord.Embed(color=0x593695, description="Command not available in " + message.guild.name + ".")
