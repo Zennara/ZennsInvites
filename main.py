@@ -197,6 +197,48 @@ async def on_message(message):
           data[str(message.guild.get_member(message.mentions[0].id).id)] = {'server': str(message.guild.id), 'name': str(message.guild.get_member(message.mentions[0].id).name) + "#" + str(message.guild.get_member(message.mentions[0].id).discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
       except:
         pass
+    
+    #cross
+    if messagecontent == prefix + "cross":
+      server = 0
+      count = 0
+      i = 0
+      players = [""]
+      #main server
+      if message.guild.id == 566984586618470411:
+        server = 684524717167607837
+      #modding
+      if message.guild.id == 684524717167607837:
+        server = 566984586618470411
+
+      embed = discord.Embed(color=0x593695, description= "")
+
+      for member in message.guild.members:
+        if member not in client.get_guild(server).members:
+          if message.guild.id == 566984586618470411:
+            memberName = str(member.name) + "#" + str(member.discriminator)
+          else:
+            memberName = str(member.mention)
+          players[i] += "`" + str(count+1) + " |` " + memberName  + "\n";
+          count += 1
+          if count >= 50 * (i+1):
+            players.append("")
+            embed.description = players[i]
+            embed.set_author(name="✔️ | @" + client.user.name)
+            await message.channel.send(embed=embed)
+            i += 1
+      embed.description = players[i]
+      embed.set_author(name="✔️ | @" + client.user.name)
+      await message.channel.send(embed=embed)
+
+      embed.description = "**" + str(count) + " members not in " + client.get_guild(server).name + "**\n*Offline members may not tag correctly*"
+      embed.set_author(name="✔️ | @" + client.user.name)
+      embed.set_footer(text=nowDate + " at " + nowTime)
+      await message.channel.send(embed=embed)
+      print(count)
+
+      #if len(players) == 1:
+        #embed.add_field(name="1", value=str(players[0]))
 
     #setup server
     if messagecontent == prefix + "setup":
@@ -1163,6 +1205,7 @@ async def on_message(message):
       embed.add_field(name="`"+prefix+ "prefix <prefix>`", value="Change the command prefix", inline=False)
       embed.add_field(name="`"+prefix+ "codeadmin <roleID>`", value="Change the admin rank ID", inline=False)
       embed.add_field(name="`"+prefix+ "poll <\"desc\"> [\"option\"]`", value="Change the command prefix", inline=False)
+      embed.add_field(name="`"+prefix+ "cross`", value="Returns list of members not in the other server.", inline=False)
       embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
       await message.channel.send(embed=embed)
 
