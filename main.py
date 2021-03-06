@@ -389,8 +389,7 @@ async def on_message(message):
         else:
           options = ""
         
-        embed = discord.Embed(color=0x593695, description=options)
-        embed.set_author(name="📊 | " + msg[1])
+        embed = discord.Embed(color=0x593695, description="**📊 | " + msg[1] + "**\n\n" + options)
         embed.set_footer(text=nowDate + " at " + nowTime)
         pollmsg = await message.channel.send(embed=embed)
 
