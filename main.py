@@ -47,7 +47,7 @@ if DUMP:
   with open("database.json", 'w') as f:
     json.dump(str(data2), f)
 
-DBFIX = True
+DBFIX = False
 if DBFIX:
   data["admin684524717167607837"] = {"server": "684524717167607837", "role": "684535492619927587"}
   data["prefix"] = "cm/"
@@ -180,7 +180,7 @@ async def on_message(message):
       #data["messages"] += 1
 
     #set message content to lowercase
-    messagecontent = message.content.lower()
+    messagecontent = message.content.lower().replace('<', '').replace('>', '').replace('!', '').replace('#', '').replace('@', '')
 
     #split current datetime
     nowDT = str(datetime.now()).split()
@@ -1397,7 +1397,7 @@ async def on_member_remove(member):
     #check for irole keys
     if key.startswith('irole'):
       #check codeowner invites
-      if data[data[str(member.id)]['inviter']]['invites'] - data[data[str(member.id)]['inviter']]['leaves'] < data[key]['amount']:
+      if int(data[data[str(member.id)]['inviter']]['invites']) - int(data[data[str(member.id)]['inviter']]['leaves']) < int(data[key]['amount']):
         #remove role
         await member.guild.get_member(int(codeOwner)).remove_roles((member.guild.get_role(int(data[key]['roleID']))), atomic=True)
   
