@@ -180,7 +180,9 @@ async def on_message(message):
       #data["messages"] += 1
 
     #set message content to lowercase
-    messagecontent = message.content.lower().replace('<', '').replace('>', '').replace('!', '').replace('#', '').replace('@', '')
+    messagecontent = message.content.lower().replace('<', '').replace('>', '').replace('!', '').replace('#', '').replace('@', '').replace('&', '')
+
+    print(messagecontent)
 
     #split current datetime
     nowDT = str(datetime.now()).split()
