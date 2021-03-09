@@ -11,6 +11,7 @@ from datetime import datetime
 import math
 import time
 import requests
+import re
 
 from replit import db
 data = db
@@ -167,6 +168,22 @@ async def on_raw_reaction_remove(payload):
       #give role
       role = client.get_guild(int(payload.guild_id)).get_role(int(data["role" + str(payload.guild_id) + str(payload.channel_id) + str(payload.message_id)]['role']))
       await client.get_guild(int(payload.guild_id)).get_member(int(payload.user_id)).remove_roles(role, atomic=True)
+
+@client.event
+async def on_member_update(before, after):
+  #anti zalgo etc
+  percentbad = 0
+  characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 `+_-~=[]\\{}|;:\"\',<.>/?!@#$%^&*()"
+  if before.nick != after.nick:
+    for char in after.nick:
+      if char not in characters:
+        percentbad += 1
+    percentbad = (percentbad / len(after.nick)) * 100
+    if percentbad > 50:
+      await after.edit(nick=before.nick)
+      embed = discord.Embed(color=0x593695, description="Can not change nickname. Contains more that 50 percent of non-allowed characters. Please only use the standard english keyboard.")
+      embed.set_author(name="❌ | @" + client.user.name)
+      await after.send(embed=embed)
 
 @client.event
 async def on_message(message):
@@ -1379,6 +1396,16 @@ async def on_member_join(member):
       if data[data[str(member.id)]['inviter']]['invites'] - data[data[str(member.id)]['inviter']]['leaves'] >= data[key]['amount']:
         #give role
         await member.guild.get_member(int(data[str(member.id)]['inviter'])).add_roles((member.guild.get_role(int(data[key]['roleID']))), atomic=True)
+
+  #anti zalgo etc
+  percentbad = 0
+  characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 `+_-~=[]\\{}|;:\"\',<.>/?!@#$%^&*()"
+  for char in member.name:
+    if char not in characters:
+      percentbad += 1
+  percentbad = (percentbad / len(member.name)) * 100
+  if percentbad > 50:
+    await member.edit(nick="NEEDSCHANGED")
 
 @client.event
 async def on_member_remove(member):
