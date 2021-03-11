@@ -84,6 +84,9 @@ async def checkCounters():
 
     #update channels
     for guild in client.guilds:
+      #steam
+      header = {"Client-ID": "F07D7ED5C43A695B3EBB01C28B6A18E5"}
+      game_players_url = 'https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?format=json&appid='
       #get amount of bots
       bots = 0
       for member in guild.members:
@@ -109,10 +112,11 @@ async def checkCounters():
         if channel.name.startswith("Messages"):
           await channel.edit(name="Messages: " + str(data['messages']))
         if channel.name.startswith("CMZ Players"):
-          header = {"Client-ID": "F07D7ED5C43A695B3EBB01C28B6A18E5"}
-          game_players_url = 'https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?format=json&appid=253430'
-          game_players = requests.get(game_players_url, headers=header)
+          game_players = requests.get(game_players_url + "253430", headers=header)
           await channel.edit(name="CMZ Players: " + str(game_players.json()['response']['player_count']))
+        if channel.name.startswith("CMW Players"):
+          game_players = requests.get(game_players_url + "675210", headers=header)
+          await channel.edit(name="CMW Players: " + str(game_players.json()['response']['player_count']))
 
 #header = {"Client-ID": "F07D7ED5C43A695B3EBB01C28B6A18E5"}
 #appIDs = ["253430", "675210", "414550"]
@@ -198,8 +202,6 @@ async def on_message(message):
 
     #set message content to lowercase
     messagecontent = message.content.lower().replace('<', '').replace('>', '').replace('!', '').replace('#', '').replace('@', '').replace('&', '')
-
-    print(messagecontent)
 
     #split current datetime
     nowDT = str(datetime.now()).split()
