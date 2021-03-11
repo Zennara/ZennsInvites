@@ -227,6 +227,17 @@ async def on_message(message):
         await message.channel.send(embed=embed)
       else:
         await incorrectRank(message)
+
+    #custom message
+    if messagecontent.startswith(prefix + "custom"):
+      if checkRole(message, data):
+        embed = discord.Embed(color=0x593695, description= str(messagecontent.split(maxsplit=1)[1]))
+        embed.set_author(name="✔️ | @" + client.user.name)
+        embed.set_footer(text="Made by " + message.author.name + "#" + message.author.discriminator + "\n" + nowDate + " at " + nowTime)
+        await message.channel.send(embed=embed)
+        await message.delete()
+      else:
+        await incorrectRank(message)
     
     #cross
     if messagecontent == prefix + "cross":
