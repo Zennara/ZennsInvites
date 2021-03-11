@@ -216,6 +216,17 @@ async def on_message(message):
           data[str(message.guild.get_member(message.mentions[0].id).id)] = {'server': str(message.guild.id), 'name': str(message.guild.get_member(message.mentions[0].id).name) + "#" + str(message.guild.get_member(message.mentions[0].id).discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
       except:
         pass
+
+    #fake ban
+    if messagecontent.startswith(prefix + "ban"):
+      if checkRole(message, data):
+        memberName = message.guild.get_member(int(messagecontent.split()[1])).mention
+        embed = discord.Embed(color=0x593695, description= memberName + "*** has been banned! F.***")
+        embed.set_author(name="✔️ | @" + client.user.name)
+        embed.set_footer(text=nowDate + " at " + nowTime)
+        await message.channel.send(embed=embed)
+      else:
+        await incorrectRank(message)
     
     #cross
     if messagecontent == prefix + "cross":
