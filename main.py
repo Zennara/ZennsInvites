@@ -48,10 +48,11 @@ if DUMP:
   with open("database.json", 'w') as f:
     json.dump(str(data2), f)
 
-DBFIX = False
+DBFIX = True
 if DBFIX:
-  data["admin684524717167607837"] = {"server": "684524717167607837", "role": "684535492619927587"}
-  data["prefix"] = "cm/"
+  #data["admin684524717167607837"] = {"server": "684524717167607837", "role": "684535492619927587"}
+  #data["prefix"] = "cm/"
+  data["449710278012174346"] = {'server': "566984586618470411", 'name': "Proto" + "#" + "3079", 'invites': 592, 'leaves': 8, 'bumps': 135, 'joinCode': "null", 'inviter': "null"}
 
 #check invites and compare
 invites = {}
@@ -236,6 +237,24 @@ async def on_message(message):
         embed.set_footer(text="Made by " + message.author.name + "#" + message.author.discriminator + "\n" + nowDate + " at " + nowTime)
         await message.channel.send(embed=embed)
         await message.delete()
+      else:
+        await incorrectRank(message)
+
+    #create data
+    if messagecontent.startswith(prefix + "data"):
+      if checkRole(message, data):
+        if int(messagecontent.split()[1]) not in data:
+          member2 = await message.guild.fetch_member(int(messagecontent.split()[1]))
+          data[str(member2.id)] = {'server': str(message.guild.id), 'name': str(member2.name) + "#" + str(member2.discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
+          embed = discord.Embed(color=0x593695, description="**Data created.**")
+          embed.set_author(name="✔️ | @" + client.user.name)
+          embed.set_footer(text=nowDate + " at " + nowTime)
+          await message.channel.send(embed=embed)
+        else:
+          embed = discord.Embed(color=0x593695, description="**Data already exists.**")
+          embed.set_author(name="❌ | @" + client.user.name)
+          embed.set_footer(text=nowDate + " at " + nowTime)
+          await message.channel.send(embed=embed)
       else:
         await incorrectRank(message)
     
