@@ -94,29 +94,40 @@ async def checkCounters():
           bots += 1
       for channel in guild.voice_channels:
         if channel.name.startswith("Members"):
-          await channel.edit(name="Members: " + str(guild.member_count - bots))
+          if (channel.name != "Members: " + str(guild.member_count - bots)):
+            await channel.edit(name="Members: " + str(guild.member_count - bots))
         if channel.name.startswith("Bots"):
-          await channel.edit(name="Bots: " + str(bots))
+          if (channel.name != "Bots: " + str(bots)):
+            await channel.edit(name="Bots: " + str(bots))
         if channel.name.startswith("Channels"):
-          await channel.edit(name="Channels: " + str(len(guild.text_channels) + len(guild.voice_channels) - len(guild.categories)))
+          if (channel.name != "Channels: " + str(len(guild.text_channels) + len(guild.voice_channels) - len(guild.categories))):
+            await channel.edit(name="Channels: " + str(len(guild.text_channels) + len(guild.voice_channels) - len(guild.categories)))
         if channel.name.startswith("Text Channels"):
-          await channel.edit(name="Text Channels: " + str(len(guild.text_channels)))
+          if (channel.name != "Text Channels: " + str(len(guild.text_channels))):
+            await channel.edit(name="Text Channels: " + str(len(guild.text_channels)))
         if channel.name.startswith("Voice Channels"):
-          await channel.edit(name="Voice Channels: " + str(len(guild.voice_channels)))
+          if (channel.name != "Voice Channels: " + str(len(guild.voice_channels))):
+            await channel.edit(name="Voice Channels: " + str(len(guild.voice_channels)))
         if channel.name.startswith("Categories"):
-          await channel.edit(name="Categories: " + str(len(guild.categories)))
+          if (channel.name != "Categories: " + str(len(guild.categories))):
+            await channel.edit(name="Categories: " + str(len(guild.categories)))
         if channel.name.startswith("Roles"):
-          await channel.edit(name="Roles: " + str(len(guild.roles)))
+          if (channel.name != "Roles: " + str(len(guild.roles))):
+            await channel.edit(name="Roles: " + str(len(guild.roles)))
         if channel.name.startswith("Bans"):
-          await channel.edit(name="Bans: " + str(len(await guild.bans())))
+          if (channel.name != "Bans: " + str(len(await guild.bans()))):
+            await channel.edit(name="Bans: " + str(len(await guild.bans())))
         if channel.name.startswith("Messages"):
-          await channel.edit(name="Messages: " + str(data['messages']))
+          if (channel.name != "Messages: " + str(data['messages'])):
+            await channel.edit(name="Messages: " + str(data['messages']))
         if channel.name.startswith("CMZ Players"):
           game_players = requests.get(game_players_url + "253430", headers=header)
-          await channel.edit(name="CMZ Players: " + str(game_players.json()['response']['player_count']))
+          if (channel.name != "CMZ Players: " + str(game_players.json()['response']['player_count'])):
+            await channel.edit(name="CMZ Players: " + str(game_players.json()['response']['player_count']))
         if channel.name.startswith("CMW Players"):
           game_players = requests.get(game_players_url + "675210", headers=header)
-          await channel.edit(name="CMW Players: " + str(game_players.json()['response']['player_count']))
+          if (channel.name != "CMW Players: " + str(game_players.json()['response']['player_count'])):
+            await channel.edit(name="CMW Players: " + str(game_players.json()['response']['player_count']))
 
 #header = {"Client-ID": "F07D7ED5C43A695B3EBB01C28B6A18E5"}
 #appIDs = ["253430", "675210", "414550"]
