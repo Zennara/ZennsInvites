@@ -48,7 +48,7 @@ if DUMP:
   with open("database.json", 'w') as f:
     json.dump(str(data2), f)
 
-DBFIX = True
+DBFIX = False
 if DBFIX:
   #data["admin684524717167607837"] = {"server": "684524717167607837", "role": "684535492619927587"}
   #data["prefix"] = "cm/"
