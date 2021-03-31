@@ -48,9 +48,9 @@ if DUMP:
   with open("database.json", 'w') as f:
     json.dump(str(data2), f)
 
-DBFIX = False
+DBFIX = True
 if DBFIX:
-  data["admin684524717167607837"] = {"server": "684524717167607837", "role": "684535492619927587"}
+  #data["admin684524717167607837"] = {"server": "684524717167607837", "role": "684535492619927587"}
   data["prefix"] = "cm/"
 
 #check invites and compare
@@ -1148,9 +1148,8 @@ async def on_message(message):
           await incorrectRank(message)
       else:
         await incorrectServer(message)
-
     #check bump disboard
-    if messagecontent == '!d bump':
+    if message.content == '!d bump':
       bumped = True
       #get user (member object)
       user = message.author
