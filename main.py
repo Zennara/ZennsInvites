@@ -12,6 +12,10 @@ import math
 import time
 import requests
 import re
+import random
+from discord import Webhook, AsyncWebhookAdapter
+import aiohttp
+from discord import Embed
 
 from replit import db
 data = db
@@ -163,8 +167,51 @@ async def on_ready():
   print("\nZennInvites Ready\n")
   await client.change_presence(activity=discord.Streaming(name=" | " + data["prefix"] + "help", url="https://www.twitch.tv/xzennara/about"))  
 
+#channel and category IDs restricted for starboard
+noStarboard = ["591135975355187200", "759976154479984650", "572774759331397632", "706953196425314820", "738634279357251586", "812692775895957574"]
 @client.event
 async def on_raw_reaction_add(payload):
+  #STARBOARD
+  #check not restricted category
+  channel = await client.fetch_channel(payload.channel_id)
+  starchannel = await client.fetch_channel(812692775895957574)
+  if str(channel.category.id) not in noStarboard and str(channel.id) not in noStarboard:
+    #check for star
+    if payload.emoji.name == "⭐":
+      message = await channel.fetch_message(payload.message_id)
+      count = {react.emoji: react.count for react in message.reactions}
+      print(count)
+      #check star count
+      if count['⭐'] >= 6:
+        #check msg already in starchannel
+        messages = await starchannel.history(limit=1000).flatten()
+        done = False
+        for msg in messages:
+          if msg.content.startswith(message.jump_url):
+            done = True
+        if not done:
+          embed = discord.Embed(color=0xFFD700, description= message.content)
+          embed.set_author(name=message.author.name + "#" + message.author.discriminator, icon_url=message.author.avatar_url)
+          #get all files
+          files = []
+          for ach in message.attachments:
+            files.append(await ach.to_file())
+          #get all non-link embeds
+          doEmbeds = True
+          for emb in message.embeds:
+            if str(emb.provider) != "EmbedProxy()":
+              doEmbeds = False
+          #define webhook
+          async with aiohttp.ClientSession() as session:
+            webhook = Webhook.from_url("https://discord.com/api/webhooks/873176692456300564/5zk5qiE4G_vTuxrZgqTgbARe4VQ0erCVF3E-SvgscKvRvfddBkrNC8IGL3Pwy2eU6XUH", adapter=AsyncWebhookAdapter(session))
+            await webhook.send(username=message.author.name, avatar_url=message.author.avatar_url, content=message.jump_url+"\n\n"+message.content, files=files)
+            #if all non-link embeds
+            if doEmbeds:
+              try:
+                await webhook.send(username=message.author.name, avatar_url=message.author.avatar_url, embeds=message.embeds)
+              except:
+                pass
+
   #make sure its not initial reaction
   if payload.member != client.user:
     #check if key exists in database
@@ -229,7 +276,41 @@ async def on_message(message):
           data[str(message.guild.get_member(message.mentions[0].id).id)] = {'server': str(message.guild.id), 'name': str(message.guild.get_member(message.mentions[0].id).name) + "#" + str(message.guild.get_member(message.mentions[0].id).discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
       except:
         pass
+
+    #role
+    if messagecontent.startswith(prefix + "role"):
+      try:
+        role = message.guild.get_role(int(message.content.split()[1]))
+        embed = discord.Embed(color=0x593695, description= "Itest*")
+        embed.set_author(name="❌ | @" + client.user.name)
+        embed.set_footer(text=nowDate + " at " + nowTime)
+        await message.channel.send(embed=embed)
+      except Exception as ex:
+        embed = discord.Embed(color=0x593695, description= "Invalid Syntax\n*" +str(ex)+"*")
+        embed.set_author(name="❌ | @" + client.user.name)
+        embed.set_footer(text=nowDate + " at " + nowTime)
+        await message.channel.send(embed=embed)
     
+    #giveaway
+    if messagecontent.startswith(prefix + "giveaway"):
+      if checkRole(message, data):
+        try:
+          channel = await client.fetch_channel(int(messagecontent.split()[1]))
+          event = await channel.fetch_message(int(messagecontent.split()[2]))
+          reaction = event.reactions[0]
+
+          users = await reaction.users().flatten()
+          # users is now a list of User...
+          winner = random.choice(users)
+          await message.channel.send(':cupcake: ***{}***  **has won the giveaway!**'.format(winner))
+        except:
+          embed = discord.Embed(color=0x593695, description= "Invalid Syntax")
+          embed.set_author(name="❌ | @" + client.user.name)
+          embed.set_footer(text=nowDate + " at " + nowTime)
+          await message.channel.send(embed=embed)
+      else:
+        await incorrectRank(message)
+
     #cross
     if messagecontent == prefix + "cross":
       server = 0
@@ -798,7 +879,8 @@ async def on_message(message):
         #make new dictionary to sort
         tempdata = {}
         for key in tmp.keys():
-          if not key.startswith('role') and not key.startswith('irole') and not key.startswith('admin')and key != "prefix" and key != "messages" and not key.startswith("report"):
+          #all other dataEntries
+          if not key.startswith('role') and not key.startswith('irole') and not key.startswith('admin')and key != "prefix" and key != "messages" and not key.startswith("report") and not key.startswith("star"):
             tempdata[key] = tmp[key]['invites'] - tmp[key]['leaves']
         #sort data
         order = sorted(tempdata.items(), key=lambda x: x[1], reverse=True)
@@ -842,7 +924,8 @@ async def on_message(message):
         #make new dictionary to sort
         tempdata = {}
         for key in tmp.keys():
-          if not key.startswith('role') and not key.startswith('irole') and not key.startswith('admin') and key != "prefix" and key != "messages" and not key.startswith("report"):
+          #all other dataEntries
+          if not key.startswith('role') and not key.startswith('irole') and not key.startswith('admin') and key != "prefix" and key != "messages" and not key.startswith("report") and not key.startswith("star"):
             tempdata[key] = tmp[key]['bumps']
         #sort data
         order = sorted(tempdata.items(), key=lambda x: x[1], reverse=True)
