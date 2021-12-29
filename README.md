@@ -44,3 +44,5 @@ Includes API integration from Discord for the bot, Steam for playercounts, and R
 | report        | none                                              | Creates a new report and DM's user for info| yes     |
 | reportchannel | <channel>                                         | Changes the channel reports are sent to    | no      |
 | giveaway      | <channel> <message>                               | Selects a random user from the reactions   | no      |
+| ban           | <member>                                          | Fake bans this member                      | no      |
+| custom        | <message>                                         | Sends a custom embed message               | no      |
