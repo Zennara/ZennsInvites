@@ -1325,8 +1325,11 @@ async def on_message(message):
       embed.add_field(name="`"+prefix+ "info [member]`", value="Show info about a member", inline=False)
       embed.add_field(name="`"+prefix+ "prefix <prefix>`", value="Change the command prefix", inline=False)
       embed.add_field(name="`"+prefix+ "codeadmin <roleID>`", value="Change the admin rank ID", inline=False)
-      embed.add_field(name="`"+prefix+ "poll <\"desc\"> [\"option\"]`", value="Change the command prefix", inline=False)
+      embed.add_field(name="`"+prefix+ "poll <\"desc\"> [\"option\"]`", value="Create a poll.", inline=False)
       embed.add_field(name="`"+prefix+ "cross`", value="Returns list of members not in the other server.", inline=False)
+      embed.add_field(name="`"+prefix+ "ban <member>`", value="Fake-bans this member.", inline=False)
+      embed.add_field(name="`"+prefix+ "giveaway <channel> <message>`", value="Selects a random winner from that message reactions.", inline=False)
+      embed.add_field(name="`"+prefix+ "custom <message>`", value="Sends a custom embed message.", inline=False)
       embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
       await message.channel.send(embed=embed)
 
