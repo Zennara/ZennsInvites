@@ -277,20 +277,6 @@ async def on_message(message):
       except:
         pass
 
-    #role
-    if messagecontent.startswith(prefix + "role"):
-      try:
-        role = message.guild.get_role(int(message.content.split()[1]))
-        embed = discord.Embed(color=0x593695, description= "Itest*")
-        embed.set_author(name="❌ | @" + client.user.name)
-        embed.set_footer(text=nowDate + " at " + nowTime)
-        await message.channel.send(embed=embed)
-      except Exception as ex:
-        embed = discord.Embed(color=0x593695, description= "Invalid Syntax\n*" +str(ex)+"*")
-        embed.set_author(name="❌ | @" + client.user.name)
-        embed.set_footer(text=nowDate + " at " + nowTime)
-        await message.channel.send(embed=embed)
-
     #fake ban
     if messagecontent.startswith(prefix + "ban"):
       if checkRole(message, data):
