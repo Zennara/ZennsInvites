@@ -12,6 +12,10 @@ import math
 import time
 import requests
 import re
+import random
+from discord import Webhook, AsyncWebhookAdapter
+import aiohttp
+from discord import Embed
 
 from replit import db
 data = db
@@ -48,11 +52,10 @@ if DUMP:
   with open("database.json", 'w') as f:
     json.dump(str(data2), f)
 
-DBFIX = False
+DBFIX = True
 if DBFIX:
   #data["admin684524717167607837"] = {"server": "684524717167607837", "role": "684535492619927587"}
-  #data["prefix"] = "cm/"
-  data["449710278012174346"] = {'server': "566984586618470411", 'name': "Proto" + "#" + "3079", 'invites': 592, 'leaves': 8, 'bumps': 135, 'joinCode': "null", 'inviter': "null"}
+  data["prefix"] = "cm/"
 
 #check invites and compare
 invites = {}
@@ -85,6 +88,9 @@ async def checkCounters():
 
     #update channels
     for guild in client.guilds:
+      #steam
+      header = {"Client-ID": "F07D7ED5C43A695B3EBB01C28B6A18E5"}
+      game_players_url = 'https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?format=json&appid='
       #get amount of bots
       bots = 0
       for member in guild.members:
@@ -92,28 +98,40 @@ async def checkCounters():
           bots += 1
       for channel in guild.voice_channels:
         if channel.name.startswith("Members"):
-          await channel.edit(name="Members: " + str(guild.member_count - bots))
+          if (channel.name != "Members: " + str(guild.member_count - bots)):
+            await channel.edit(name="Members: " + str(guild.member_count - bots))
         if channel.name.startswith("Bots"):
-          await channel.edit(name="Bots: " + str(bots))
+          if (channel.name != "Bots: " + str(bots)):
+            await channel.edit(name="Bots: " + str(bots))
         if channel.name.startswith("Channels"):
-          await channel.edit(name="Channels: " + str(len(guild.text_channels) + len(guild.voice_channels) - len(guild.categories)))
+          if (channel.name != "Channels: " + str(len(guild.text_channels) + len(guild.voice_channels) - len(guild.categories))):
+            await channel.edit(name="Channels: " + str(len(guild.text_channels) + len(guild.voice_channels) - len(guild.categories)))
         if channel.name.startswith("Text Channels"):
-          await channel.edit(name="Text Channels: " + str(len(guild.text_channels)))
+          if (channel.name != "Text Channels: " + str(len(guild.text_channels))):
+            await channel.edit(name="Text Channels: " + str(len(guild.text_channels)))
         if channel.name.startswith("Voice Channels"):
-          await channel.edit(name="Voice Channels: " + str(len(guild.voice_channels)))
+          if (channel.name != "Voice Channels: " + str(len(guild.voice_channels))):
+            await channel.edit(name="Voice Channels: " + str(len(guild.voice_channels)))
         if channel.name.startswith("Categories"):
-          await channel.edit(name="Categories: " + str(len(guild.categories)))
+          if (channel.name != "Categories: " + str(len(guild.categories))):
+            await channel.edit(name="Categories: " + str(len(guild.categories)))
         if channel.name.startswith("Roles"):
-          await channel.edit(name="Roles: " + str(len(guild.roles)))
+          if (channel.name != "Roles: " + str(len(guild.roles))):
+            await channel.edit(name="Roles: " + str(len(guild.roles)))
         if channel.name.startswith("Bans"):
-          await channel.edit(name="Bans: " + str(len(await guild.bans())))
+          if (channel.name != "Bans: " + str(len(await guild.bans()))):
+            await channel.edit(name="Bans: " + str(len(await guild.bans())))
         if channel.name.startswith("Messages"):
-          await channel.edit(name="Messages: " + str(data['messages']))
+          if (channel.name != "Messages: " + str(data['messages'])):
+            await channel.edit(name="Messages: " + str(data['messages']))
         if channel.name.startswith("CMZ Players"):
-          header = {"Client-ID": "F07D7ED5C43A695B3EBB01C28B6A18E5"}
-          game_players_url = 'https://api.steampowered.com/ISteamUserStats/GetNumberOfCurrentPlayers/v1/?format=json&appid=253430'
-          game_players = requests.get(game_players_url, headers=header)
-          await channel.edit(name="CMZ Players: " + str(game_players.json()['response']['player_count']))
+          game_players = requests.get(game_players_url + "253430", headers=header)
+          if (channel.name != "CMZ Players: " + str(game_players.json()['response']['player_count'])):
+            await channel.edit(name="CMZ Players: " + str(game_players.json()['response']['player_count']))
+        if channel.name.startswith("CMW Players"):
+          game_players = requests.get(game_players_url + "675210", headers=header)
+          if (channel.name != "CMW Players: " + str(game_players.json()['response']['player_count'])):
+            await channel.edit(name="CMW Players: " + str(game_players.json()['response']['player_count']))
 
 #header = {"Client-ID": "F07D7ED5C43A695B3EBB01C28B6A18E5"}
 #appIDs = ["253430", "675210", "414550"]
@@ -149,8 +167,51 @@ async def on_ready():
   print("\nZennInvites Ready\n")
   await client.change_presence(activity=discord.Streaming(name=" | " + data["prefix"] + "help", url="https://www.twitch.tv/xzennara/about"))  
 
+#channel and category IDs restricted for starboard
+noStarboard = ["591135975355187200", "759976154479984650", "572774759331397632", "706953196425314820", "738634279357251586", "812692775895957574"]
 @client.event
 async def on_raw_reaction_add(payload):
+  #STARBOARD
+  #check not restricted category
+  channel = await client.fetch_channel(payload.channel_id)
+  starchannel = await client.fetch_channel(812692775895957574)
+  if str(channel.category.id) not in noStarboard and str(channel.id) not in noStarboard:
+    #check for star
+    if payload.emoji.name == "⭐":
+      message = await channel.fetch_message(payload.message_id)
+      count = {react.emoji: react.count for react in message.reactions}
+      print(count)
+      #check star count
+      if count['⭐'] >= 6:
+        #check msg already in starchannel
+        messages = await starchannel.history(limit=1000).flatten()
+        done = False
+        for msg in messages:
+          if msg.content.startswith(message.jump_url):
+            done = True
+        if not done:
+          embed = discord.Embed(color=0xFFD700, description= message.content)
+          embed.set_author(name=message.author.name + "#" + message.author.discriminator, icon_url=message.author.avatar_url)
+          #get all files
+          files = []
+          for ach in message.attachments:
+            files.append(await ach.to_file())
+          #get all non-link embeds
+          doEmbeds = True
+          for emb in message.embeds:
+            if str(emb.provider) != "EmbedProxy()":
+              doEmbeds = False
+          #define webhook
+          async with aiohttp.ClientSession() as session:
+            webhook = Webhook.from_url("https://discord.com/api/webhooks/873176692456300564/5zk5qiE4G_vTuxrZgqTgbARe4VQ0erCVF3E-SvgscKvRvfddBkrNC8IGL3Pwy2eU6XUH", adapter=AsyncWebhookAdapter(session))
+            await webhook.send(username=message.author.name, avatar_url=message.author.avatar_url, content=message.jump_url+"\n\n"+message.content, files=files)
+            #if all non-link embeds
+            if doEmbeds:
+              try:
+                await webhook.send(username=message.author.name, avatar_url=message.author.avatar_url, embeds=message.embeds)
+              except:
+                pass
+
   #make sure its not initial reaction
   if payload.member != client.user:
     #check if key exists in database
@@ -200,8 +261,6 @@ async def on_message(message):
     #set message content to lowercase
     messagecontent = message.content.lower().replace('<', '').replace('>', '').replace('!', '').replace('#', '').replace('@', '').replace('&', '')
 
-    print(messagecontent)
-
     #split current datetime
     nowDT = str(datetime.now()).split()
     nowDate = nowDT[0]
@@ -217,6 +276,20 @@ async def on_message(message):
           data[str(message.guild.get_member(message.mentions[0].id).id)] = {'server': str(message.guild.id), 'name': str(message.guild.get_member(message.mentions[0].id).name) + "#" + str(message.guild.get_member(message.mentions[0].id).discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
       except:
         pass
+
+    #role
+    if messagecontent.startswith(prefix + "role"):
+      try:
+        role = message.guild.get_role(int(message.content.split()[1]))
+        embed = discord.Embed(color=0x593695, description= "Itest*")
+        embed.set_author(name="❌ | @" + client.user.name)
+        embed.set_footer(text=nowDate + " at " + nowTime)
+        await message.channel.send(embed=embed)
+      except Exception as ex:
+        embed = discord.Embed(color=0x593695, description= "Invalid Syntax\n*" +str(ex)+"*")
+        embed.set_author(name="❌ | @" + client.user.name)
+        embed.set_footer(text=nowDate + " at " + nowTime)
+        await message.channel.send(embed=embed)
 
     #fake ban
     if messagecontent.startswith(prefix + "ban"):
@@ -239,25 +312,27 @@ async def on_message(message):
         await message.delete()
       else:
         await incorrectRank(message)
-
-    #create data
-    if messagecontent.startswith(prefix + "data"):
+    
+    #giveaway
+    if messagecontent.startswith(prefix + "giveaway"):
       if checkRole(message, data):
-        if int(messagecontent.split()[1]) not in data:
-          member2 = await message.guild.fetch_member(int(messagecontent.split()[1]))
-          data[str(member2.id)] = {'server': str(message.guild.id), 'name': str(member2.name) + "#" + str(member2.discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
-          embed = discord.Embed(color=0x593695, description="**Data created.**")
-          embed.set_author(name="✔️ | @" + client.user.name)
-          embed.set_footer(text=nowDate + " at " + nowTime)
-          await message.channel.send(embed=embed)
-        else:
-          embed = discord.Embed(color=0x593695, description="**Data already exists.**")
+        try:
+          channel = await client.fetch_channel(int(messagecontent.split()[1]))
+          event = await channel.fetch_message(int(messagecontent.split()[2]))
+          reaction = event.reactions[0]
+
+          users = await reaction.users().flatten()
+          # users is now a list of User...
+          winner = random.choice(users)
+          await message.channel.send(':cupcake: ***{}***  **has won the giveaway!**'.format(winner))
+        except:
+          embed = discord.Embed(color=0x593695, description= "Invalid Syntax")
           embed.set_author(name="❌ | @" + client.user.name)
           embed.set_footer(text=nowDate + " at " + nowTime)
           await message.channel.send(embed=embed)
       else:
         await incorrectRank(message)
-    
+
     #cross
     if messagecontent == prefix + "cross":
       server = 0
@@ -826,7 +901,8 @@ async def on_message(message):
         #make new dictionary to sort
         tempdata = {}
         for key in tmp.keys():
-          if not key.startswith('role') and not key.startswith('irole') and not key.startswith('admin')and key != "prefix" and key != "messages" and not key.startswith("report"):
+          #all other dataEntries
+          if not key.startswith('role') and not key.startswith('irole') and not key.startswith('admin')and key != "prefix" and key != "messages" and not key.startswith("report") and not key.startswith("star"):
             tempdata[key] = tmp[key]['invites'] - tmp[key]['leaves']
         #sort data
         order = sorted(tempdata.items(), key=lambda x: x[1], reverse=True)
@@ -870,7 +946,8 @@ async def on_message(message):
         #make new dictionary to sort
         tempdata = {}
         for key in tmp.keys():
-          if not key.startswith('role') and not key.startswith('irole') and not key.startswith('admin') and key != "prefix" and key != "messages" and not key.startswith("report"):
+          #all other dataEntries
+          if not key.startswith('role') and not key.startswith('irole') and not key.startswith('admin') and key != "prefix" and key != "messages" and not key.startswith("report") and not key.startswith("star"):
             tempdata[key] = tmp[key]['bumps']
         #sort data
         order = sorted(tempdata.items(), key=lambda x: x[1], reverse=True)
@@ -1176,9 +1253,8 @@ async def on_message(message):
           await incorrectRank(message)
       else:
         await incorrectServer(message)
-
     #check bump disboard
-    if messagecontent == '!d bump':
+    if message.content == '!d bump':
       bumped = True
       #get user (member object)
       user = message.author

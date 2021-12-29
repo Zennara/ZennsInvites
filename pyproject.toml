@@ -10,6 +10,7 @@ flask = "^1.1.2"
 discord = "^1.0.1"
 replit = "^2.0.0"
 pypresence = "^4.0.0"
+emoji = "^1.4.2"
 
 [tool.poetry.dev-dependencies]
 
