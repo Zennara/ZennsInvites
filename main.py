@@ -290,6 +290,28 @@ async def on_message(message):
         embed.set_author(name="❌ | @" + client.user.name)
         embed.set_footer(text=nowDate + " at " + nowTime)
         await message.channel.send(embed=embed)
+
+    #fake ban
+    if messagecontent.startswith(prefix + "ban"):
+      if checkRole(message, data):
+        memberName = message.guild.get_member(int(messagecontent.split()[1])).mention
+        embed = discord.Embed(color=0x593695, description= memberName + "*** has been banned! F.***")
+        embed.set_author(name="✔️ | @" + client.user.name)
+        embed.set_footer(text=nowDate + " at " + nowTime)
+        await message.channel.send(embed=embed)
+      else:
+        await incorrectRank(message)
+
+    #custom message
+    if messagecontent.startswith(prefix + "custom"):
+      if checkRole(message, data):
+        embed = discord.Embed(color=0x593695, description= str(messagecontent.split(maxsplit=1)[1]))
+        embed.set_author(name="✔️ | @" + client.user.name)
+        embed.set_footer(text="Made by " + message.author.name + "#" + message.author.discriminator + "\n" + nowDate + " at " + nowTime)
+        await message.channel.send(embed=embed)
+        await message.delete()
+      else:
+        await incorrectRank(message)
     
     #giveaway
     if messagecontent.startswith(prefix + "giveaway"):
