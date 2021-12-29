@@ -6,9 +6,13 @@ These sets of features add the ability to track each member who joins and leaves
 ## Roles on Message Reactions
 ZennDev also offers features including awarded roles when a user reacts to a specific message with a specific role. This are also intended to be a lot easier to set up then Zira's time consuming process. 
 ## Server Stats
-Channels can also be added displaying different stats of the current server. These include; members, bots, channels, textchannels, voicechannels, categories, roles, bans, and messages.
+Channels can also be added displaying different stats of the current server. These include; members, bots, channels, textchannels, voicechannels, categories, roles, bans, and messages. Fetching the Steam API can also allow for in-game player counts.
 ## Disboard Bot Integration
 ZennDev is able to track bumps, as well as fetch previous bumps of your server from specific channels. These are added to the bumps of each user, and can be displayed from a server-wide leaderboard.
+## Moderation and Staff
+Includes reporting of in-game events, auto bad nickname detector and auto-change, changing admin roles for the bot.
+## Starboard
+Working starboard type integration. This allows a message- including attachments, links, embeds - to be sent to another channel if it reaches a minimum reaction requirement.
 ## Polling
 ZennDev can also conduct simple polling from yes or no to complex multiple choice polls. This uses reactions and will eventually support custom reactions.
 ## API Integration from Multiple Sources
@@ -39,3 +43,4 @@ Includes API integration from Discord for the bot, Steam for playercounts, and R
 | poll          | <"desc"> ["opt1"]...                              | Creates a poll and deletes the message     | yes     |
 | report        | none                                              | Creates a new report and DM's user for info| yes     |
 | reportchannel | <channel>                                         | Changes the channel reports are sent to    | no      |
+| giveaway      | <channel> <message>                               | Selects a random user from the reactions   | no      |
