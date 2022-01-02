@@ -1441,7 +1441,10 @@ async def on_message(message):
           embed.add_field(name="Join Code", value=jCode, inline=True)
           if data[str(user.id)]['inviter'] != "null":
             inviterMember = str(data[str(user.id)]['inviter'])
-            embed.add_field(name="Owned By", value=data[inviterMember]['name'], inline=True)
+            if inviterMember in data:
+              embed.add_field(name="Owned By", value=data[inviterMember]['name'], inline=True)
+            else:
+              embed.add_field(name="Owned By", value="<@!"+inviterMember+">", inline=True)
 
         #joined discord
         embed.add_field(name="Joined Discord at", value=createdDate + " at " + createdTime, inline=False)
