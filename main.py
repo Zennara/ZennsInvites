@@ -57,29 +57,41 @@ if DBFIX:
   #data["admin684524717167607837"] = {"server": "684524717167607837", "role": "684535492619927587"}
   data["prefix"] = "cm/"
 
-#check invites and compare
 invites = {}
-last = ""
-async def getInvites():
-  global last
-  global invites
-  global codeOwner
-  global joinCode
-  await client.wait_until_ready()
-  gld = client.get_guild(int(guild_id))
-  while True:
-    invs = await gld.invites()
-    tmp = []
-    for i in invs:
-      for s in invites:
-        if s[0] == i.code:
-          if int(i.uses) > s[1]:
-            #get inviter id
-            codeOwner = str(i.inviter.id)
-            joinCode = str(i.code)
-      tmp.append(tuple((i.code, i.uses)))
-    invites = tmp
-  await asyncio.sleep(1)
+
+@client.event
+async def on_invite_create(invite):
+  #write cache
+  invites[invite.guild.id] = await invite.guild.invites()
+
+@client.event
+async def on_invite_delete(invite):
+  #write cache
+  invites[invite.guild.id] = await invite.guild.invites()
+
+#check invites and compare
+#invites = {}
+#last = ""
+#async def getInvites():
+#  global last
+#  global invites
+#  global codeOwner
+#  global joinCode
+#  await client.wait_until_ready()
+#  gld = client.get_guild(int(guild_id))
+#  while True:
+#    invs = await gld.invites()
+#    tmp = []
+#    for i in invs:
+#      for s in invites:
+#        if s[0] == i.code:
+#          if int(i.uses) > s[1]:
+#            #get inviter id
+#            codeOwner = str(i.inviter.id)
+#            joinCode = str(i.code)
+#      tmp.append(tuple((i.code, i.uses)))
+#    invites = tmp
+#  await asyncio.sleep(1)
 
 async def checkCounters():
   while True:
@@ -144,6 +156,16 @@ async def checkCounters():
 #print("CMW: " + str(game_players[1].json()['response']['player_count']))
 #print("Death Toll: " + str(game_players[2].json()['response']['player_count']))
 
+def find_invite_by_code(invite_list, code): 
+  # Simply looping through each invite in an
+  # invite list which we will get using guild.invites()
+  for inv in invite_list:
+    # Check if the invite code in this element
+    # of the list is the one we're looking for  
+    if inv.code == code:       
+      # If it is, we return it.      
+      return inv
+
 async def incorrectServer(message):
   embed = discord.Embed(color=0x593695, description="Command not available in " + message.guild.name + ".")
   embed.set_author(name="❌ | @" + client.user.name)
@@ -166,6 +188,11 @@ async def on_ready():
   bumped = False
   print("\nZennInvites Ready\n")
   await client.change_presence(activity=discord.Streaming(name=" | " + data["prefix"] + "help", url="https://www.twitch.tv/xzennara/about"))  
+
+  # Getting all the guilds our bot is in
+  for guild in client.guilds:
+    # Adding each guild's invites to our dict
+    invites[guild.id] = await guild.invites()
 
 #channel and category IDs restricted for starboard
 noStarboard = ["591135975355187200", "759976154479984650", "572774759331397632", "706953196425314820", "738634279357251586", "812692775895957574"]
@@ -1475,27 +1502,38 @@ async def on_member_join(member):
   await asyncio.sleep(1.1)
 
   if str(member.guild.id) == guild_id: 
+    invites_before_join = invites[member.guild.id]
+    invites_after_join = await member.guild.invites()
+    for invite in invites_before_join: 
+      if invite.uses < find_invite_by_code(invites_after_join, invite.code).uses:
+        gotInvite = invite
+        #print(f"Member {member.name} Joined")
+        #print(f"Invite Code: {invite.code}")
+        #print(f"Inviter: {invite.inviter}")
+        invites[member.guild.id] = invites_after_join
+        break
+    
     #append join code
     if str(member.id) not in data.keys():
-      data[str(member.id)] = {'server': str(member.guild.id), 'name': str(member.name) + "#" + str(member.discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': joinCode, 'inviter': codeOwner}
+      data[str(member.id)] = {'server': str(member.guild.id), 'name': str(member.name) + "#" + str(member.discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': gotInvite.code, 'inviter': str(gotInvite.inviter.id)}
 
     tmp = data[str(member.id)]
     del data[str(member.id)]
-    tmp['joinCode'] = joinCode
+    tmp['joinCode'] = gotInvite.code
     data[str(member.id)] = tmp
 
     tmp = data[str(member.id)]
     del data[str(member.id)]
-    tmp['inviter'] = codeOwner
+    tmp['inviter'] =  str(gotInvite.inviter.id)
     data[str(member.id)] = tmp
 
     #add to invites
-    if codeOwner not in data.keys():
-      data[codeOwner] = {'server': str(member.guild.id), 'name': str(member.guild.get_member(int(codeOwner)).name) + "#" + str(member.guild.get_member(int(codeOwner)).discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
-    tmp = data[codeOwner]
-    del data[codeOwner]
+    if str(gotInvite.inviter.id) not in data.keys():
+      data[str(gotInvite.inviter.id)] = {'server': str(member.guild.id), 'name': str(member.guild.get_member(int(gotInvite.inviter.id)).name) + "#" + str(member.guild.get_member(int(gotInvite.inviter.id)).discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
+    tmp = data[str(gotInvite.inviter.id)]
+    del data[str(gotInvite.inviter.id)]
     tmp['invites'] += 1
-    data[codeOwner] = tmp
+    data[str(gotInvite.inviter.id)] = tmp
   
   #check for iroles
   for key in data.keys():
@@ -1535,13 +1573,13 @@ async def on_member_remove(member):
     #check for irole keys
     if key.startswith('irole'):
       #check codeowner invites
+      codeOwner = data[str(member.id)]['inviter']
       if int(data[data[str(member.id)]['inviter']]['invites']) - int(data[data[str(member.id)]['inviter']]['leaves']) < int(data[key]['amount']):
         #remove role
         await member.guild.get_member(int(codeOwner)).remove_roles((member.guild.get_role(int(data[key]['roleID']))), atomic=True)
   
 
 
-client.loop.create_task(getInvites())
 client.loop.create_task(checkCounters())
 
 keep_alive.keep_alive() 
