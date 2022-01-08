@@ -1512,6 +1512,9 @@ async def on_member_join(member):
         #print(f"Inviter: {invite.inviter}")
         invites[member.guild.id] = invites_after_join
         break
+
+    #write cache
+    invites[member.guild.id] = await member.guild.invites()
     
     #append join code
     if str(member.id) not in data.keys():
@@ -1556,8 +1559,8 @@ async def on_member_join(member):
 
 @client.event
 async def on_member_remove(member):
-  #wait for getInvites()
-  await asyncio.sleep(1.1)
+  #write cache
+  invites[member.guild.id] = await member.guild.invites()
 
   if str(member.guild.id) == guild_id:
     #add to leaves
