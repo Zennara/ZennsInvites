@@ -194,6 +194,12 @@ async def on_ready():
     # Adding each guild's invites to our dict
     invites[guild.id] = await guild.invites()
 
+
+  #gg = client.get_guild(566984586618470411)
+  #for ban in await gg.bans():
+  #  if ban.user.name.lower().startswith("scatman"):
+  #    print(f"{ban.user.id} | {ban.user.name}")
+
 #channel and category IDs restricted for starboard
 noStarboard = ["591135975355187200", "759976154479984650", "572774759331397632", "706953196425314820", "738634279357251586", "812692775895957574"]
 @client.event
@@ -230,7 +236,7 @@ async def on_raw_reaction_add(payload):
               doEmbeds = False
           #define webhook
           async with aiohttp.ClientSession() as session:
-            webhook = Webhook.from_url("https://discord.com/api/webhooks/873176692456300564/5zk5qiE4G_vTuxrZgqTgbARe4VQ0erCVF3E-SvgscKvRvfddBkrNC8IGL3Pwy2eU6XUH", adapter=AsyncWebhookAdapter(session))
+            webhook = Webhook.from_url(os.environ.get("STAR_WEBHOOK"), adapter=AsyncWebhookAdapter(session))
             await webhook.send(username=message.author.name, avatar_url=message.author.avatar_url, content=message.jump_url+"\n\n"+message.content, files=files)
             #if all non-link embeds
             if doEmbeds:
@@ -303,6 +309,59 @@ async def on_message(message):
           data[str(message.guild.get_member(message.mentions[0].id).id)] = {'server': str(message.guild.id), 'name': str(message.guild.get_member(message.mentions[0].id).name) + "#" + str(message.guild.get_member(message.mentions[0].id).discriminator), 'invites': 0, 'leaves': 0, 'bumps': 0, 'joinCode': "null", 'inviter': "null"}
       except:
         pass
+
+    #grab for-digitaldna
+    if messagecontent == prefix + "grab memos":
+      if checkRole(message, data):
+        guild = client.get_guild(int(guild_id))
+        forddna = guild.get_channel(671495633051451397)
+        messageData = {}
+        #loop through messages in channel
+        async for m in forddna.history(limit=None):
+          #write content
+          messageData[str(m.author.id)] = {"name":str(m.author.name + "#" + m.author.discriminator),
+                                                 "content":m.content, 
+                                                 "pfp":str(m.author.avatar_url)}
+        #load to json
+        obj = json.dumps(messageData, indent=4)
+        with open("For_DDNA_Responses.json", "w") as outfile:
+          outfile.write(obj)
+
+        #generate file
+        file = discord.File("For_DDNA_Responses.json")
+          
+        #send message
+        await message.channel.send("**Below is the** `.json`** file of all the responses in** " + forddna.mention, file=file)
+      else:
+        await incorrectRank(message)
+
+    #grab signatures
+    if messagecontent == prefix + "grab signatures":
+      if checkRole(message, data):
+        guild = client.get_guild(int(guild_id))
+        sigs = guild.get_channel(933608307170623498)
+        messageData = {}
+        #loop through messages in channel
+        async for m in sigs.history(limit=None):
+          #write content
+          if m.attachments: #check if there is attachment
+            messageData[str(m.author.id)] = {"name": m.author.name + "#" + m.author.discriminator, 
+                                             "signature":str(m.attachments[0].url)}
+          else: #no attachments
+            messageData[str(m.author.id)] = {"name": m.author.name + "#" + m.author.discriminator, 
+                                             "signature": m.content}
+        #load to json
+        obj = json.dumps(messageData, indent=4)
+        with open("Signatures.json", "w") as outfile:
+          outfile.write(obj)
+
+        #generate file
+        file = discord.File("Signatures.json")
+          
+        #send message
+        await message.channel.send("**Below is the** `.json`** file of all the signatures in** " + sigs.mention, file=file)
+      else:
+        await incorrectRank(message)
 
     #fake ban
     if messagecontent.startswith(prefix + "ban"):
