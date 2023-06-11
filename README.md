@@ -1,6 +1,6 @@
 # ZennDev
 A discord bot developed in Python3 along with the Discord.py API after InviteManager, a discord bot, was regulated by Discord. This bot is for personal use by the [CastleMiner Discord](discord.gg/cJH7DFb) Server.
-[![Run on Repl.it](https://repl.it/badge/github/Zennara/ZennsInvites)](https://repl.it/github/Zennara/ZennsInvites)
+
 ## Invite Manager
 These sets of features add the ability to track each member who joins and leaves the server, carefully logging the code they used to join, who owned that code, and adding invites/leaves to the owner of that code. It also has the ability to reward and take away roles at specified invite amounts. 
 ## Roles on Message Reactions
