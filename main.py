@@ -19,10 +19,16 @@ import json
 intents = discord.Intents.all()
 client = discord.Client(intents=intents)
 
+
+# json config data
+f = open('config.json', encoding="utf-8")  # open json file
+config = json.load(f)  # load file into dict
+f.close()  # close file
+
+
 # server-specific ids
-guild_id = "566984586618470411"
+guild_id = config["guild_id"]
 guild = client.get_guild(int(guild_id))
-print(os.getenv("REPLIT_DB_URL"))
 # print(data["566984586618470411434547908415586311"]["invites"])
 
 
@@ -1814,5 +1820,4 @@ async def on_member_remove(member):
 client.loop.create_task(checkCounters())
 
 # run bot
-# Bot token is in .env file on repl.it, which isn't viewable by data
-client.run(os.environ.get("TOKEN"))
+client.run(config["Token"])
