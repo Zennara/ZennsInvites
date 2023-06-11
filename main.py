@@ -2,7 +2,6 @@
 #This is a custom discord bot. It is written to work on only one server.
 
 #imports
-import keep_alive
 import discord
 import os
 import asyncio
@@ -1643,9 +1642,6 @@ async def on_member_remove(member):
 
 
 client.loop.create_task(checkCounters())
-
-keep_alive.keep_alive() 
-#keep the bot running after the window closes, use UptimeRobot to ping the website at least every <60min. to prevent the website from going to sleep, turning off the bot
 
 #run bot
 #Bot token is in .env file on repl.it, which isn't viewable by data
