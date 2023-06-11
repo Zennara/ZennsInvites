@@ -1079,7 +1079,7 @@ async def on_message(message):
                                     value="**Role:** <@&" + str(data[k]['roleID']) + ">\n**Invites:** " + str(
                                         data[k]['amount']))
 
-            embed.set_author(name=message.guild.name, icon_url=message.guild.icon_url)
+            embed.set_author(name=message.guild.name, icon_url=message.guild.icon.url)
             embed.set_footer(text=nowDate + " at " + nowTime)
             await message.channel.send(embed=embed)
         else:
@@ -1091,7 +1091,7 @@ async def on_message(message):
             embed = discord.Embed(color=0x593695, description="Loading . . .\n*This may take up to 25s*")
             embed.set_footer(text="Page " + "?" + "/" + str(
                 math.ceil(len(message.guild.members) / 10)) + " ● " + nowDate + " at " + nowTime)
-            embed.set_author(name="Invite Leaderboard", icon_url=message.guild.icon_url)
+            embed.set_author(name="Invite Leaderboard", icon_url=message.guild.icon.url)
             message2 = await message.channel.send(embed=embed)
 
             tmp = {}
@@ -1131,7 +1131,7 @@ async def on_message(message):
                 embed = discord.Embed(color=0x593695, description=inputText)
                 embed.set_footer(text="Page " + str(page) + "/" + str(
                     math.ceil(len(message.guild.members) / 10)) + " ● " + nowDate + " at " + nowTime)
-                embed.set_author(name="Invite Leaderboard", icon_url=message.guild.icon_url)
+                embed.set_author(name="Invite Leaderboard", icon_url=message.guild.icon.url)
                 await message2.edit(embed=embed)
         else:
             await incorrectServer(message)
@@ -1142,7 +1142,7 @@ async def on_message(message):
             embed = discord.Embed(color=0x593695, description="Loading . . .\n*This may take up to 25s*")
             embed.set_footer(text="Page " + "?" + "/" + str(
                 math.ceil(len(message.guild.members) / 10)) + " ● " + nowDate + " at " + nowTime)
-            embed.set_author(name="Disboard Bumps Leaderboard", icon_url=message.guild.icon_url)
+            embed.set_author(name="Disboard Bumps Leaderboard", icon_url=message.guild.icon.url)
             message2 = await message.channel.send(embed=embed)
 
             tmp = {}
@@ -1177,7 +1177,7 @@ async def on_message(message):
                 embed = discord.Embed(color=0x593695, description=inputText)
                 embed.set_footer(text="Page " + str(page) + "/" + str(
                     math.ceil(len(message.guild.members) / 10)) + " ● " + nowDate + " at " + nowTime)
-                embed.set_author(name="Disboard Bumps Leaderboard", icon_url=message.guild.icon_url)
+                embed.set_author(name="Disboard Bumps Leaderboard", icon_url=message.guild.icon.url)
                 await message2.edit(embed=embed)
         else:
             await incorrectServer(message)
@@ -1235,7 +1235,7 @@ async def on_message(message):
                                     data[k]['message']) + ")")
 
         # print embed
-        embed.set_author(name=message.guild.name, icon_url=message.guild.icon_url)
+        embed.set_author(name=message.guild.name, icon_url=message.guild.icon.url)
         embed.set_footer(text=nowDate + " at " + nowTime)
         await message.channel.send(embed=embed)
 
