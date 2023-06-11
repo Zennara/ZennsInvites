@@ -12,12 +12,10 @@ import time
 import requests
 import re
 import random
-from discord import Webhook, AsyncWebhookAdapter
+from discord import Webhook
 import aiohttp
 from discord import Embed
-
-from replit import db
-data = db
+from discord.webhook.async_ import AsyncWebhookAdapter
 
 #declare client
 intents = discord.Intents.all()
