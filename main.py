@@ -28,7 +28,7 @@ f.close()  # close file
 
 
 # server-specific ids
-guild_id = config["guild_id"]
+guild_id = str(config["guild_id"])
 guild = client.get_guild(int(guild_id))
 # print(data["566984586618470411434547908415586311"]["invites"])
 
@@ -53,6 +53,9 @@ def write_data(data):
     # Writing to sample.json
     with open("database.json", "w", encoding="utf-8") as outfile:
         outfile.write(json_object)
+
+
+read_data()
 
 
 def update_data():
@@ -276,7 +279,7 @@ async def on_raw_reaction_add(payload):
                 if not done:
                     embed = discord.Embed(color=0xFFD700, description=message.content)
                     embed.set_author(name=message.author.name + "#" + message.author.discriminator,
-                                     icon_url=message.author.avatar_url)
+                                     icon_url=message.author.avatar.url)
                     # get all files
                     files = []
                     for ach in message.attachments:
@@ -289,12 +292,12 @@ async def on_raw_reaction_add(payload):
                     # define webhook
                     async with aiohttp.ClientSession() as session:
                         webhook = Webhook.from_url(os.environ.get("STAR_WEBHOOK"), adapter=AsyncWebhookAdapter(session))
-                        await webhook.send(username=message.author.name, avatar_url=message.author.avatar_url,
+                        await webhook.send(username=message.author.name, avatar_url=message.author.avatar.url,
                                            content=message.jump_url + "\n\n" + message.content, files=files)
                         # if all non-link embeds
                         if doEmbeds:
                             try:
-                                await webhook.send(username=message.author.name, avatar_url=message.author.avatar_url,
+                                await webhook.send(username=message.author.name, avatar_url=message.author.avatar.url,
                                                    embeds=message.embeds)
                             except:
                                 pass
@@ -399,7 +402,7 @@ async def on_message(message):
                 # write content
                 messageData[str(m.author.id)] = {"name": str(m.author.name + "#" + m.author.discriminator),
                                                  "content": m.content,
-                                                 "pfp": str(m.author.avatar_url)}
+                                                 "pfp": str(m.author.avatar.url)}
             # load to json
             obj = json.dumps(messageData, indent=4)
             with open("For_DDNA_Responses.json", "w") as outfile:
@@ -536,7 +539,7 @@ async def on_message(message):
                 if "admin" + str(message.guild.id) not in data:
                     # loading message
                     embed = discord.Embed(color=0x593695, description="**Loading Users Into Database...**")
-                    embed.set_author(name="⌛ | @" + client.user.name, icon_url=client.user.avatar_url)
+                    embed.set_author(name="⌛ | @" + client.user.name, icon_url=client.user.avatar.url)
                     embed.set_footer(text=nowDate + " at " + nowTime)
                     message2 = await message.channel.send(embed=embed)
                     # members
@@ -551,7 +554,7 @@ async def on_message(message):
 
                     # invites
                     embed = discord.Embed(color=0x593695, description="**Loading Previous Invites**")
-                    embed.set_author(name="⌛ | @" + client.user.name, icon_url=client.user.avatar_url)
+                    embed.set_author(name="⌛ | @" + client.user.name, icon_url=client.user.avatar.url)
                     embed.set_footer(text=nowDate + " at " + nowTime)
                     await message2.edit(embed=embed)
                     for member in message.guild.members:
@@ -568,7 +571,7 @@ async def on_message(message):
                     while True:
                         embed = discord.Embed(color=0x593695,
                                               description="**Please enter the ID of your Disboard bumping channel.**\nEnter 0 to stop adding channels.")
-                        embed.set_author(name="📝 | @" + client.user.name, icon_url=client.user.avatar_url)
+                        embed.set_author(name="📝 | @" + client.user.name, icon_url=client.user.avatar.url)
                         embed.set_footer(text=nowDate + " at " + nowTime)
                         await message2.edit(embed=embed)
 
@@ -605,7 +608,7 @@ async def on_message(message):
                         # disboard bumps
                         embed = discord.Embed(color=0x593695,
                                               description="**Loading Previous Disboard Bumps**\nThis could take a while.")
-                        embed.set_author(name="⌛ | @" + client.user.name, icon_url=client.user.avatar_url)
+                        embed.set_author(name="⌛ | @" + client.user.name, icon_url=client.user.avatar.url)
                         embed.set_footer(text=nowDate + " at " + nowTime)
                         await message2.edit(embed=embed)
                         bumped = False
@@ -637,7 +640,7 @@ async def on_message(message):
                     # code admin role
                     embed = discord.Embed(color=0x593695,
                                           description="**Please enter the ID of the lowest role in the hierarchy able to do server-managing bot commands.**")
-                    embed.set_author(name="📝 | @" + client.user.name, icon_url=client.user.avatar_url)
+                    embed.set_author(name="📝 | @" + client.user.name, icon_url=client.user.avatar.url)
                     embed.set_footer(text=nowDate + " at " + nowTime)
                     await message2.edit(embed=embed)
 
@@ -660,7 +663,7 @@ async def on_message(message):
 
                     embed = discord.Embed(color=0x593695,
                                           description="**" + str(message.guild.name) + " Setup Complete**")
-                    embed.set_author(name="✔️ | @" + client.user.name, icon_url=client.user.avatar_url)
+                    embed.set_author(name="✔️ | @" + client.user.name, icon_url=client.user.avatar.url)
                     embed.set_footer(text=nowDate + " at " + nowTime)
                     await message2.edit(embed=embed)
                 else:
@@ -706,7 +709,7 @@ async def on_message(message):
         except:
             embed = discord.Embed(color=0x593695,
                                   description="**Invalid Poll Usage**\nRefer to syntax at cm/help polls")
-            embed.set_author(name="❌ | @" + client.user.name, icon_url=client.user.avatar_url)
+            embed.set_author(name="❌ | @" + client.user.name, icon_url=client.user.avatar.url)
             embed.set_footer(text=nowDate + " at " + nowTime)
             await message.channel.send(embed=embed)
 
@@ -721,12 +724,12 @@ async def on_message(message):
         async def reportmsg():
             embed = discord.Embed(color=0x593695,
                                   description="**Report started**\nUse cm/cancel in DM to cancel the report.")
-            embed.set_author(name="✅ | @" + client.user.name, icon_url=client.user.avatar_url)
+            embed.set_author(name="✅ | @" + client.user.name, icon_url=client.user.avatar.url)
             embed.set_footer(text=nowDate + " at " + nowTime)
             await message.author.send(embed=embed)
 
             embed = discord.Embed(color=0x593695, description="**In-game name of attacker:**")
-            embed.set_author(name="📝 | @" + client.user.name, icon_url=client.user.avatar_url)
+            embed.set_author(name="📝 | @" + client.user.name, icon_url=client.user.avatar.url)
             embed.set_footer(text=nowDate + " at " + nowTime)
             message2 = await message.author.send(embed=embed)
             inGameName = await client.wait_for('message', check=check)
@@ -765,7 +768,7 @@ async def on_message(message):
                 return
 
             embed = discord.Embed(color=0x593695, description="**Thank you for your report.**")
-            embed.set_author(name="✅ | @" + client.user.name, icon_url=client.user.avatar_url)
+            embed.set_author(name="✅ | @" + client.user.name, icon_url=client.user.avatar.url)
             embed.set_footer(text=nowDate + " at " + nowTime)
             await message2.edit(embed=embed)
 
@@ -774,7 +777,7 @@ async def on_message(message):
             embed.add_field(name="Game", value=game.content)
             embed.add_field(name="Mod", value=modName.content)
             embed.add_field(name="Description", value=description.content, inline=False)
-            embed.set_author(name="✖ | @" + client.user.name, icon_url=client.user.avatar_url)
+            embed.set_author(name="✖ | @" + client.user.name, icon_url=client.user.avatar.url)
             embed.set_footer(
                 text=nowDate + " at " + nowTime + "\nReport by: " + message.author.name + "#" + message.author.discriminator)
             await message.author.send(embed=embed)
@@ -785,7 +788,7 @@ async def on_message(message):
             else:
                 embed = discord.Embed(color=0x593695,
                                       description="**Failed to send report**\nContact an admin if you think this is a mistake.")
-                embed.set_author(name="❌ | @" + client.user.name, icon_url=client.user.avatar_url)
+                embed.set_author(name="❌ | @" + client.user.name, icon_url=client.user.avatar.url)
                 embed.set_footer(text=nowDate + " at " + nowTime)
                 await message2.edit(embed=embed)
 
@@ -822,7 +825,7 @@ async def on_message(message):
 
                 embed = discord.Embed(color=0x593695,
                                       description="**WARNING: Doing so may result in data loss. Continue?**\nReact with ✅ or wait 30s")
-                embed.set_author(name="❔ | @" + client.user.name, icon_url=client.user.avatar_url)
+                embed.set_author(name="❔ | @" + client.user.name, icon_url=client.user.avatar.url)
                 embed.set_footer(text=nowDate + " at " + nowTime)
                 message2 = await message.channel.send(embed=embed)
                 await message2.add_reaction('✅')
@@ -834,7 +837,7 @@ async def on_message(message):
                 else:
                     # invites
                     embed = discord.Embed(color=0x593695, description="**Loading Previous Invites**")
-                    embed.set_author(name="⌛ | @" + client.user.name, icon_url=client.user.avatar_url)
+                    embed.set_author(name="⌛ | @" + client.user.name, icon_url=client.user.avatar.url)
                     embed.set_footer(text=nowDate + " at " + nowTime)
                     await message2.edit(embed=embed)
                     count = 0
@@ -858,12 +861,12 @@ async def on_message(message):
                             update_data()
                         except:
                             embed = discord.Embed(color=0x593695, description="<@!" + str(member.id) + ">")
-                            embed.set_author(name="❌ | @" + client.user.name, icon_url=client.user.avatar_url)
+                            embed.set_author(name="❌ | @" + client.user.name, icon_url=client.user.avatar.url)
                             embed.set_footer(text=nowDate + " at " + nowTime)
                             await message.channel.send(embed=embed)
 
                     embed = discord.Embed(color=0x593695, description="**Previous Invites Fetched**")
-                    embed.set_author(name="✔️ | @" + client.user.name, icon_url=client.user.avatar_url)
+                    embed.set_author(name="✔️ | @" + client.user.name, icon_url=client.user.avatar.url)
                     embed.set_footer(text=nowDate + " at " + nowTime)
                     await message2.edit(embed=embed)
             else:
@@ -882,7 +885,7 @@ async def on_message(message):
 
                 embed = discord.Embed(color=0x593695,
                                       description="**WARNING: Doing so may result in data loss. Continue?**\nReact with ✅ or wait 30s")
-                embed.set_author(name="❔ | @" + client.user.name, icon_url=client.user.avatar_url)
+                embed.set_author(name="❔ | @" + client.user.name, icon_url=client.user.avatar.url)
                 embed.set_footer(text=nowDate + " at " + nowTime)
                 message2 = await message.channel.send(embed=embed)
                 await message2.add_reaction('✅')
@@ -893,7 +896,7 @@ async def on_message(message):
                     await message2.delete()
                 else:
                     embed = discord.Embed(color=0x593695, description="**Clearing Bumps...**")
-                    embed.set_author(name="⌛ | @" + client.user.name, icon_url=client.user.avatar_url)
+                    embed.set_author(name="⌛ | @" + client.user.name, icon_url=client.user.avatar.url)
                     embed.set_footer(text=nowDate + " at " + nowTime)
                     await message2.edit(embed=embed)
 
@@ -911,7 +914,7 @@ async def on_message(message):
                     while True:
                         embed = discord.Embed(color=0x593695,
                                               description="**Please enter the ID of your Disboard bumping channel.**\nEnter 0 to stop adding channels.")
-                        embed.set_author(name="📝 | @" + client.user.name, icon_url=client.user.avatar_url)
+                        embed.set_author(name="📝 | @" + client.user.name, icon_url=client.user.avatar.url)
                         embed.set_footer(text=nowDate + " at " + nowTime)
                         await message2.edit(embed=embed)
 
@@ -946,7 +949,7 @@ async def on_message(message):
                         # disboard bumps
                         embed = discord.Embed(color=0x593695,
                                               description="**Loading Previous Disboard Bumps**\nThis could take a while.")
-                        embed.set_author(name="⌛ | @" + client.user.name, icon_url=client.user.avatar_url)
+                        embed.set_author(name="⌛ | @" + client.user.name, icon_url=client.user.avatar.url)
                         embed.set_footer(text=nowDate + " at " + nowTime)
                         await message2.edit(embed=embed)
                         bumped = False
@@ -976,7 +979,7 @@ async def on_message(message):
                                 bumpedAuthor = messages.author
 
                     embed = discord.Embed(color=0x593695, description="**Previous Bumps Fetched**")
-                    embed.set_author(name="✔️ | @" + client.user.name, icon_url=client.user.avatar_url)
+                    embed.set_author(name="✔️ | @" + client.user.name, icon_url=client.user.avatar.url)
                     embed.set_footer(text=nowDate + " at " + nowTime)
                     await message2.edit(embed=embed)
             else:
@@ -1319,7 +1322,7 @@ async def on_message(message):
                         # send embed
                         embed = discord.Embed(color=0x593695, description="User now has **" + str(
                             editAmount) + "** " + editType + "!" + " (Original: **" + str(prevAmount) + "**)")
-                        embed.set_author(name="@" + user.name + "#" + str(user.discriminator), icon_url=user.avatar_url)
+                        embed.set_author(name="@" + user.name + "#" + str(user.discriminator), icon_url=user.avatar.url)
                         embed.set_footer(text=nowDate + " at " + nowTime)
                         await message.channel.send(embed=embed)
                 except:
@@ -1332,7 +1335,7 @@ async def on_message(message):
     # help
     if messagecontent == prefix + 'help':
         embed = discord.Embed(color=0x593695)
-        embed.set_author(name=client.user.name + " Help", icon_url=client.user.avatar_url)
+        embed.set_author(name=client.user.name + " Help", icon_url=client.user.avatar.url)
         start = "`" + prefix + "help"
         embed.add_field(name="Counters", value=start + " counters`", inline=True)
         embed.add_field(name="Invites", value=start + " invites`", inline=True)
@@ -1438,8 +1441,7 @@ async def on_message(message):
                             break
                     # create channel
                     if foundChannel == False:
-                        channelObject = await guild.create_voice_channel(f"{channelName}: {channelType}",
-                                                                         overwrites=None, category=categoryObject,
+                        channelObject = await guild.create_voice_channel(f"{channelName}: {channelType}", category=categoryObject,
                                                                          reason=None)
                         await channelObject.set_permissions(guild.default_role, connect=False)
 
@@ -1511,7 +1513,7 @@ async def on_message(message):
             # send embed
             embed = discord.Embed(color=0x593695,
                                   description="User has bumped the server **" + str(bumps) + "** times!")
-            embed.set_author(name="@" + user.name + "#" + str(user.discriminator), icon_url=user.avatar_url)
+            embed.set_author(name="@" + user.name + "#" + str(user.discriminator), icon_url=user.avatar.url)
             embed.set_footer(text=nowDate + " at " + nowTime)
             await message.channel.send(embed=embed)
         else:
@@ -1520,7 +1522,7 @@ async def on_message(message):
     # help invites (InviteManager)
     if messagecontent == prefix + 'help invites':
         embed = discord.Embed(color=0x593695)
-        embed.set_author(name=client.user.name + " Invites Help", icon_url=client.user.avatar_url)
+        embed.set_author(name=client.user.name + " Invites Help", icon_url=client.user.avatar.url)
         embed.add_field(name="`" + prefix + "invites [member]`", value="Shows how many invites the user has",
                         inline=False)
         embed.add_field(name="`" + prefix + "leaderboard`", value="Shows the invites leaderboard", inline=False)
@@ -1538,7 +1540,7 @@ async def on_message(message):
     # help reactions (Zira)
     if messagecontent == prefix + 'help reactions':
         embed = discord.Embed(color=0x593695)
-        embed.set_author(name=client.user.name + " Reactions Help", icon_url=client.user.avatar_url)
+        embed.set_author(name=client.user.name + " Reactions Help", icon_url=client.user.avatar.url)
         embed.add_field(name="`" + prefix + "rr <channelID> <messageID> <:reaction:> <roleID>`",
                         value="Give a role when user reacts to message", inline=False)
         embed.add_field(name="`" + prefix + "delrr <channelID> <messageID>`", value="Remove a reaction role",
@@ -1550,7 +1552,7 @@ async def on_message(message):
     # help stats (Server Stats)
     if messagecontent == prefix + 'help counters':
         embed = discord.Embed(color=0x593695)
-        embed.set_author(name=client.user.name + " Counters Help", icon_url=client.user.avatar_url)
+        embed.set_author(name=client.user.name + " Counters Help", icon_url=client.user.avatar.url)
         embed.add_field(name="`" + prefix + "addcounter <tracker>`", value="Make a new server counter", inline=False)
         embed.add_field(name="`" + prefix + "delcounter <tracker>`", value="Delete a server counter", inline=False)
         embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
@@ -1559,7 +1561,7 @@ async def on_message(message):
     # help commands
     if messagecontent == prefix + 'help commands':
         embed = discord.Embed(color=0x593695)
-        embed.set_author(name=client.user.name + " Commands Help", icon_url=client.user.avatar_url)
+        embed.set_author(name=client.user.name + " Commands Help", icon_url=client.user.avatar.url)
         embed.add_field(name="`" + prefix + "setup`", value="Setup the server", inline=False)
         embed.add_field(name="`" + prefix + "info [member]`", value="Show info about a member", inline=False)
         embed.add_field(name="`" + prefix + "prefix <prefix>`", value="Change the command prefix", inline=False)
@@ -1577,7 +1579,7 @@ async def on_message(message):
     # help disboard
     if messagecontent == prefix + 'help disboard':
         embed = discord.Embed(color=0x593695)
-        embed.set_author(name=client.user.name + " Disboard Help", icon_url=client.user.avatar_url)
+        embed.set_author(name=client.user.name + " Disboard Help", icon_url=client.user.avatar.url)
         embed.add_field(name="`" + prefix + "d leaderboard`", value="Show the disboard bump leaderboard", inline=False)
         embed.add_field(name="`" + prefix + "d bumps [member]`", value="Show how many bumps a user has", inline=False)
         embed.add_field(name="`" + prefix + "edit bumps <amount> [member]`", value="Set bumps of a member",
@@ -1589,7 +1591,7 @@ async def on_message(message):
     # help reports
     if messagecontent == prefix + 'help reports':
         embed = discord.Embed(color=0x593695)
-        embed.set_author(name=client.user.name + " Reports Help", icon_url=client.user.avatar_url)
+        embed.set_author(name=client.user.name + " Reports Help", icon_url=client.user.avatar.url)
         embed.add_field(name="`" + prefix + "report`", value="Start a report", inline=False)
         embed.add_field(name="`" + prefix + "reportchannel`", value="Changes the reports channel", inline=False)
         embed.set_footer(text="________________________\n<> Required | [] Optional\nMade By Zennara#8377")
@@ -1635,7 +1637,7 @@ async def on_message(message):
             embed = discord.Embed(color=0x593695,
                                   description="User has **" + str(totalInvites) + "** invites! (**" + str(
                                       Invites) + "** regular, **-" + str(Leaves) + "** leaves)")
-            embed.set_author(name="@" + user.name + "#" + str(user.discriminator), icon_url=user.avatar_url)
+            embed.set_author(name="@" + user.name + "#" + str(user.discriminator), icon_url=user.avatar.url)
             embed.set_footer(text=nowDate + " at " + nowTime)
 
             await message.channel.send(embed=embed)
@@ -1673,7 +1675,7 @@ async def on_message(message):
         embed = discord.Embed(color=0x593695)
         embed.set_author(name="@" + user.name + "#" + user.discriminator)
         embed.add_field(name="ID:", value=user.id, inline=False)
-        embed.set_thumbnail(url=user.avatar_url)
+        embed.set_thumbnail(url=user.avatar.url)
 
         # split created_at into date and time
         createDT = str(user.created_at).split()
