@@ -553,6 +553,7 @@ async def on_message(message):
                         del data[str(member.id)]
                         tmp['invites'] = totalInvites
                         data[str(member.id)] = tmp
+                        update_data()
 
                     while True:
                         embed = discord.Embed(color=0x593695,
@@ -616,6 +617,7 @@ async def on_message(message):
                                         del data[str(bumpedAuthor.id)]
                                         tmp['bumps'] += 1
                                         data[str(bumpedAuthor.id)] = tmp
+                                        update_data()
                                 bumped = False
                             # check if message was bump
                             if messages.content == "!d bump":
@@ -790,6 +792,7 @@ async def on_message(message):
                 if "report" in data:
                     del data["report"]
                 data["report"] = {"server": str(message.guild.id), "channel": str(reportChannel.id)}
+                update_data()
 
                 # print embed
                 embed = discord.Embed(color=0x593695, description="Reports will now go to " + reportChannel.mention)
@@ -842,6 +845,7 @@ async def on_message(message):
                             del data[str(member.id)]
                             tmp['invites'] = totalInvites
                             data[str(member.id)] = tmp
+                            update_data()
                         except:
                             embed = discord.Embed(color=0x593695, description="<@!" + str(member.id) + ">")
                             embed.set_author(name="❌ | @" + client.user.name, icon_url=client.user.avatar_url)
@@ -890,6 +894,7 @@ async def on_message(message):
                             del data[key]
                             tmp['bumps'] = 0
                             data[key] = tmp
+                            update_data()
                         except:
                             pass
 
@@ -953,6 +958,7 @@ async def on_message(message):
                                         del data[str(bumpedAuthor.id)]
                                         tmp['bumps'] += 1
                                         data[str(bumpedAuthor.id)] = tmp
+                                        update_data()
                                 bumped = False
                             # check if message was bump
                             if messages.content == "!d bump":
@@ -1030,6 +1036,7 @@ async def on_message(message):
                     if "irole" + str(message.guild.id) + str(deliRole.id) in data:
                         # delete key
                         del data["irole" + str(message.guild.id) + str(deliRole.id)]
+                        update_data()
 
                         # print embed
                         embed = discord.Embed(color=0x593695, description="Invite role-reward deleted.")
@@ -1182,6 +1189,7 @@ async def on_message(message):
                     await msg.remove_reaction(
                         data["role" + str(message.guild.id) + str(channelID) + str(messageID)]['reaction'], client.user)
                     del data["role" + str(message.guild.id) + str(channelID) + str(messageID)]
+                    update_data()
 
                     # print embed
                     embed = discord.Embed(color=0x593695, description="Role reaction message deleted.")
@@ -1296,6 +1304,7 @@ async def on_message(message):
                         del data[str(user.id)]
                         tmp[editType] = editAmount
                         data[str(user.id)] = tmp
+                        update_data()
 
                         # send embed
                         embed = discord.Embed(color=0x593695, description="User now has **" + str(
@@ -1464,6 +1473,7 @@ async def on_message(message):
                 del data[str(user.id)]
                 tmp['bumps'] += 1
                 data[str(user.id)] = tmp
+                update_data()
         bumped = False
 
     # disboard bumps
@@ -1582,6 +1592,7 @@ async def on_message(message):
             del data["prefix"]
             tmp = messagecontent.split()[1]
             data["prefix"] = tmp
+            update_data()
             await client.change_presence(activity=discord.Streaming(name=" | " + data["prefix"] + "help",
                                                                     url="https://www.twitch.tv/xzennara/about"))
         else:
@@ -1747,6 +1758,7 @@ async def on_member_join(member):
         del data[str(gotInvite.inviter.id)]
         tmp['invites'] += 1
         data[str(gotInvite.inviter.id)] = tmp
+        update_data()
 
     # check for iroles
     for key in data:
@@ -1783,6 +1795,7 @@ async def on_member_remove(member):
                 del data[data[str(member.id)]['inviter']]
                 tmp['leaves'] += 1
                 data[data[str(member.id)]['inviter']] = tmp
+                update_data()
 
     # check for iroles
     for key in data:
@@ -1792,6 +1805,7 @@ async def on_member_remove(member):
             codeOwner = data[str(member.id)]['inviter']
             if int(data[data[str(member.id)]['inviter']]['invites']) - int(
                     data[data[str(member.id)]['inviter']]['leaves']) < int(data[key]['amount']):
+                update_data()
                 # remove role
                 await member.guild.get_member(int(codeOwner)).remove_roles(
                     (member.guild.get_role(int(data[key]['roleID']))), atomic=True)
