@@ -271,9 +271,8 @@ async def on_raw_reaction_add(payload):
             # check star count
             if count['⭐'] >= 1:
                 # check msg already in starchannel
-                messages = await starchannel.history(limit=1000).flatten()
                 done = False
-                for msg in messages:
+                async for msg in starchannel.history(limit=None):
                     if msg.content.startswith(message.jump_url):
                         done = True
                 if not done:
@@ -291,7 +290,7 @@ async def on_raw_reaction_add(payload):
                             doEmbeds = False
                     # define webhook
                     async with aiohttp.ClientSession() as session:
-                        webhook = Webhook.from_url(config["starboard_webhook_url"])
+                        webhook = Webhook.from_url(config["starboard_webhook_url"], session=session)
                         await webhook.send(username=message.author.name, avatar_url=message.author.avatar.url,
                                            content=message.jump_url + "\n\n" + message.content, files=files)
                         # if all non-link embeds
