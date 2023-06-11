@@ -12,7 +12,6 @@ import requests
 import random
 from discord import Webhook
 import aiohttp
-from discord.webhook.async_ import AsyncWebhookAdapter
 import json
 from discord.ext import tasks
 
@@ -260,8 +259,9 @@ noStarboard = ["591135975355187200", "759976154479984650", "572774759331397632",
 async def on_raw_reaction_add(payload):
     # STARBOARD
     # check not restricted category
-    channel = await client.fetch_channel(payload.channel_id)
-    starchannel = await client.fetch_channel(812692775895957574)
+    guild = client.get_guild(int(guild_id))
+    channel = guild.get_channel(payload.channel_id)
+    starchannel = guild.get_channel(812692775895957574)
     if str(channel.category.id) not in noStarboard and str(channel.id) not in noStarboard:
         # check for star
         if payload.emoji.name == "⭐":
@@ -269,7 +269,7 @@ async def on_raw_reaction_add(payload):
             count = {react.emoji: react.count for react in message.reactions}
             print(count)
             # check star count
-            if count['⭐'] >= 6:
+            if count['⭐'] >= 1:
                 # check msg already in starchannel
                 messages = await starchannel.history(limit=1000).flatten()
                 done = False
@@ -291,7 +291,7 @@ async def on_raw_reaction_add(payload):
                             doEmbeds = False
                     # define webhook
                     async with aiohttp.ClientSession() as session:
-                        webhook = Webhook.from_url(config["starboard_webhook_url"], adapter=AsyncWebhookAdapter(session))
+                        webhook = Webhook.from_url(config["starboard_webhook_url"])
                         await webhook.send(username=message.author.name, avatar_url=message.author.avatar.url,
                                            content=message.jump_url + "\n\n" + message.content, files=files)
                         # if all non-link embeds
@@ -395,7 +395,7 @@ async def on_message(message):
     if messagecontent == prefix + "grab memos":
         if checkRole(message, data):
             guild = client.get_guild(int(guild_id))
-            forddna = guild.get_channel(671495633051451397)
+            forddna = message.guild.get_channel(671495633051451397)
             messageData = {}
             # loop through messages in channel
             async for m in forddna.history(limit=None):
@@ -421,7 +421,7 @@ async def on_message(message):
     if messagecontent == prefix + "grab signatures":
         if checkRole(message, data):
             guild = client.get_guild(int(guild_id))
-            sigs = guild.get_channel(933608307170623498)
+            sigs = message.guild.get_channel(933608307170623498)
             messageData = {}
             # loop through messages in channel
             async for m in sigs.history(limit=None):
@@ -473,7 +473,7 @@ async def on_message(message):
     if messagecontent.startswith(prefix + "giveaway"):
         if checkRole(message, data):
             try:
-                channel = await client.fetch_channel(int(messagecontent.split()[1]))
+                channel = message.guild.get_channel(int(messagecontent.split()[1]))
                 event = await channel.fetch_message(int(messagecontent.split()[2]))
                 reaction = event.reactions[0]
 
@@ -783,7 +783,7 @@ async def on_message(message):
             await message.author.send(embed=embed)
 
             if "report" in data:
-                channel = await client.fetch_channel(int(data["report"]["channel"]))
+                channel = message.guild.get_channel(int(data["report"]["channel"]))
                 await channel.send(embed=embed)
             else:
                 embed = discord.Embed(color=0x593695,
@@ -799,7 +799,7 @@ async def on_message(message):
         if checkRole(message, data):
             try:
                 # get role
-                reportChannel = await client.fetch_channel(int(messagecontent.split()[1]))
+                reportChannel = message.guild.get_channel(int(messagecontent.split()[1]))
 
                 # write to database
                 if "report" in data:
