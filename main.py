@@ -8,13 +8,10 @@ import asyncio
 import json
 from datetime import datetime
 import math
-import time
 import requests
-import re
 import random
 from discord import Webhook
 import aiohttp
-from discord import Embed
 from discord.webhook.async_ import AsyncWebhookAdapter
 
 #declare client
