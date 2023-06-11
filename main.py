@@ -14,6 +14,7 @@ from discord import Webhook
 import aiohttp
 from discord.webhook.async_ import AsyncWebhookAdapter
 import json
+from discord.ext import tasks
 
 # declare client
 intents = discord.Intents.all()
@@ -127,6 +128,7 @@ async def on_invite_delete(invite):
 #    invites = tmp
 #  await asyncio.sleep(1)
 
+@tasks.loop(seconds = 10) # repeat after every 10 seconds
 async def checkCounters():
     while True:
         # discord API limits rates to twice every 10m for channel edits
@@ -242,6 +244,8 @@ async def on_ready():
     # for ban in await gg.bans():
     #  if ban.user.name.lower().startswith("scatman"):
     #    print(f"{ban.user.id} | {ban.user.name}")
+
+    await checkCounters.start()
 
 
 # channel and category IDs restricted for starboard
@@ -1815,9 +1819,6 @@ async def on_member_remove(member):
                 # remove role
                 await member.guild.get_member(int(codeOwner)).remove_roles(
                     (member.guild.get_role(int(data[key]['roleID']))), atomic=True)
-
-
-client.loop.create_task(checkCounters())
 
 # run bot
 client.run(config["Token"])
