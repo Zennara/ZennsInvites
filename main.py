@@ -269,7 +269,7 @@ async def on_raw_reaction_add(payload):
             count = {react.emoji: react.count for react in message.reactions}
             print(count)
             # check star count
-            if count['⭐'] >= 1:
+            if count['⭐'] >= 6:
                 # check msg already in starchannel
                 done = False
                 async for msg in starchannel.history(limit=None):
