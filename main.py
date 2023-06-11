@@ -291,7 +291,7 @@ async def on_raw_reaction_add(payload):
                     # define webhook
                     async with aiohttp.ClientSession() as session:
                         webhook = Webhook.from_url(config["starboard_webhook_url"], session=session)
-                        await webhook.send(username=message.author.name, avatar_url=message.author.avatar.url,
+                        await webhook.send(username=message.author.display_name, avatar_url=message.author.avatar.url,
                                            content=message.jump_url + "\n\n" + message.content, files=files)
                         # if all non-link embeds
                         if doEmbeds:
